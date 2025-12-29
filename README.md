@@ -7,6 +7,12 @@
 
 A production-ready bidirectional sync between Jira Product Discovery (JPD) and GitHub Issues with support for custom fields, hierarchies, and workflows.
 
+---
+
+📚 **[Complete Documentation](https://expedition.github.io/jpd-to-github-connector/)** • [Getting Started](https://expedition.github.io/jpd-to-github-connector/docs/installation) • [CLI Guide](https://expedition.github.io/jpd-to-github-connector/docs/cli) • [Features](https://expedition.github.io/jpd-to-github-connector/docs/features/sub-issues)
+
+---
+
 ## 🎉 What's New - Rate Limit Protection!
 
 JPD has strict rate limits that could cause setup failures. **We now handle them automatically:**
