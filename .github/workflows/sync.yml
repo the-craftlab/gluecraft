@@ -1,0 +1,186 @@
+name: JPD to GitHub Sync
+
+# ============================================================================
+# Automated Sync Workflow
+# ============================================================================
+#
+# This workflow runs the JPD to GitHub sync on a schedule and can be
+# manually triggered. It's designed for production use with proper error
+# handling and notifications.
+#
+# Setup:
+#   1. Add repository secrets (Settings → Secrets → Actions):
+#      - JPD_BASE_URL: Your JIRA/JPD URL (e.g., https://company.atlassian.net)
+#      - JPD_EMAIL: Your JIRA email
+#      - JPD_API_KEY: Your JIRA API key
+#      - GITHUB_TOKEN: Automatically provided by GitHub (or use PAT)
+#      - CONFIG_PATH: (optional) Path to config file
+#
+#   2. Adjust the cron schedule below
+#   3. (Optional) Add Slack webhook for notifications
+#
+# ============================================================================
+
+on:
+  # Scheduled sync (every 15 minutes)
+  schedule:
+    - cron: '*/15 * * * *'
+  
+  # Manual trigger from Actions tab
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Run in dry-run mode (no changes made)'
+        required: false
+        type: boolean
+        default: false
+      config_path:
+        description: 'Path to config file'
+        required: false
+        type: string
+        default: 'config/sync-config.yaml'
+
+  # Trigger on config changes (optional)
+  # push:
+  #   paths:
+  #     - 'config/**'
+  #     - '.github/workflows/sync.yml'
+
+# Prevent concurrent runs
+concurrency:
+  group: jpd-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30  # Prevent hung jobs
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 10.20.0
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Run health check
+        id: health
+        env:
+          JPD_BASE_URL: ${{ secrets.JPD_BASE_URL }}
+          JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
+          JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          CONFIG_PATH: ${{ inputs.config_path || secrets.CONFIG_PATH || 'config/sync-config.yaml' }}
+        run: |
+          pnpm run health-check --json > health-check.json
+          cat health-check.json
+          
+          # Check if unhealthy
+          if jq -e '.status == "unhealthy"' health-check.json > /dev/null; then
+            echo "❌ Health check failed"
+            exit 1
+          fi
+        continue-on-error: false
+      
+      - name: Run sync
+        id: sync
+        env:
+          JPD_BASE_URL: ${{ secrets.JPD_BASE_URL }}
+          JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
+          JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          CONFIG_PATH: ${{ inputs.config_path || secrets.CONFIG_PATH || 'config/sync-config.yaml' }}
+        run: |
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            echo "🔍 Running in DRY RUN mode"
+            pnpm run dev -- --dry-run 2>&1 | tee sync.log
+          else
+            echo "🚀 Running sync"
+            pnpm run dev 2>&1 | tee sync.log
+          fi
+          
+          # Save last 50 lines for summary
+          tail -50 sync.log > sync-summary.txt
+      
+      - name: Upload sync log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sync-log-${{ github.run_number }}
+          path: sync.log
+          retention-days: 7
+      
+      - name: Create job summary
+        if: always()
+        run: |
+          echo "## Sync Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Config**: ${{ inputs.config_path || secrets.CONFIG_PATH || 'config/sync-config.yaml' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Dry Run**: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Output" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat sync-summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+      
+      # Optional: Notify on failure
+      # - name: Notify Slack on failure
+      #   if: failure()
+      #   uses: slackapi/slack-github-action@v1
+      #   with:
+      #     webhook-url: ${{ secrets.SLACK_WEBHOOK_URL }}
+      #     payload: |
+      #       {
+      #         "text": "❌ JPD Sync failed in ${{ github.repository }}",
+      #         "blocks": [
+      #           {
+      #             "type": "section",
+      #             "text": {
+      #               "type": "mrkdwn",
+      #               "text": "Sync workflow failed\n*Repository:* ${{ github.repository }}\n*Run:* <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View logs>"
+      #             }
+      #           }
+      #         ]
+      #       }
+
+# ============================================================================
+# Tips:
+# ============================================================================
+#
+# 1. Start with manual trigger (workflow_dispatch) to test
+# 2. Use dry_run mode first to verify behavior
+# 3. Monitor the first few scheduled runs closely
+# 4. Adjust schedule based on your team's needs:
+#    - Every 5 min:  */5 * * * *
+#    - Every 30 min: */30 * * * *
+#    - Every hour:   0 * * * *
+#    - Weekdays 9-5: 0 9-17 * * 1-5
+#
+# 5. Consider adding notifications:
+#    - Slack: Uncomment Slack notification step and add SLACK_WEBHOOK_URL secret
+#    - Email: Use https://github.com/dawidd6/action-send-mail
+#    - Discord: Use https://github.com/sarisia/actions-status-discord
+#
+# 6. For production:
+#    - Enable branch protection on config files
+#    - Set up log aggregation
+#    - Monitor rate limits
+#    - Use dedicated GitHub App token instead of PAT
+#
+# ============================================================================

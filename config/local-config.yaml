@@ -1,0 +1,45 @@
+sync:
+  direction: bidirectional
+  poll_interval: "*/15 * * * *"
+  # Target your specific JPD project
+  jql: "project = MTT AND updated > -30d ORDER BY updated DESC"
+
+mappings:
+  # Basic field mappings
+  - jpd: Summary
+    github: title
+  
+  - jpd: Description
+    github: body
+  
+  # JPD uses custom fields for priority-like concepts
+  # Common JPD fields (you'll need to identify the customfield IDs from the debug logs):
+  # - Impact Score: usually customfield_10100 or similar
+  # - Effort: customfield_XXXXX
+  # - Roadmap: customfield_XXXXX (Now/Next/Later)
+  #
+  # Example mapping once you find the correct field:
+  # - jpd: customfield_10100
+  #   github: labels
+  #   transform: "impact:{{customfield_10100.name | lowercase}}"
+
+statuses:
+  "Idea": 
+    github_state: open
+    github_column: "To Do"
+  "In Progress":
+    github_state: open
+    github_column: "In Progress"
+  "Done":
+    github_state: closed
+    github_column: "Done"
+
+hierarchy:
+  # Epic/parent tracking
+  epic_label_template: "epic:{{epic.fields.summary | slugify}}"
+  story_label_template: "story:{{story.key}}"
+  parent_field_in_body: true
+  use_github_parent_issue: true
+
+teams:
+  auto_detect: true

@@ -1,0 +1,50 @@
+# Generic Test Config
+# Uses arbitrary field IDs and status names to prove genericness
+# NO MTT-specific values allowed
+
+sync:
+  direction: bidirectional
+  jql: 'project = TEST'
+
+mappings:
+  - jpd: "fields.summary"
+    github: "title"
+  
+  - jpd: "fields.description"
+    github: "body"
+  
+  # Arbitrary field ID (not customfield_14xxx)
+  - jpd: "fields.customfield_99999.value"
+    github: "labels"
+    template: "priority:{{fields.customfield_99999.value | lowercase}}"
+  
+  # Another arbitrary field
+  - jpd: "fields.customfield_88888.value"
+    github: "labels"
+    template: "type:{{fields.customfield_88888.value | lowercase}}"
+
+statuses:
+  # Non-MTT status names
+  "To Do":
+    github_state: open
+    sync: true
+  
+  "Doing":
+    github_state: open
+    sync: true
+  
+  "Complete":
+    github_state: closed
+    sync: true
+
+fields:
+  - id: "customfield_99999"
+    name: "Test Priority Field"
+    type: "select"
+    required: false
+  
+  - id: "customfield_88888"
+    name: "Test Type Field"
+    type: "select"
+    required: false
+

@@ -1,0 +1,101 @@
+# ============================================================================
+# JIRA Software Basic Example
+# ============================================================================
+#
+# Use Case: Simple JIRA Software project with basic 3-status workflow
+# 
+# This example demonstrates:
+# - Minimal setup with no custom fields
+# - Standard 3-status workflow (To Do → In Progress → Done)
+# - Bidirectional sync of title, description, and status
+# - GitHub Issues only (no Projects integration)
+#
+# Perfect for: Teams using basic JIRA Software without complex customization
+# ============================================================================
+
+# Sync configuration
+sync:
+  direction: bidirectional
+  
+  # Replace with your JIRA project key
+  jql: 'project = YOUR_PROJECT_KEY'
+  
+  # Optional: Cron schedule for automated sync
+  # poll_interval: "*/15 * * * *"  # Every 15 minutes
+
+# ============================================================================
+# FIELD MAPPINGS
+# ============================================================================
+mappings:
+  # Title mapping (required)
+  - jpd: "fields.summary"
+    github: "title"
+  
+  # Description/body mapping (required)
+  - jpd: "fields.description"
+    github: "body"
+  
+  # Status as label (optional but recommended for visibility)
+  - jpd: "fields.status.name"
+    github: "labels"
+    template: "status:{{fields.status.name | lowercase | slugify}}"
+
+# ============================================================================
+# STATUS MAPPINGS
+# ============================================================================
+# Map JIRA statuses to GitHub issue states
+statuses:
+  "To Do":
+    github_state: open
+    sync: true
+  
+  "In Progress":
+    github_state: open
+    sync: true
+  
+  "Done":
+    github_state: closed
+    sync: true
+
+# ============================================================================
+# GITHUB → JIRA CREATION (Optional)
+# ============================================================================
+# Enable this if you want to create JIRA issues from GitHub issues
+# github_to_jpd_creation:
+#   enabled: false
+#   
+#   # Default values for issues created from GitHub
+#   default_status: "To Do"
+#   default_category: "Task"  # Or "Story", "Bug", depending on your issue types
+#   
+#   # Map GitHub labels to JIRA issue types
+#   label_to_category:
+#     "bug": "Bug"
+#     "enhancement": "Story"
+#     "task": "Task"
+
+# ============================================================================
+# GITHUB LABELS (Auto-Created)
+# ============================================================================
+# Labels are automatically created the first time they're used
+# Pre-create all labels with: pnpm run setup-labels
+labels:
+  hierarchy:
+    - name: "epic"
+      color: "0052CC"
+      description: "High-level initiative"
+    - name: "story"
+      color: "2684FF"
+      description: "User story"
+    - name: "task"
+      color: "B3D4FF"
+      description: "Task"
+  
+  types:
+    - name: "type:bug"
+      color: "DE350B"
+      description: "Bug fix"
+    - name: "type:feature"
+      color: "6554C0"
+      description: "New feature"
+

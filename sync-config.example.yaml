@@ -1,0 +1,108 @@
+# JPD to GitHub Sync Configuration
+
+sync:
+  # Sync direction: 'jpd-to-github', 'github-to-jpd', or 'bidirectional'
+  direction: bidirectional
+  # How often to run the sync (if using scheduled workflow)
+  poll_interval: "*/15 * * * *"
+
+# Field Mappings
+# Maps JPD fields to GitHub fields with optional transformations
+mappings:
+  # Simple 1:1 mapping
+  - jpd: Summary
+    github: title
+
+  # Map Description to body
+  - jpd: Description
+    github: body
+
+  # Generate labels from Priority
+  - jpd: Priority
+    github: labels
+    # Template: {{Priority}} will be replaced by the value
+    # Filters: | lowercase, | slugify
+    transform: "priority:{{Priority | lowercase}}"
+
+  # Combine multiple fields into labels using a custom function
+  - jpd: [Epic, Service, NextUp]
+    github: labels
+    # Path to a custom TypeScript function
+    transform_function: "./transforms/combine-labels.ts"
+
+# Status Workflow Mapping
+# Maps JPD Status names to GitHub issue state and Project columns
+statuses:
+  "Ready": 
+    github_state: open
+    github_column: "To Do"
+  "In Progress":
+    github_state: open
+    github_column: "In Progress"
+  "Validating":
+    github_state: open
+    github_column: "In Review"
+  "Done":
+    github_state: closed
+    github_column: "Done"
+
+# Hierarchy Handling
+# Configures how Epics, Stories, and Tasks are related
+hierarchy:
+  # Generate a label for the parent Epic on the Story
+  # e.g. epic:payments
+  epic_label_template: "epic:{{epic.fields.slug | slugify}}"
+  
+  # Generate a label for the parent Story on the Task
+  # e.g. story:DKP-123
+  story_label_template: "story:{{story.key}}"
+  
+  # Inject a link to the parent JPD issue at the bottom of the GitHub issue body
+  parent_field_in_body: true
+  
+  # Use GitHub's native "Parent Issue" field (requires Projects)
+  use_github_parent_issue: true
+
+# Team Filtering Rules
+teams:
+  # Automatically detect team from JPD Assignee or Team field
+  auto_detect: true
+  
+  # Generate a team label
+  team_label_template: "team:{{fields.Team.value | slugify}}"
+  
+  # If true, all stories under an Epic owned by a team get that team's label
+  epic_ownership: true
+
+# Field Validation
+# Define custom fields that must exist in JPD before syncing
+# The tool will validate these fields and their types before starting
+fields:
+  # Example: RICE scoring field
+  - id: "customfield_10001"
+    name: "Impact"
+    type: "number"
+    required: true
+    description: "RICE Impact score (0-10)"
+  
+  # Example: Multi-select field
+  - id: "customfield_10002"
+    name: "Product Theme"
+    type: "multiselect"
+    required: true
+    description: "Strategic product themes"
+  
+  # Example: Single-select field
+  - id: "customfield_10003"
+    name: "Priority"
+    type: "select"
+    required: false
+    description: "Priority level (High/Medium/Low)"
+  
+  # Example: Text field
+  - id: "customfield_10004"
+    name: "Business Justification"
+    type: "text"
+    required: false
+    description: "Rationale for this feature"
+

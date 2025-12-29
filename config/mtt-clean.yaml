@@ -1,0 +1,177 @@
+# ============================================================================
+# TODO: MTT-SPECIFIC CONFIGURATION - Move to examples/mtt/config.yaml
+# ============================================================================
+# 
+# ⚠️ WARNING: This configuration is PROJECT-SPECIFIC and will NOT work for other JPD projects!
+# 
+# Hard-coded MTT-specific values:
+# - Field IDs: customfield_14385, customfield_14425 (only exist in MTT project)
+# - Status names: Idea, Discovery, Icebox, Epic Design, Backlog, Ready, In Progress, In Review, Done
+# - Label mappings: bug→Bug, epic→Epic, story→Story (MTT conventions)
+# - Transform functions: derive-priority.ts, build-issue-body.ts (MTT-specific field IDs)
+# 
+# For a GENERIC starter config, use: config/sync-config.minimal.yaml
+# For documentation on creating YOUR config: docs/CONFIG_GUIDE.md
+# 
+# This file will be moved to examples/mtt/config.yaml in the next refactor.
+# ============================================================================
+
+# MTT Test Project - Clean, Essential Configuration
+# Focus: Core fields, proper hierarchy, clean labels
+
+sync:
+  direction: bidirectional
+  jql: 'project = MTT'
+
+# ==========================================
+# GITHUB → JPD CREATION (Reverse Sync)
+# ==========================================
+github_to_jpd_creation:
+  enabled: true
+  
+  # Map GitHub labels to JPD Category field (type of issue)
+  # Valid JPD Categories: Bug, Epic, Story (NOT "Idea" - that's a STATUS)
+  label_to_category:
+    bug: "Bug"
+    epic: "Epic"
+    story: "Story"
+    # Note: "enhancement" label not mapped - falls through to default_category
+  
+  # Default category for unlabeled issues (or "enhancement" label)
+  default_category: "Story"  # Unlabeled or enhancement → Story category
+  
+  # Initial workflow status for created issues
+  default_status: "Idea"  # "Idea" status = initial intake state (not synced back to GitHub)
+  
+  # Optional default priority
+  default_priority: "Medium"
+
+# ==========================================
+# FIELD MAPPINGS (Essential Only)
+# ==========================================
+mappings:
+  # Title
+  - jpd: "fields.summary"
+    github: "title"
+
+  # Rich body with JPD context
+  - jpd: "fields.description"
+    github: "body"
+    transform_function: "./transforms/build-issue-body.ts"
+
+  # Category → Type labels (bug/epic/story/enhancement)
+  # Map directly, lowercase, no prefix
+  - jpd: "fields.customfield_14385.value"  # Category
+    github: "labels"
+    template: "{{fields.customfield_14385.value | lowercase}}"
+
+  # Dev Priority → priority labels (critical/high/normal/low)
+  - jpd: "."
+    github: "labels"
+    transform_function: "./transforms/derive-priority.ts"
+
+# ==========================================
+# STATUS MAPPINGS (Workflow)
+# ==========================================
+statuses:
+  # Intake/Planning (PM territory, not synced to GitHub yet)
+  "Idea":
+    sync: false  # Don't sync raw ideas
+  
+  "Discovery":
+    sync: false  # Don't sync during evaluation
+
+  "Icebox":
+    sync: false  # Don't sync parked items
+
+  # Ready for Dev (Start syncing here)
+  "Epic Design":
+    github_state: open
+    github_project_status: "Epic Design"
+    sync: true
+
+  "Backlog":
+    github_state: open
+    github_project_status: "Backlog"
+    sync: true
+
+  "Ready":
+    github_state: open
+    github_project_status: "Ready"
+    sync: true
+
+  # Active Development
+  "In Progress":
+    github_state: open
+    github_project_status: "In Progress"
+    sync: true
+    # Note: GitHub → JPD sync disabled for ambiguous open states
+
+  "In Review":
+    github_state: open
+    github_project_status: "In Review"
+    sync: true
+    # Note: GitHub → JPD sync disabled for ambiguous open states
+
+  # Complete (Only unambiguous GitHub → JPD mapping)
+  "Done":
+    github_state: closed
+    github_project_status: "Done"
+    sync: true
+    # GitHub closed → JPD Done (clear mapping)
+
+# ==========================================
+# HIERARCHY (Use JPD's Native Parent-Child)
+# ==========================================
+hierarchy:
+  # Use JPD's issuelinks with type "Subtask" for parent-child relationships
+  # Epic (parent) → Story (subtask via issuelink)
+  # Story (parent) → Task (subtask via issuelink)
+  
+  use_native_hierarchy: true
+  link_type: "Subtask"
+  
+  # Auto-add hierarchy labels based on Category field
+  # Category "Epic" → label: epic
+  # Category "Story" → label: story
+  # (Already handled in mappings above)
+
+# ==========================================
+# GITHUB PROJECTS (Optional)
+# ==========================================
+# projects:
+#   enabled: false
+#   project_number: 1  # Your GitHub project number
+
+# ==========================================
+# FIELD DEFINITIONS (Validation)
+# ==========================================
+fields:
+  - id: "customfield_14385"
+    name: "Category"
+    type: "select"
+    required: true
+    description: "Issue type (Bug/Epic/Story/Enhancement)"
+
+  - id: "customfield_14425"
+    name: "Dev Priority"
+    type: "select"
+    required: false
+    description: "Execution priority (Critical/High/Medium/Low)"
+
+# ==========================================
+# FIELD ID REFERENCE
+# ==========================================
+field_ids:
+  category: "customfield_14385"    # Type: Bug/Epic/Story
+  dev_priority: "customfield_14425"  # Priority: Critical/High/Medium/Low
+  theme: "customfield_14377"       # Strategic theme (not synced)
+  roadmap: "customfield_14378"     # Timeline (not synced)
+  
+  # RICE scoring (stored in metadata, not labels)
+  reach: "customfield_14379"
+  impact: "customfield_14376"
+  confidence: "customfield_14389"
+  effort: "customfield_14387"
+  value: "customfield_14386"
+

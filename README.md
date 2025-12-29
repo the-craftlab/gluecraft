@@ -250,9 +250,21 @@ See [LABEL_STRATEGY_FLUID_TEAMS.md](LABEL_STRATEGY_FLUID_TEAMS.md) for a complet
 
 ---
 
-## 🌳 Hierarchy & Sub-Issues
+## 🌳 Hierarchy & Sub-Issues ⭐ NEW in v2.0
 
 The connector now supports **native GitHub sub-issues** for visualizing and managing Epic → Story → Task relationships!
+
+### ⭐ What's New in v2.0
+
+**Critical Fixes:**
+- ✅ **Existing Issue Parent Sync** - Issues can now be linked to parents after creation
+- ✅ **Checkbox State Preservation** - Task list checkboxes persist across parent updates
+
+**New Features:**
+- ✅ **Hierarchy Enable/Disable** - New `hierarchy.enabled` config flag
+- ✅ **Depth Validation** - Prevents exceeding GitHub's 8-level limit with warnings
+
+**See [`RELEASE_NOTES_v2.0.md`](./RELEASE_NOTES_v2.0.md) for complete details.**
 
 ### How It Works
 

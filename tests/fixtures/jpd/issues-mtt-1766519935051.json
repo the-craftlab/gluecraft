@@ -1,0 +1,1875 @@
+{
+  "timestamp": "2025-12-23T19:58:55.050Z",
+  "scenario": "full-mtt-project",
+  "jpd": {
+    "request": {
+      "jql": "project = MTT",
+      "maxResults": 100
+    },
+    "response": {
+      "total": 6,
+      "issues": [
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163303",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163303",
+          "key": "MTT-6",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.390-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": null,
+            "customfield_14381": null,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-6/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": null,
+            "customfield_14385": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14153",
+              "value": "Sample ideas",
+              "id": "14153"
+            },
+            "customfield_14382": null,
+            "created": "2025-12-23T08:18:31.698-0800",
+            "customfield_14383": null,
+            "customfield_14388": "This idea is about this",
+            "customfield_14389": 10,
+            "customfield_14386": 1,
+            "customfield_14387": 5,
+            "customfield_10100": "0|i1bjws:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:31.756-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14157",
+                "value": "Expand horizons",
+                "id": "14157"
+              }
+            ],
+            "customfield_13243": null,
+            "customfield_14378": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14161",
+              "value": "Won't do",
+              "id": "14161"
+            },
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": []
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": 1,
+            "customfield_14379": 3,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "Explore VR travel features",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": null,
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-6/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163303/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        },
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163302",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163302",
+          "key": "MTT-5",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.337-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": null,
+            "customfield_14381": 0,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-5/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": "{\"start\":\"2026-01-01\",\"end\":\"2026-03-31\"}",
+            "customfield_14385": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14153",
+              "value": "Sample ideas",
+              "id": "14153"
+            },
+            "customfield_14382": null,
+            "created": "2025-12-23T08:18:31.275-0800",
+            "customfield_14383": "{\"start\":\"2025-10-01\",\"end\":\"2025-12-31\"}",
+            "customfield_14388": "This idea is about X",
+            "customfield_14389": 23,
+            "customfield_14386": 3,
+            "customfield_14387": 4,
+            "customfield_10100": "0|i1bjwk:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:31.368-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14156",
+                "value": "Delight users",
+                "id": "14156"
+              }
+            ],
+            "customfield_13243": null,
+            "customfield_14378": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14160",
+              "value": "Later",
+              "id": "14160"
+            },
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":thought_balloon:",
+                        "id": "1f4ad",
+                        "text": "💭"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Problem definition"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "The current way of handling user profile data makes the architecture difficult to handle and it could cause timeouts in the future. Engineers have difficulties making improvements on the user profiles and this can slow down adoption and overall user satisfaction. "
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":notepad_spiral:",
+                        "id": "1f5d2",
+                        "text": "🗒"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Solution definition"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What are possible solutions?"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Solution A:",
+                              "marks": [
+                                {
+                                  "type": "underline"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " We migrate the data to a newer application and associate a new database,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Solution B:",
+                              "marks": [
+                                {
+                                  "type": "underline"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " We create a new architecture in this database and migrate the existing data."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What’s the initial scope?"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "User profiles for new and existing users,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Not in scope:",
+                              "marks": [
+                                {
+                                  "type": "underline"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "text": " Service provider data, Travel agency data."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Knowledge gaps "
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We need to evaluate the complexity of the data migration according to the two possible solutions in order to assess the effort on each of these. "
+                    }
+                  ]
+                }
+              ]
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": 3,
+            "customfield_14379": 5,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "Refactor user profile data",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": null,
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-5/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163302/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        },
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163301",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163301",
+          "key": "MTT-4",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.252-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14145",
+                "value": "SMB",
+                "id": "14145"
+              },
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14146",
+                "value": "Startups",
+                "id": "14146"
+              }
+            ],
+            "customfield_14381": 1,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-4/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": "{\"start\":\"2025-10-01\",\"end\":\"2025-12-31\"}",
+            "customfield_14385": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14153",
+              "value": "Sample ideas",
+              "id": "14153"
+            },
+            "customfield_14382": null,
+            "created": "2025-12-23T08:18:30.823-0800",
+            "customfield_14383": "{\"start\":\"2025-07-01\",\"end\":\"2025-09-30\"}",
+            "customfield_14388": "This idea is about X",
+            "customfield_14389": 63,
+            "customfield_14386": 3,
+            "customfield_14387": 4,
+            "customfield_10100": "0|i1bjwc:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:30.932-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14156",
+                "value": "Delight users",
+                "id": "14156"
+              }
+            ],
+            "customfield_13243": null,
+            "customfield_14378": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14159",
+              "value": "Next",
+              "id": "14159"
+            },
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":bulb:",
+                        "id": "1f4a1",
+                        "text": "💡"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Hypothesis"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When customers are signing up for the waiting list for our most famous travel plans, they do not get enough information about waiting time or what’s next for them."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We believe that this lack of information ",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": "prevents them to sign up for more waiting lists and affects their overall satisfaction regarding their experience on the platform."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This will benefit users by",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "text": " providing them with more advantages, the more they are using the platform and will encourage new users to use the platform even more."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":notepad_spiral:",
+                        "id": "1f5d2",
+                        "text": "🗒️"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Solution Definition"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "When a user subscribes to a waiting list they receive information about:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "Their real-time position on the waiting list,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A countdown up to the start of the event,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "A checklist on what to prepare if a spot becomes free."
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":test_tube:",
+                        "id": "1f9ea",
+                        "text": "🧪"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Validation",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This hypothesis will be validated if we notice an increase in waiting list subscriptions, globally and per customer. "
+                    }
+                  ]
+                }
+              ]
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": 4,
+            "customfield_14379": 4,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "Improve waiting list experience",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": null,
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-4/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163301/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        },
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163300",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163300",
+          "key": "MTT-3",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.192-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14146",
+                "value": "Startups",
+                "id": "14146"
+              }
+            ],
+            "customfield_14381": 1,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-3/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": "{\"start\":\"2025-10-01\",\"end\":\"2025-12-31\"}",
+            "customfield_14385": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14153",
+              "value": "Sample ideas",
+              "id": "14153"
+            },
+            "customfield_14382": null,
+            "created": "2025-12-23T08:18:30.349-0800",
+            "customfield_14383": "{\"start\":\"2025-10-01\",\"end\":\"2025-12-31\"}",
+            "customfield_14388": "This idea is about X",
+            "customfield_14389": 71,
+            "customfield_14386": 4,
+            "customfield_14387": 2,
+            "customfield_10100": "0|i1bjw4:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:30.456-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14155",
+                "value": "Win enterprise customers",
+                "id": "14155"
+              }
+            ],
+            "customfield_13243": null,
+            "customfield_14378": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14159",
+              "value": "Next",
+              "id": "14159"
+            },
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":checkered_flag:",
+                        "id": "1f3c1",
+                        "text": "🏁"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Strategic alignment"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "How does this fit into the broader strategy?",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As we are planning to increase revenue, we believe that accelerating the checkout process will encourage our customers to purchase new items more frequently and seamlessly"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":thought_balloon:",
+                        "id": "1f4ad",
+                        "text": "💭"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Problem definition"
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 3
+                  },
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "What problem or job are we going after?"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "As a user who is looking to purchase a flight on the platform:"
+                    }
+                  ]
+                },
+                {
+                  "type": "bulletList",
+                  "content": [
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "When I select on my cart and select “Check out.”,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "I want to be able to reuse the information I provided in my previous purchase,"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "listItem",
+                      "content": [
+                        {
+                          "type": "paragraph",
+                          "content": [
+                            {
+                              "type": "text",
+                              "text": "So I can save time by not typing my details again. "
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Who faces this problem, and how important is it to them?",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We need to ease the process for our most valued customers, the ones returning to the platform."
+                    }
+                  ]
+                }
+              ]
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": 4,
+            "customfield_14379": 4,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "Express checkout",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": null,
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-3/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163300/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        },
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163299",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163299",
+          "key": "MTT-2",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.133-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14144",
+                "value": "Enterprise",
+                "id": "14144"
+              }
+            ],
+            "customfield_14381": 1,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-2/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": "{\"start\":\"2025-07-01\",\"end\":\"2025-09-30\"}",
+            "customfield_14385": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14153",
+              "value": "Sample ideas",
+              "id": "14153"
+            },
+            "customfield_14382": 1,
+            "created": "2025-12-23T08:18:29.789-0800",
+            "customfield_14383": "{\"start\":\"2025-01-01\",\"end\":\"2025-03-31\"}",
+            "customfield_14388": "This is an idea about X",
+            "customfield_14389": 100,
+            "customfield_14386": 5,
+            "customfield_14387": 1,
+            "customfield_10100": "0|i1bjvw:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:29.938-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": [
+              {
+                "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14154",
+                "value": "Increase revenue",
+                "id": "14154"
+              }
+            ],
+            "customfield_13243": null,
+            "customfield_14378": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/14158",
+              "value": "Now",
+              "id": "14158"
+            },
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":bulb:",
+                        "id": "1f4a1",
+                        "text": "💡"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " Hypothesis"
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Creating"
+                    },
+                    {
+                      "type": "text",
+                      "text": " a reward program for our customers will increase the adoption of our travel booking platform. ",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This will benefit users by providing them with more advantages as they use the platform and will encourage new users to use the platform even more."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "We will know if this is true if the number of travel booked per user per year significantly increases after the first six months of experimentation. "
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":test_tube:",
+                        "id": "1f9ea",
+                        "text": "🧪"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Validation",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "After a runtime of 16 weeks, we saw the number of booking per user increase significantly: +17%. The number of returning users has also increased by 24%."
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "This validates our hypothesis that a reward program has increased our users’ platform adoption."
+                    }
+                  ]
+                },
+                {
+                  "type": "heading",
+                  "attrs": {
+                    "level": 2
+                  },
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":heavy_check_mark:",
+                        "id": "2714",
+                        "text": "✔"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " "
+                    },
+                    {
+                      "type": "text",
+                      "text": "Decision",
+                      "marks": [
+                        {
+                          "type": "strong"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "emoji",
+                      "attrs": {
+                        "shortName": ":check_mark:",
+                        "id": "atlassian-check_mark",
+                        "text": ":check_mark:"
+                      }
+                    },
+                    {
+                      "type": "text",
+                      "text": " We will move this feature from Beta to make it generally available to all our customers as its benefit has been proven."
+                    }
+                  ]
+                }
+              ]
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": 5,
+            "customfield_14379": 3,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "New rewards program",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": null,
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-2/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163299/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        },
+        {
+          "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+          "id": "163298",
+          "self": "https://checkfront.atlassian.net/rest/api/3/issue/163298",
+          "key": "MTT-1",
+          "fields": {
+            "statuscategorychangedate": "2025-12-23T08:18:32.073-0800",
+            "customfield_14391": null,
+            "issuetype": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issuetype/12713",
+              "id": "12713",
+              "description": "Discovery idea",
+              "iconUrl": "https://checkfront.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10300?size=medium",
+              "name": "Idea",
+              "subtask": false,
+              "avatarId": 10300,
+              "entityId": "65f53d25-c889-4abd-99eb-733490f930a4",
+              "hierarchyLevel": 0
+            },
+            "customfield_14392": null,
+            "customfield_14390": null,
+            "timespent": null,
+            "project": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/project/13909",
+              "id": "13909",
+              "key": "MTT",
+              "name": "Manifest-test",
+              "projectTypeKey": "product_discovery",
+              "simplified": true,
+              "avatarUrls": {
+                "48x48": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305",
+                "24x24": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=small",
+                "16x16": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=xsmall",
+                "32x32": "https://checkfront.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/15305?size=medium"
+              }
+            },
+            "fixVersions": [],
+            "customfield_12210": null,
+            "aggregatetimespent": null,
+            "statusCategory": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+              "id": 2,
+              "key": "new",
+              "colorName": "blue-gray",
+              "name": "To Do"
+            },
+            "resolution": null,
+            "resolutiondate": null,
+            "workratio": -1,
+            "customfield_14380": null,
+            "customfield_14381": null,
+            "watches": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-1/watchers",
+              "watchCount": 1,
+              "isWatching": true
+            },
+            "lastViewed": null,
+            "customfield_14384": null,
+            "customfield_14385": null,
+            "customfield_14382": null,
+            "created": "2025-12-23T08:18:28.919-0800",
+            "customfield_14383": null,
+            "customfield_14388": null,
+            "customfield_14389": null,
+            "customfield_14386": null,
+            "customfield_14387": null,
+            "customfield_10100": "0|i1bjvo:",
+            "priority": null,
+            "customfield_12201": null,
+            "labels": [],
+            "timeestimate": null,
+            "aggregatetimeoriginalestimate": null,
+            "versions": [],
+            "issuelinks": [],
+            "assignee": null,
+            "updated": "2025-12-23T08:18:29.105-0800",
+            "status": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/status/14618",
+              "description": "",
+              "iconUrl": "https://checkfront.atlassian.net/images/icons/statuses/generic.png",
+              "name": "Parking lot",
+              "id": "14618",
+              "statusCategory": {
+                "self": "https://checkfront.atlassian.net/rest/api/3/statuscategory/2",
+                "id": 2,
+                "key": "new",
+                "colorName": "blue-gray",
+                "name": "To Do"
+              }
+            },
+            "components": [],
+            "customfield_13241": null,
+            "customfield_13240": null,
+            "timeoriginalestimate": null,
+            "customfield_14377": null,
+            "customfield_13243": null,
+            "customfield_14378": null,
+            "customfield_13242": null,
+            "description": {
+              "type": "doc",
+              "version": 1,
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "If multiple and similar ideas have been created, use the merge function to keep only one and archive others. "
+                    }
+                  ]
+                },
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Archiving ideas is also a way to keep your project clean without deleting idea - as an archived idea can always be restored. "
+                    }
+                  ]
+                }
+              ]
+            },
+            "customfield_13245": null,
+            "customfield_13244": null,
+            "customfield_14376": null,
+            "customfield_14379": 2,
+            "timetracking": {},
+            "customfield_13239": null,
+            "security": null,
+            "attachment": [],
+            "aggregatetimeestimate": null,
+            "summary": "What are archived ideas?",
+            "creator": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "subtasks": [],
+            "customfield_13032": null,
+            "reporter": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/user?accountId=712020%3A37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "accountId": "712020:37d7fa03-33fb-41dc-9d6c-6dab4804d57b",
+              "emailAddress": "james.villarrubia@rezdy.com",
+              "avatarUrls": {
+                "48x48": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "24x24": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "16x16": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png",
+                "32x32": "https://secure.gravatar.com/avatar/a0c4210900d89e415d4d1f0c7ab5eb50?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FJV-6.png"
+              },
+              "displayName": "James Villarrubia",
+              "active": true,
+              "timeZone": "America/Vancouver",
+              "accountType": "atlassian"
+            },
+            "aggregateprogress": {
+              "progress": 0,
+              "total": 0
+            },
+            "customfield_13236": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/customFieldOption/13060",
+              "value": "Yes",
+              "id": "13060"
+            },
+            "customfield_13238": null,
+            "customfield_13237": null,
+            "environment": null,
+            "duedate": null,
+            "progress": {
+              "progress": 0,
+              "total": 0
+            },
+            "votes": {
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/MTT-1/votes",
+              "votes": 0,
+              "hasVoted": false
+            },
+            "comment": {
+              "comments": [],
+              "self": "https://checkfront.atlassian.net/rest/api/3/issue/163298/comment",
+              "maxResults": 0,
+              "total": 0,
+              "startAt": 0
+            },
+            "worklog": {
+              "startAt": 0,
+              "maxResults": 20,
+              "total": 0,
+              "worklogs": []
+            }
+          }
+        }
+      ]
+    }
+  }
+}

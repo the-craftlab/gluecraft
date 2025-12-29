@@ -1,0 +1,106 @@
+# ============================================================================
+# JPD to GitHub Connector - Docker Compose
+# ============================================================================
+#
+# Use this for local development and testing
+#
+# Quick start:
+#   1. Copy .env.example to .env and fill in your credentials
+#   2. Run: docker-compose up
+#
+# ============================================================================
+
+services:
+  jpd-sync:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: jpd-github-sync:latest
+    container_name: jpd-sync
+    
+    # Environment variables from .env file
+    env_file:
+      - .env
+    
+    # Optional: Override config path
+    environment:
+      - CONFIG_PATH=${CONFIG_PATH:-config/sync-config.yaml}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    
+    # Optional: Mount config directory for easy updates
+    volumes:
+      - ./config:/app/config:ro
+      - ./examples:/app/examples:ro
+    
+    # Restart policy for production
+    restart: unless-stopped
+    
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('healthy')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# ============================================================================
+# Optional: Add a cron service for scheduled sync
+# ============================================================================
+#
+# Uncomment to run sync on a schedule instead of continuous mode
+#
+#   jpd-sync-cron:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     image: jpd-github-sync:latest
+#     container_name: jpd-sync-cron
+#     env_file:
+#       - .env
+#     volumes:
+#       - ./config:/app/config:ro
+#     # Run sync every 15 minutes
+#     command: sh -c "while true; do node dist/index.cjs; sleep 900; done"
+#     restart: unless-stopped
+#     logging:
+#       driver: "json-file"
+#       options:
+#         max-size: "10m"
+#         max-file: "3"
+
+# ============================================================================
+# Optional: Add a monitoring service
+# ============================================================================
+#
+# Example with Prometheus for metrics (requires instrumentation)
+#
+#   prometheus:
+#     image: prom/prometheus:latest
+#     container_name: prometheus
+#     ports:
+#       - "9090:9090"
+#     volumes:
+#       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#       - prometheus-data:/prometheus
+#     restart: unless-stopped
+#
+# volumes:
+#   prometheus-data:
+

@@ -1,0 +1,111 @@
+# Complete JPD ↔ GitHub Sync Configuration
+# Demonstrates full hierarchy, labels, Projects integration, and two-way sync
+
+sync:
+  direction: bidirectional
+  poll_interval: '*/15 * * * *'
+  jql: 'project = MTT'  # Sync all MTT project issues
+
+# Field mappings with transformations
+mappings:
+  # Basic fields
+  - jpd: "fields.summary"
+    github: "title"
+
+  # Rich body using custom function
+  - jpd: "fields.description"
+    github: "body"
+    transform_function: "./transforms/build-issue-body.ts"
+
+  # Theme as epic/project grouping (multi-select, use first value)
+  - jpd: "fields.customfield_14377[0].value"
+    github: "labels"
+    template: "theme:{{fields.customfield_14377[0].value | slugify}}"
+
+  # Category as type
+  - jpd: "fields.customfield_14385.value"
+    github: "labels"
+    template: "category:{{fields.customfield_14385.value | slugify}}"
+
+  # Roadmap as priority
+  - jpd: "fields.customfield_14378.value"
+    github: "labels"
+    template: "priority:{{fields.customfield_14378.value | slugify}}"
+
+# Status mappings for two-way sync
+statuses:
+  # Ideas Phase (not synced to GitHub)
+  "Parking lot":
+    github_state: open
+    github_project_status: "📥 Inbox"
+  
+  "Discovery":
+    github_state: open
+    github_project_status: "🔍 Discovery"
+
+  # Epic Phase (synced as Epic type)
+  "Epic Design":
+    github_state: open
+    github_project_status: "🎨 Epic Design"
+
+  # Story Phase (synced as Story type)
+  "Backlog":
+    github_state: open
+    github_project_status: "📋 Backlog"
+
+  "Ready":
+    github_state: open
+    github_project_status: "✅ Ready"
+
+  "In Progress":
+    github_state: open
+    github_project_status: "⚙️ In Progress"
+
+  "In Review":
+    github_state: open
+    github_project_status: "👀 In Review"
+
+  # Completion
+  "Done":
+    github_state: closed
+    github_project_status: "✅ Done"
+
+  "Icebox":
+    github_state: closed
+    github_project_status: "🧊 Icebox"
+
+# Hierarchy configuration (status-based)
+hierarchy:
+  # Status-based hierarchy levels
+  epic_statuses:
+    - "Epic Design"
+  
+  story_statuses:
+    - "Backlog"
+    - "Ready"
+    - "In Progress"
+    - "In Review"
+    - "Done"
+  
+  task_statuses: []  # Tasks created in GitHub, not JPD
+
+  # Label templates (if using parent-child relationships)
+  epic_label_template: "epic:{{epic.key}}"
+  story_label_template: "story:{{story.key}}"
+  
+  # Include parent links in issue body
+  parent_field_in_body: true
+  use_github_parent_issue: true
+
+# GitHub Projects (Beta) integration
+projects:
+  enabled: true
+  project_number: 1  # Update with your actual project number
+  status_field_name: "Status"
+
+# Team management (optional)
+teams:
+  auto_detect: true
+  team_label_template: "team:{{team.name | slugify}}"
+  epic_ownership: true
+

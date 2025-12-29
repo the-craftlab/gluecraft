@@ -1,0 +1,311 @@
+# ============================================================================
+# MINIMAL SYNC CONFIGURATION TEMPLATE
+# ============================================================================
+#
+# This is a bare-bones starter configuration with ZERO assumptions about your
+# JPD project structure. Replace ALL_CAPS placeholders with your actual values.
+#
+# Documentation:
+# - Architecture: docs/ARCHITECTURE.md
+# - Transform Patterns: docs/TRANSFORM_PATTERNS.md
+# - Full examples: config/examples/
+#
+# Discovery Tools (find your field IDs and statuses):
+# - pnpm run discover-fields YOUR_PROJECT_KEY
+# - pnpm run discover-statuses YOUR_PROJECT_KEY (planned)
+# - pnpm run setup (interactive wizard)
+#
+# ============================================================================
+
+# ============================================================================
+# SYNC CONFIGURATION
+# ============================================================================
+sync:
+  # Direction: jpd-to-github | github-to-jpd | bidirectional
+  direction: bidirectional
+  
+  # JQL query to filter JPD issues to sync
+  # Replace YOUR_PROJECT_KEY with your actual project key (e.g., "MTT", "ENG", "PROD")
+  jql: 'project = YOUR_PROJECT_KEY'
+  
+  # Optional: Cron schedule for automated sync (when deployed to GitHub Actions)
+  # poll_interval: "*/15 * * * *"  # Every 15 minutes
+
+# ============================================================================
+# FIELD MAPPINGS
+# ============================================================================
+# Map JPD fields to GitHub fields
+# 
+# Discovery: Run `pnpm run discover-fields YOUR_PROJECT_KEY` to find your field IDs
+#
+# Pattern 1: Direct mapping (no transform)
+# Pattern 2: Template string ({{field | filter}})
+# Pattern 3: Custom function (transform_function: "./transforms/your-function.ts")
+#
+mappings:
+  # ──────────────────────────────────────────────────────────────────────────
+  # REQUIRED: Title mapping
+  # ──────────────────────────────────────────────────────────────────────────
+  - jpd: "fields.summary"
+    github: "title"
+  
+  # ──────────────────────────────────────────────────────────────────────────
+  # REQUIRED: Body/Description mapping
+  # ──────────────────────────────────────────────────────────────────────────
+  - jpd: "fields.description"
+    github: "body"
+    # Optional: Use a transform function for complex body building
+    # transform_function: "./transforms/your-body-builder.ts"
+  
+  # ──────────────────────────────────────────────────────────────────────────
+  # OPTIONAL: Custom field → Labels
+  # ──────────────────────────────────────────────────────────────────────────
+  # Example: Map a select field to labels with a prefix
+  # 
+  # - jpd: "fields.customfield_XXXXX.value"  # Replace XXXXX with your field ID
+  #   github: "labels"
+  #   template: "my-prefix:{{fields.customfield_XXXXX.value | lowercase}}"
+  
+  # ──────────────────────────────────────────────────────────────────────────
+  # OPTIONAL: Transform function for complex logic
+  # ──────────────────────────────────────────────────────────────────────────
+  # Example: Custom transform function
+  # 
+  # - jpd: "."
+  #   github: "labels"
+  #   transform_function: "./transforms/my-transform.ts"
+
+# ============================================================================
+# STATUS MAPPINGS
+# ============================================================================
+# Map your JPD workflow status names to GitHub issue states
+#
+# Discovery: Check your JPD project workflow or use `pnpm run discover-statuses`
+#
+# Each status name MUST match your JPD workflow exactly (case-sensitive)
+#
+# github_state: open | closed
+# github_project_status: Column name in GitHub Projects (optional)
+# sync: true | false (whether to sync issues in this status)
+#
+statuses:
+  # ──────────────────────────────────────────────────────────────────────────
+  # EXAMPLE: Map your actual status names
+  # ──────────────────────────────────────────────────────────────────────────
+  # Replace these with YOUR actual JPD status names:
+  
+  # "Your To Do Status Name":
+  #   github_state: open
+  #   sync: true
+  #   # Optional: Map to GitHub Projects column
+  #   # github_project_status: "To Do"
+  
+  # "Your In Progress Status Name":
+  #   github_state: open
+  #   sync: true
+  #   # github_project_status: "In Progress"
+  
+  # "Your Done Status Name":
+  #   github_state: closed
+  #   sync: true
+  #   # github_project_status: "Done"
+  
+  # ──────────────────────────────────────────────────────────────────────────
+  # OPTIONAL: Statuses to NOT sync
+  # ──────────────────────────────────────────────────────────────────────────
+  # Example: Don't sync issues in "Idea" phase
+  # 
+  # "Your Idea Status Name":
+  #   sync: false
+
+# ============================================================================
+# HIERARCHY (Optional)
+# ============================================================================
+# Configure parent-child relationships (Epic → Story → Task)
+#
+# Options:
+# 1. JPD native links (use_native_hierarchy: true)
+# 2. GitHub labels (epic_label_template, story_label_template)
+# 3. Status-based (epic_statuses, story_statuses)
+#
+# hierarchy:
+#   # Option 1: Use JPD's native issue links
+#   use_native_hierarchy: true
+#   link_type: "Subtask"  # or "Blocks", "Parent", etc.
+#   
+#   # Option 2: Label-based hierarchy
+#   epic_label_template: "epic:{{epic.key}}"
+#   story_label_template: "story:{{story.key}}"
+#   parent_field_in_body: true
+#   
+#   # Option 3: Status-based hierarchy
+#   epic_statuses: ["Your Epic Status"]
+#   story_statuses: ["Your Story Status"]
+#   task_statuses: ["Your Task Status"]
+
+# ============================================================================
+# GITHUB PROJECTS (Optional)
+# ============================================================================
+# Integrate with GitHub Projects Beta for visual board management
+#
+# projects:
+#   enabled: false
+#   project_number: 1  # Your GitHub project number (find in project URL)
+#   status_field_name: "Status"  # Name of status field in your project
+
+# ============================================================================
+# GITHUB → JPD CREATION (Optional)
+# ============================================================================
+# Create JPD issues from GitHub issues that don't exist in JPD yet
+#
+# github_to_jpd_creation:
+#   enabled: false
+#   
+#   # Map GitHub labels to JPD field values
+#   label_to_category:
+#     "bug": "Bug"          # GitHub label → JPD field value
+#     "enhancement": "Idea"
+#     "epic": "Epic"
+#   
+#   # Default JPD field values for unlabeled issues
+#   default_category: "Idea"
+#   default_status: "Backlog"
+#   default_priority: "Medium"
+#   
+#   # IMPORTANT: Specify custom field IDs for category and priority
+#   # Without these, the tool cannot set these fields in JPD
+#   # Run `pnpm run discover-fields YOUR_PROJECT_KEY` to find your field IDs
+#   field_mappings:
+#     category_field_id: "customfield_XXXXX"   # Replace with your category field ID
+#     priority_field_id: "customfield_YYYYY"   # Replace with your priority field ID
+
+# ============================================================================
+# FIELD VALIDATION (Optional but Recommended)
+# ============================================================================
+# Validate that JPD fields exist before syncing
+# This prevents sync failures from typos or missing fields
+#
+# Run `pnpm run discover-fields YOUR_PROJECT_KEY` to find field info
+#
+# fields:
+#   # Example: Validate a custom field
+#   - id: "customfield_XXXXX"         # Field ID from JPD
+#     name: "Your Field Name"         # Human-readable name
+#     type: "select"                  # Field type: select, multiselect, number, text, etc.
+#     required: true                  # Is this field required for sync?
+#     description: "Field description"
+
+# ============================================================================
+# GITHUB LABELS (Optional but Recommended)
+# ============================================================================
+# Define labels to auto-create in GitHub with custom colors
+#
+# Labels are automatically created the first time they're used in a sync,
+# or you can pre-create them with: pnpm run setup-labels
+#
+# Colors are hex codes WITHOUT the # prefix (e.g., "0052CC" not "#0052CC")
+#
+# labels:
+#   # Hierarchy labels (epic, story, task)
+#   hierarchy:
+#     - name: "epic"
+#       color: "0052CC"
+#       description: "High-level initiative (2-3 month project)"
+#     - name: "story"
+#       color: "2684FF"
+#       description: "Deliverable unit of work"
+#     - name: "task"
+#       color: "B3D4FF"
+#       description: "Implementation step"
+#   
+#   # Type labels (what kind of work?)
+#   types:
+#     - name: "type:feature"
+#       color: "6554C0"
+#       description: "New feature or enhancement"
+#     - name: "type:bug"
+#       color: "DE350B"
+#       description: "Bug fix"
+#     - name: "type:tech-debt"
+#       color: "FF8B00"
+#       description: "Technical debt or refactoring"
+#     - name: "type:docs"
+#       color: "00B8D9"
+#       description: "Documentation"
+#     - name: "type:security"
+#       color: "FF5630"
+#       description: "Security issue"
+#   
+#   # Priority labels (how urgent?)
+#   priorities:
+#     - name: "priority:critical"
+#       color: "DE350B"
+#       description: "Critical - drop everything"
+#     - name: "priority:high"
+#       color: "FF8B00"
+#       description: "High priority"
+#     - name: "priority:normal"
+#       color: "FFC400"
+#       description: "Normal priority"
+#     - name: "priority:low"
+#       color: "8993A4"
+#       description: "Low priority"
+#   
+#   # Optional: Status labels (workflow states)
+#   # statuses:
+#   #   - name: "blocked"
+#   #     color: "DE350B"
+#   #     description: "Blocked by dependency"
+#   #   - name: "needs-review"
+#   #     color: "00B8D9"
+#   #     description: "Ready for review"
+#   
+#   # Optional: Custom labels (project-specific)
+#   # custom:
+#   #   - name: "your-custom-label"
+#   #     color: "8993A4"
+#   #     description: "Your description"
+
+# ============================================================================
+# NEXT STEPS
+# ============================================================================
+#
+# 1. Find your field IDs:
+#    pnpm run discover-fields YOUR_PROJECT_KEY
+#
+# 2. Replace placeholders:
+#    - YOUR_PROJECT_KEY → your actual project key
+#    - customfield_XXXXX → your actual field IDs
+#    - Status names → your actual workflow statuses
+#
+# 3. Uncomment sections you want to use
+#
+# 4. (Optional) Pre-create labels in GitHub:
+#    pnpm run setup-labels --preview  # Preview labels first
+#    pnpm run setup-labels            # Create labels
+#
+# 5. Validate your config:
+#    pnpm run validate-config
+#
+# 6. Test with dry-run:
+#    pnpm run dev -- --dry-run
+#
+# 7. Run actual sync:
+#    pnpm run dev
+#
+# ============================================================================
+# RESOURCES
+# ============================================================================
+#
+# Documentation:
+# - Architecture: docs/ARCHITECTURE.md
+# - Transform Patterns: docs/TRANSFORM_PATTERNS.md
+# - CLI Tools: CLI_GUIDE.md
+# - Getting Started: GETTING_STARTED.md
+#
+# Example Configs:
+# - MTT Project: examples/mtt/config.yaml
+# - Full Features: config/sync-config.example.yaml
+#
+# ============================================================================
+

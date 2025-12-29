@@ -1,0 +1,24 @@
+name: 'JPD to GitHub Sync'
+description: 'Bidirectional sync between Jira Product Discovery and GitHub Issues'
+author: 'James Villarrubia'
+inputs:
+  config-path:
+    description: 'Path to the configuration file'
+    required: false
+    default: 'config/sync-config.yaml'
+  jpd-api-key:
+    description: 'JPD API Token'
+    required: true
+  jpd-email:
+    description: 'JPD Email Address'
+    required: true
+  jpd-base-url:
+    description: 'JPD Base URL (e.g. https://your-domain.atlassian.net)'
+    required: true
+  github-token:
+    description: 'GitHub Token'
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
