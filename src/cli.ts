@@ -23,7 +23,7 @@ const program = new Command();
 program
   .name('gluecraft')
   .description('Gluecraft JPD: Bidirectional sync between Jira Product Discovery and GitHub Issues')
-  .version('2.0.0');
+  .version('0.0.2');
 
 // Sync command (default when no subcommand specified)
 program

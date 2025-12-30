@@ -1,6 +1,6 @@
 {
   "name": "@thecraftlab/gluecraft",
-  "version": "2.0.0",
+  "version": "0.0.2",
   "type": "module",
   "description": "Gluecraft JPD: Bidirectional sync between Jira Product Discovery and GitHub Issues with support for custom fields, hierarchies, and workflows",
   "main": "dist/cli.js",
@@ -19,7 +19,7 @@
     "test": "vitest",
     "test:e2e": "vitest run tests/e2e",
     "test:capture-fixtures": "tsx tests/e2e/capture-fixtures.ts",
-    "build": "tsup && chmod +x dist/cli.js",
+    "build": "tsup && chmod +x dist/cli.js && test -f dist/index.js || (echo 'ERROR: dist/index.js not found after build' && exit 1)",
     "dev": "tsx src/cli.ts",
     "sync": "tsx src/cli.ts sync",
     "setup": "tsx src/cli.ts setup",
