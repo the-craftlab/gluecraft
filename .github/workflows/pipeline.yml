@@ -301,16 +301,7 @@ jobs:
 
   promote:
     needs: [ version, tag ]
-    if: ${{
-        always() &&
-        (github.event_name == 'push' ||
-        github.event_name == 'workflow_dispatch') &&
-        needs.version.result == 'success' &&
-        needs.version.outputs.version != '' &&
-        (needs.tag.result == 'success' ||
-        needs.tag.result == 'skipped') &&
-        ()
-      }}
+    if: false  # Skip promotion - single branch workflow (main → main)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
