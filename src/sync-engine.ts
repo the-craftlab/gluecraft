@@ -669,13 +669,11 @@ export class SyncEngine {
   /**
    * Remove stale JPD metadata from a GitHub issue
    * Called when the linked JPD issue no longer exists
+   * 
+   * Note: This runs even in dry-run mode because it's cleanup of broken data,
+   * not creation of new sync data. Stale metadata causes errors and confusion.
    */
   private async removeStaleMetadata(githubIssueNumber: number): Promise<void> {
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would remove stale metadata from #${githubIssueNumber}`);
-      return;
-    }
-
     try {
       // Get the current issue
       const issue = await this.github.getIssueByNumber(
@@ -686,18 +684,24 @@ export class SyncEngine {
 
       if (!issue || !issue.body) return;
 
+      // Check if metadata exists before trying to remove
+      if (!issue.body.includes('jpd-sync-metadata')) {
+        return; // Already clean
+      }
+
       // Remove the hidden sync metadata comment
       const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata\s*:\s*{.*?}\s*-->/gs, '').trim();
 
-      // Update the issue
-      await this.github.updateIssue(
+      // Cleanup happens even in dry-run mode - call the cleanup method
+      await this.github.cleanupStaleMetadata(
         this.githubOwner,
         this.githubRepo,
         githubIssueNumber,
-        { body: cleanBody }
+        cleanBody
       );
 
-      this.logger.debug(`Removed stale metadata from #${githubIssueNumber}`);
+      const mode = this.dryRun ? '[DRY RUN] ' : '';
+      this.logger.info(`${mode}🧹 Cleaned stale metadata from #${githubIssueNumber}`);
     } catch (error: any) {
       this.logger.warn(`Failed to remove stale metadata from #${githubIssueNumber}: ${error.message}`);
     }

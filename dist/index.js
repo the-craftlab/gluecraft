@@ -22783,6 +22783,18 @@ var GitHubClient = class {
     await this.octokit.issues.update(updatePayload);
   }
   /**
+   * Clean up stale JPD metadata from an issue
+   * This bypasses dry-run mode because it's fixing broken data, not syncing new data
+   */
+  async cleanupStaleMetadata(owner, repo, issueNumber, cleanedBody) {
+    await this.octokit.issues.update({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      body: cleanedBody
+    });
+  }
+  /**
    * Get comments for a GitHub issue
    */
   async getComments(owner, repo, issueNumber) {
@@ -24528,12 +24540,11 @@ Results:`);
   /**
    * Remove stale JPD metadata from a GitHub issue
    * Called when the linked JPD issue no longer exists
+   * 
+   * Note: This runs even in dry-run mode because it's cleanup of broken data,
+   * not creation of new sync data. Stale metadata causes errors and confusion.
    */
   async removeStaleMetadata(githubIssueNumber) {
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would remove stale metadata from #${githubIssueNumber}`);
-      return;
-    }
     try {
       const issue = await this.github.getIssueByNumber(
         this.githubOwner,
@@ -24541,14 +24552,18 @@ Results:`);
         githubIssueNumber
       );
       if (!issue || !issue.body) return;
+      if (!issue.body.includes("jpd-sync-metadata")) {
+        return;
+      }
       const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata\s*:\s*{.*?}\s*-->/gs, "").trim();
-      await this.github.updateIssue(
+      await this.github.cleanupStaleMetadata(
         this.githubOwner,
         this.githubRepo,
         githubIssueNumber,
-        { body: cleanBody }
+        cleanBody
       );
-      this.logger.debug(`Removed stale metadata from #${githubIssueNumber}`);
+      const mode = this.dryRun ? "[DRY RUN] " : "";
+      this.logger.info(`${mode}\u{1F9F9} Cleaned stale metadata from #${githubIssueNumber}`);
     } catch (error) {
       this.logger.warn(`Failed to remove stale metadata from #${githubIssueNumber}: ${error.message}`);
     }

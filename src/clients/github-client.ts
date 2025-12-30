@@ -260,6 +260,26 @@ export class GitHubClient {
   }
 
   /**
+   * Clean up stale JPD metadata from an issue
+   * This bypasses dry-run mode because it's fixing broken data, not syncing new data
+   */
+  async cleanupStaleMetadata(
+    owner: string,
+    repo: string,
+    issueNumber: number,
+    cleanedBody: string
+  ): Promise<void> {
+    // Always execute cleanup, even in dry-run mode
+    // This is maintenance, not sync - broken references should be cleaned
+    await this.octokit.issues.update({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      body: cleanedBody
+    });
+  }
+
+  /**
    * Get comments for a GitHub issue
    */
   async getComments(owner: string, repo: string, issueNumber: number): Promise<any[]> {
