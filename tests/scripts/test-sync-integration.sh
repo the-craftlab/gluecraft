@@ -607,7 +607,7 @@ test_checkbox_state_preservation() {
   local epic_body_before
   epic_body_before=$(echo "$epic_issue" | jq -r '.body')
   
-  if echo "$epic_body_before" | grep -q "- \[x\] #${story_gh_number}"; then
+  if echo "$epic_body_before" | grep -q -- "- \[x\] #${story_gh_number}"; then
     log_success "Checkbox marked as complete: - [x] #${story_gh_number}"
   else
     log_error "Checkbox not marked as complete"
@@ -630,7 +630,7 @@ test_checkbox_state_preservation() {
   local epic_body_after
   epic_body_after=$(echo "$epic_issue" | jq -r '.body')
   
-  if echo "$epic_body_after" | grep -q "- \[x\] #${story_gh_number}"; then
+  if echo "$epic_body_after" | grep -q -- "- \[x\] #${story_gh_number}"; then
     log_success "Checkbox state PRESERVED after Epic update: - [x] #${story_gh_number}"
   else
     log_error "Checkbox state was LOST after Epic update (should be [x] but is [ ])"
@@ -723,7 +723,7 @@ test_sub_issues_hierarchy() {
         if echo "$epic_body" | grep -q "## 📋 Subtasks"; then
           log_success "Epic contains Subtasks section"
           
-          if echo "$epic_body" | grep -q "- \[ \] #${story_gh_number}"; then
+          if echo "$epic_body" | grep -q -- "- \[ \] #${story_gh_number}"; then
             log_success "Epic task list contains Story as sub-issue: - [ ] #${story_gh_number}"
           else
             log_error "Epic task list does not contain Story sub-issue"
@@ -741,7 +741,7 @@ test_sub_issues_hierarchy() {
         if echo "$story_body" | grep -q "## 📋 Subtasks"; then
           log_success "Story contains Subtasks section"
           
-          if echo "$story_body" | grep -q "- \[ \] #${task_gh_number}"; then
+          if echo "$story_body" | grep -q -- "- \[ \] #${task_gh_number}"; then
             log_success "Story task list contains Task as sub-issue: - [ ] #${task_gh_number}"
           else
             log_error "Story task list does not contain Task sub-issue"
@@ -778,7 +778,7 @@ test_sub_issues_hierarchy() {
         story_issue=$(github_get_issue "$story_gh_number")
         story_body=$(echo "$story_issue" | jq -r '.body')
         
-        if echo "$story_body" | grep -q "- \[x\] #${task_gh_number}"; then
+        if echo "$story_body" | grep -q -- "- \[x\] #${task_gh_number}"; then
           log_success "Story task list shows Task as completed: - [x] #${task_gh_number}"
         else
           log_error "Story task list did not update Task to completed"
