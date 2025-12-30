@@ -33,6 +33,11 @@ fi
 TEST_ISSUE_PREFIX="[TEST-FAST]"
 TIMESTAMP=$(date +%s)
 
+# Rate limit configuration (adjust based on your API limits)
+RATE_LIMIT_SHORT="${RATE_LIMIT_SHORT:-1}"    # Quick operations
+RATE_LIMIT_MEDIUM="${RATE_LIMIT_MEDIUM:-2}"  # Standard operations
+RATE_LIMIT_LONG="${RATE_LIMIT_LONG:-3}"      # After sync operations
+
 # Test state tracking
 CREATED_JPD_KEYS=()
 CREATED_GITHUB_NUMBERS=()
@@ -66,7 +71,7 @@ log_info() {
 }
 
 wait_for_rate_limit() {
-  local seconds="${1:-2}"
+  local seconds="${1:-$RATE_LIMIT_MEDIUM}"
   echo -e "${YELLOW}⏳ ${seconds}s...${NC}" >&2
   sleep "$seconds"
 }
@@ -287,9 +292,11 @@ cleanup_test_data() {
   local keys
   keys=$(echo "$search_result" | jq -r '.issues[]?.key // empty')
   
-  for key in $keys; do
-    jpd_delete_issue "$key"
-  done
+  if [ -n "$keys" ]; then
+    for key in $keys; do
+      jpd_delete_issue "$key"
+    done
+  fi
   
   # Close GitHub issues
   local gh_issues
@@ -299,11 +306,14 @@ cleanup_test_data() {
   local numbers
   numbers=$(echo "$gh_issues" | jq -r ".[] | select(.title | contains(\"${TEST_ISSUE_PREFIX}\")) | .number")
   
-  for number in $numbers; do
-    github_delete_issue "$number"
-  done
+  if [ -n "$numbers" ]; then
+    for number in $numbers; do
+      github_delete_issue "$number"
+    done
+  fi
   
   log_success "Cleanup complete"
+  return 0
 }
 
 # ==========================================
@@ -321,9 +331,9 @@ test_1_create() {
     "Backlog")
   CREATED_JPD_KEYS+=("$key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   run_sync "live"
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local gh_number
   gh_number=$(github_get_issue_by_jpd_key "$key")
@@ -342,9 +352,9 @@ test_2_update() {
   local key="${CREATED_JPD_KEYS[0]}"
   jpd_update_issue "$key" "summary" "${TEST_ISSUE_PREFIX} Story UPDATED (${TIMESTAMP})"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   run_sync "live"
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local gh_number="${CREATED_GITHUB_NUMBERS[0]}"
   local gh_issue
@@ -363,9 +373,9 @@ test_3_priority() {
   local key="${CREATED_JPD_KEYS[0]}"
   jpd_update_issue "$key" "priority" "Critical"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   run_sync "live"
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local gh_number="${CREATED_GITHUB_NUMBERS[0]}"
   local labels
@@ -384,9 +394,9 @@ test_4_github_to_jpd() {
   local gh_number="${CREATED_GITHUB_NUMBERS[0]}"
   github_update_issue "$gh_number" "state" "closed"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   run_sync "live"
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local key="${CREATED_JPD_KEYS[0]}"
   local status
@@ -411,7 +421,7 @@ test_5_hierarchy() {
     "Backlog")
   CREATED_JPD_KEYS+=("$epic_key")
   
-  wait_for_rate_limit 1
+  wait_for_rate_limit "$RATE_LIMIT_SHORT"
   
   local story_key
   story_key=$(jpd_create_issue \
@@ -421,9 +431,9 @@ test_5_hierarchy() {
     "Backlog")
   CREATED_JPD_KEYS+=("$story_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   run_sync "live"
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local epic_gh_number
   epic_gh_number=$(github_get_issue_by_jpd_key "$epic_key")
@@ -437,9 +447,9 @@ test_5_hierarchy() {
     
     jpd_link_issues "$story_key" "$epic_key"
     
-    wait_for_rate_limit 2
+    wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
     run_sync "live"
-    wait_for_rate_limit 2
+    wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
     
     local epic_body
     epic_body=$(github_get_issue "$epic_gh_number" | jq -r '.body')
@@ -469,11 +479,11 @@ log_info "Running tests 1-5 (~3 minutes)"
 
 cleanup_test_data
 
-test_1_create
-test_2_update
-test_3_priority
-test_4_github_to_jpd
-test_5_hierarchy
+test_1_create || true
+test_2_update || true
+test_3_priority || true
+test_4_github_to_jpd || true
+test_5_hierarchy || true
 
 cleanup_test_data
 

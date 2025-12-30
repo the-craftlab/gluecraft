@@ -27,6 +27,27 @@ tests/
     └── TEST_*.md                  # Test result reports
 ```
 
+## Rate Limit Configuration
+
+All test scripts support configurable rate limit waits via environment variables:
+
+```bash
+# Default values (in seconds)
+RATE_LIMIT_SHORT=1    # Quick operations (issue creation)
+RATE_LIMIT_MEDIUM=2   # Standard operations (before/after sync)
+RATE_LIMIT_LONG=3     # After major sync operations
+
+# Example: Run tests with faster waits (use if APIs allow)
+RATE_LIMIT_SHORT=0.5 RATE_LIMIT_MEDIUM=1 RATE_LIMIT_LONG=1.5 \
+  ./tests/scripts/test-integration-fast.sh
+
+# Example: Conservative for strict rate limits
+RATE_LIMIT_SHORT=2 RATE_LIMIT_MEDIUM=3 RATE_LIMIT_LONG=5 \
+  ./tests/scripts/test-sync-integration.sh
+```
+
+**Tip**: Start with defaults. If you see rate limit errors, increase the values. If tests are stable, you can decrease them for faster runs.
+
 ## Running Tests
 
 ### Quick Start

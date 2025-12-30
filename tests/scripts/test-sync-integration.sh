@@ -43,6 +43,11 @@ TEST_ISSUE_PREFIX="[TEST-AUTO]"
 TIMESTAMP=$(date +%s)
 CLEANUP_ONLY="${1:-false}"
 
+# Rate limit configuration (adjust based on your API limits)
+RATE_LIMIT_SHORT="${RATE_LIMIT_SHORT:-1}"    # Quick operations
+RATE_LIMIT_MEDIUM="${RATE_LIMIT_MEDIUM:-2}"  # Standard operations  
+RATE_LIMIT_LONG="${RATE_LIMIT_LONG:-3}"      # After sync operations
+
 # Test state tracking
 CREATED_JPD_KEYS=()
 CREATED_GITHUB_NUMBERS=()
@@ -81,7 +86,7 @@ log_info() {
 
 # Wait for rate limits to reset
 wait_for_rate_limit() {
-  local seconds="${1:-3}"
+  local seconds="${1:-$RATE_LIMIT_LONG}"
   echo -e "${YELLOW}⏳ Waiting ${seconds}s for rate limits...${NC}" >&2
   sleep "$seconds"
 }
@@ -368,12 +373,12 @@ test_jpd_to_github_create() {
   # Add to tracking array (command substitution runs in subshell, so array updates don't persist)
   CREATED_JPD_KEYS+=("$key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Run sync
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify GitHub issue was created
   local gh_number
@@ -422,12 +427,12 @@ test_jpd_to_github_update() {
   # Update title in JPD
   jpd_update_issue "$key" "summary" "${TEST_ISSUE_PREFIX} Story Title UPDATED (${TIMESTAMP})"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Run sync
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify GitHub issue was updated
   local gh_issue
@@ -451,12 +456,12 @@ test_jpd_to_github_priority_change() {
   # Change priority from High to Critical
   jpd_update_issue "$key" "priority" "Critical"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Run sync
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify label changed in GitHub
   local gh_issue
@@ -480,12 +485,12 @@ test_github_to_jpd_status() {
   # Close GitHub issue
   github_update_issue "$gh_number" "state" "closed"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Run sync
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify JPD status changed to Done
   local jpd_issue
@@ -512,7 +517,7 @@ test_existing_issue_parent_sync() {
     "Backlog")
   CREATED_JPD_KEYS+=("$epic_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   local story_key
   story_key=$(jpd_create_issue \
@@ -522,12 +527,12 @@ test_existing_issue_parent_sync() {
     "Backlog")
   CREATED_JPD_KEYS+=("$story_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Sync both (will create as separate issues)
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Get GitHub numbers
   local epic_gh_number
@@ -543,12 +548,12 @@ test_existing_issue_parent_sync() {
     # Now link Story to Epic in JPD (simulating adding parent after creation)
     jpd_link_issues "$story_key" "$epic_key"
     
-    wait_for_rate_limit 2
+    wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
     
     # Run sync again - should add Story to Epic's task list
     run_sync "live"
     
-    wait_for_rate_limit 3
+    wait_for_rate_limit "$RATE_LIMIT_LONG"
     
     # Verify Story was added to Epic's task list
     local epic_issue
@@ -589,12 +594,12 @@ test_checkbox_state_preservation() {
   log_info "Closing Story #${story_gh_number} to set checkbox"
   github_update_issue "$story_gh_number" "state" "closed"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Sync to update checkbox
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify checkbox is checked
   local epic_issue
@@ -613,12 +618,12 @@ test_checkbox_state_preservation() {
   log_info "Updating Epic title to trigger body regeneration"
   jpd_update_issue "$epic_key" "summary" "${TEST_ISSUE_PREFIX} Epic: Payment Gateway UPDATED (${TIMESTAMP})"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Sync again
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify checkbox is STILL checked (state preserved)
   epic_issue=$(github_get_issue "$epic_gh_number")
@@ -646,7 +651,7 @@ test_sub_issues_hierarchy() {
     "Backlog")
   CREATED_JPD_KEYS+=("$epic_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Create Story linked to Epic
   local story_key
@@ -657,12 +662,12 @@ test_sub_issues_hierarchy() {
     "Backlog")
   CREATED_JPD_KEYS+=("$story_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Link Story to Epic
   jpd_link_issues "$story_key" "$epic_key"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Create Task linked to Story
   local task_key
@@ -673,17 +678,17 @@ test_sub_issues_hierarchy() {
     "Backlog")
   CREATED_JPD_KEYS+=("$task_key")
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Link Task to Story
   jpd_link_issues "$task_key" "$story_key"
   
-  wait_for_rate_limit 2
+  wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
   
   # Run sync to create GitHub sub-issues
   run_sync "live"
   
-  wait_for_rate_limit 3
+  wait_for_rate_limit "$RATE_LIMIT_LONG"
   
   # Verify Epic created in GitHub
   local epic_gh_number
@@ -762,12 +767,12 @@ test_sub_issues_hierarchy() {
         log_info "Closing Task to test checkbox auto-update..."
         github_update_issue "$task_gh_number" "state" "closed"
         
-        wait_for_rate_limit 2
+        wait_for_rate_limit "$RATE_LIMIT_MEDIUM"
         
         # Run sync to update checkbox
         run_sync "live"
         
-        wait_for_rate_limit 3
+        wait_for_rate_limit "$RATE_LIMIT_LONG"
         
         # Verify Story task list shows Task as completed
         story_issue=$(github_get_issue "$story_gh_number")
@@ -809,7 +814,7 @@ cleanup_existing_tests() {
     log_info "Found old test issues, cleaning up..."
     for key in $old_keys; do
       jpd_delete_issue "$key" || true
-      wait_for_rate_limit 1
+      wait_for_rate_limit "$RATE_LIMIT_SHORT"
     done
   else
     log_info "No old JPD test issues found"
@@ -826,7 +831,7 @@ cleanup_existing_tests() {
     log_info "Found old GitHub issues, closing..."
     for num in $old_numbers; do
       github_delete_issue "$num" || true
-      wait_for_rate_limit 1
+      wait_for_rate_limit "$RATE_LIMIT_SHORT"
     done
   else
     log_info "No old GitHub test issues found"
@@ -841,13 +846,13 @@ cleanup_test_data() {
   # Delete GitHub issues (close them)
   for number in "${CREATED_GITHUB_NUMBERS[@]}"; do
     github_delete_issue "$number" || true
-    wait_for_rate_limit 1
+    wait_for_rate_limit "$RATE_LIMIT_SHORT"
   done
   
   # Delete JPD issues
   for key in "${CREATED_JPD_KEYS[@]}"; do
     jpd_delete_issue "$key" || true
-    wait_for_rate_limit 1
+    wait_for_rate_limit "$RATE_LIMIT_SHORT"
   done
   
   log_success "Cleanup complete"
