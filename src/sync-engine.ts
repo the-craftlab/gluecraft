@@ -281,9 +281,36 @@ export class SyncEngine {
     const match = existingGithubIssues.find(gh => gh.metadata?.jpd_id === issue.key);
 
     if (match && match.metadata?.sync_hash === newHash) {
-      stats.skippedUpToDate.push(issue.key);
-      // Only log if there's something interesting (not just "no changes")
-      return;
+      // Check if child checkbox states have changed (for parent issues with subtasks)
+      if (relationships.child_jpd_keys && relationships.child_jpd_keys.length > 0) {
+        const hasChildStateChange = relationships.child_jpd_keys.some(childKey => {
+          const childGhNumber = jpdToGithubMap.get(childKey);
+          if (!childGhNumber) return false;
+          
+          const childIssue = existingGithubIssues.find(gh => gh.number === childGhNumber);
+          if (!childIssue) return false;
+          
+          // Check if child state differs from what's in parent's body
+          const parentBody = match.body || '';
+          const isChildClosed = childIssue.state === 'closed';
+          const hasCheckedBox = parentBody.includes(`- [x] #${childGhNumber}`);
+          const hasUncheckedBox = parentBody.includes(`- [ ] #${childGhNumber}`);
+          
+          // State mismatch: closed but not checked, or open but checked
+          return (isChildClosed && !hasCheckedBox) || (!isChildClosed && !hasUncheckedBox);
+        });
+        
+        if (!hasChildStateChange) {
+          stats.skippedUpToDate.push(issue.key);
+          return;
+        }
+        
+        // Child checkbox state changed - proceed with update
+        this.logger.debug(`${issue.key}: child checkbox state changed, updating`);
+      } else {
+        stats.skippedUpToDate.push(issue.key);
+        return;
+      }
     }
 
     // 3. Transform Fields

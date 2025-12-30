@@ -169,7 +169,8 @@ jpd_update_issue() {
     -X PUT "${JPD_BASE_URL}/rest/api/3/issue/${key}" \
     -d "$payload")
   
-  if echo "$response" | jq -e '.errorMessages' >/dev/null 2>&1; then
+  # Empty response is success for PUT requests
+  if [ -n "$response" ] && echo "$response" | jq -e '.errorMessages' >/dev/null 2>&1; then
     log_error "Failed to update JPD issue"
     log_info "Response: $response"
     return 1
@@ -225,18 +226,19 @@ jpd_link_issues() {
   local child_key="$1"
   local parent_key="$2"
   
-  log_info "Linking $child_key to parent $parent_key"
+  log_info "Linking $child_key as subtask of $parent_key"
   
+  # Use Subtask link type (id: 10509)
   curl -s -u "${JPD_EMAIL}:${JPD_API_KEY}" \
     -H "Content-Type: application/json" \
     -X POST "${JPD_BASE_URL}/rest/api/3/issueLink" \
     -d "{
-      \"type\": {\"name\": \"relates to\"},
+      \"type\": {\"id\": \"10509\"},
       \"inwardIssue\": {\"key\": \"${child_key}\"},
       \"outwardIssue\": {\"key\": \"${parent_key}\"}
     }" >/dev/null
   
-  log_success "Linked $child_key to $parent_key"
+  log_success "Linked $child_key as subtask of $parent_key"
 }
 
 # ==========================================
@@ -557,8 +559,8 @@ test_existing_issue_parent_sync() {
     if echo "$epic_body" | grep -q "## 📋 Subtasks"; then
       log_success "Epic contains Subtasks section"
       
-      if echo "$epic_body" | grep -q "- \[ \] #${story_gh_number}"; then
-        log_success "Story was added to Epic's task list after linking: - [ ] #${story_gh_number}"
+      if echo "$epic_body" | grep -q "#${story_gh_number}"; then
+        log_success "Story was added to Epic's task list after linking: #${story_gh_number}"
       else
         log_error "Story was NOT added to Epic's task list"
       fi
