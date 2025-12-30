@@ -47,11 +47,22 @@ async function main() {
     if (!githubToken) throw new Error('GITHUB_TOKEN is required (set via input or env var)');
     if (!jpdApiKey) throw new Error('JPD_API_KEY is required (set via input or env var)');
 
+    // Extract GitHub owner/repo from GITHUB_REPOSITORY (format: "owner/repo")
+    // GitHub Actions automatically sets this variable
+    const githubRepository = process.env.GITHUB_REPOSITORY || '';
+    const [githubOwner, githubRepo] = githubRepository.split('/');
+    
+    if (!githubOwner || !githubRepo) {
+      throw new Error('GITHUB_REPOSITORY not set or invalid format (expected: owner/repo)');
+    }
+
     // Set environment variables for SyncEngine (it reads from process.env)
     if (githubToken) process.env.GITHUB_TOKEN = githubToken;
     if (jpdApiKey) process.env.JPD_API_KEY = jpdApiKey;
     if (jpdEmail) process.env.JPD_EMAIL = jpdEmail;
     if (jpdBaseUrl) process.env.JPD_BASE_URL = jpdBaseUrl;
+    process.env.GITHUB_OWNER = githubOwner;
+    process.env.GITHUB_REPO = githubRepo;
 
     // Check for dry-run mode (from input or command line arg)
     const dryRunInput = process.env['INPUT_DRY-RUN'] || process.env.INPUT_DRY_RUN;

@@ -24814,10 +24814,17 @@ async function main() {
     const jpdBaseUrl = process.env["INPUT_JPD-BASE-URL"] || process.env.INPUT_JPD_BASE_URL || process.env.JPD_BASE_URL;
     if (!githubToken) throw new Error("GITHUB_TOKEN is required (set via input or env var)");
     if (!jpdApiKey) throw new Error("JPD_API_KEY is required (set via input or env var)");
+    const githubRepository = process.env.GITHUB_REPOSITORY || "";
+    const [githubOwner, githubRepo] = githubRepository.split("/");
+    if (!githubOwner || !githubRepo) {
+      throw new Error("GITHUB_REPOSITORY not set or invalid format (expected: owner/repo)");
+    }
     if (githubToken) process.env.GITHUB_TOKEN = githubToken;
     if (jpdApiKey) process.env.JPD_API_KEY = jpdApiKey;
     if (jpdEmail) process.env.JPD_EMAIL = jpdEmail;
     if (jpdBaseUrl) process.env.JPD_BASE_URL = jpdBaseUrl;
+    process.env.GITHUB_OWNER = githubOwner;
+    process.env.GITHUB_REPO = githubRepo;
     const dryRunInput = process.env["INPUT_DRY-RUN"] || process.env.INPUT_DRY_RUN;
     const dryRunArg = process.argv.slice(2).includes("--dry-run");
     const dryRun = dryRunInput === "true" || dryRunArg;
