@@ -24503,7 +24503,8 @@ Results:`);
     }
     const jpdIssue = await this.jpd.searchIssues(`key = ${jpdKey}`, ["status"], 1);
     if (jpdIssue.issues.length === 0 || !jpdIssue.issues[0]?.fields) {
-      this.logger.error(`${jpdKey} not found or has no fields`);
+      this.logger.info(`${jpdKey} no longer exists in JPD - removing stale metadata from #${ghIssue.number}`);
+      await this.removeStaleMetadata(ghIssue.number);
       return null;
     }
     const currentJpdStatus = jpdIssue.issues[0].fields.status?.name;
@@ -24523,6 +24524,34 @@ Results:`);
       from: currentJpdStatus,
       to: targetJpdStatus
     };
+  }
+  /**
+   * Remove stale JPD metadata from a GitHub issue
+   * Called when the linked JPD issue no longer exists
+   */
+  async removeStaleMetadata(githubIssueNumber) {
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would remove stale metadata from #${githubIssueNumber}`);
+      return;
+    }
+    try {
+      const issue = await this.github.getIssueByNumber(
+        this.githubOwner,
+        this.githubRepo,
+        githubIssueNumber
+      );
+      if (!issue || !issue.body) return;
+      const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata\s*:\s*{.*?}\s*-->/gs, "").trim();
+      await this.github.updateIssue(
+        this.githubOwner,
+        this.githubRepo,
+        githubIssueNumber,
+        { body: cleanBody }
+      );
+      this.logger.debug(`Removed stale metadata from #${githubIssueNumber}`);
+    } catch (error) {
+      this.logger.warn(`Failed to remove stale metadata from #${githubIssueNumber}: ${error.message}`);
+    }
   }
   async getGitHubIssueProjectStatus(issueNumber) {
     if (!this.projects || !this.config.projects?.project_number) {
@@ -24747,7 +24776,12 @@ ${JSON.stringify(metadata, null, 2)}
         const count = await this.syncIssueComments(ghIssue.metadata.jpd_id, ghIssue.number);
         synced += count;
       } catch (error) {
-        this.logger.error(`Failed to sync comments for ${ghIssue.metadata.jpd_id}: ${error.message}`);
+        if (error.message && error.message.includes("404")) {
+          this.logger.info(`${ghIssue.metadata.jpd_id} no longer exists in JPD - removing stale metadata from #${ghIssue.number}`);
+          await this.removeStaleMetadata(ghIssue.number);
+        } else {
+          this.logger.error(`Failed to sync comments for ${ghIssue.metadata.jpd_id}: ${error.message}`);
+        }
       }
     }
     console.log(`
