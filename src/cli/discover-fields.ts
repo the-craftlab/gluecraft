@@ -101,7 +101,7 @@ async function main() {
 
     // Show config snippet
     const populatedFields = customFields.filter(f => f.populated);
-    console.log(chalk.cyan.bold('\n📝 Config Snippet (copy to sync-config.yaml):\n'));
+    console.log(chalk.cyan.bold('\n📝 Config Snippet (copy to gluecraft.yaml):\n'));
     console.log(chalk.gray('fields:'));
     populatedFields.slice(0, 5).forEach(field => {
       console.log(chalk.gray(`  - id: "${field.id}"`));

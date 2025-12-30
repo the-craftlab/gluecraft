@@ -101,7 +101,7 @@ class HealthCheck {
 
   private async checkConfig(): Promise<CheckResult> {
     try {
-      const configPath = process.env.CONFIG_PATH || 'config/sync-config.yaml';
+      const configPath = process.env.CONFIG_PATH || 'config/gluecraft.yaml';
       const config = ConfigLoader.load(configPath);
 
       const warnings: string[] = [];
@@ -301,7 +301,7 @@ class HealthCheck {
         console.log(chalk.gray('  • Set missing environment variables in .env file'));
       }
       if (result.checks.config.status === 'fail') {
-        console.log(chalk.gray('  • Fix configuration errors in config/sync-config.yaml'));
+        console.log(chalk.gray('  • Fix configuration errors in config/gluecraft.yaml'));
       }
       if (result.checks.jpd.status === 'fail') {
         console.log(chalk.gray('  • Check JPD credentials and base URL'));

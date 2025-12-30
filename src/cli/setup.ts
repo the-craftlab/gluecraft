@@ -74,7 +74,7 @@ export class SetupCLI {
 
       console.log(chalk.green.bold('\n✅ Setup complete! You\'re ready to sync.\n'));
       console.log(chalk.gray('Next steps:'));
-      console.log(chalk.gray('  1. Review your config: config/sync-config.yaml'));
+      console.log(chalk.gray('  1. Review your config: config/gluecraft.yaml'));
       console.log(chalk.gray('  2. Test sync: pnpm run dev -- --dry-run'));
       console.log(chalk.gray('  3. Run actual sync: pnpm run dev\n'));
 
@@ -86,12 +86,12 @@ export class SetupCLI {
 
   private async checkExistingSetup() {
     const hasEnv = fs.existsSync('.env');
-    const hasConfig = fs.existsSync('config/sync-config.yaml');
+    const hasConfig = fs.existsSync('config/gluecraft.yaml');
 
     if (hasEnv || hasConfig) {
       console.log(chalk.yellow('⚠️  Existing setup detected:\n'));
       if (hasEnv) console.log(chalk.gray('  - .env file found'));
-      if (hasConfig) console.log(chalk.gray('  - config/sync-config.yaml found\n'));
+      if (hasConfig) console.log(chalk.gray('  - config/gluecraft.yaml found\n'));
 
       const { overwrite } = await inquirer.prompt([
         {
@@ -338,11 +338,11 @@ export class SetupCLI {
   private async generateConfig() {
     console.log(chalk.cyan.bold('\n⚙️  Step 5: Generating Configuration\n'));
 
-    const spinner = ora('Creating sync-config.yaml from template...').start();
+    const spinner = ora('Creating gluecraft.yaml from template...').start();
 
     try {
       // Read the minimal config template
-      const templatePath = path.resolve('config/sync-config.minimal.yaml');
+      const templatePath = path.resolve('config/gluecraft.minimal.yaml');
       const templateContent = fs.readFileSync(templatePath, 'utf8');
       
       // Replace placeholders with actual values
@@ -370,7 +370,7 @@ export class SetupCLI {
       spinner.succeed('Configuration generated from generic template');
       
       const config = {
-        _note: 'Config generated from sync-config.minimal.yaml template',
+        _note: 'Config generated from gluecraft.minimal.yaml template',
         _template_used: true,
         content: configContent
       },
@@ -388,14 +388,14 @@ export class SetupCLI {
     };
 
     // Save config (write the template content directly)
-    const configPath = path.join(process.cwd(), 'config', 'sync-config.yaml');
+    const configPath = path.join(process.cwd(), 'config', 'gluecraft.yaml');
     fs.mkdirSync(path.dirname(configPath), { recursive: true });
     
     // Write the template content with replacements, not a YAML object
     fs.writeFileSync(configPath, config.content);
 
-    spinner.succeed(chalk.green('Configuration created from generic template: config/sync-config.yaml'));
-    console.log(chalk.gray('\n  📝 Your config was generated from config/sync-config.minimal.yaml'));
+    spinner.succeed(chalk.green('Configuration created from generic template: config/gluecraft.yaml'));
+    console.log(chalk.gray('\n  📝 Your config was generated from config/gluecraft.minimal.yaml'));
     console.log(chalk.gray('  📋 Discovered custom fields are included as commented examples'));
     console.log(chalk.gray('  ✏️  Uncomment and customize the field mappings you need\n'));
   }
@@ -414,7 +414,7 @@ GITHUB_OWNER=${this.state.githubOwner}
 GITHUB_REPO=${this.state.githubRepo}
 
 # Optional: Override config path
-# CONFIG_PATH=./config/sync-config.yaml
+# CONFIG_PATH=./config/gluecraft.yaml
 
 # Optional: Enable debug logging
 # DEBUG=1

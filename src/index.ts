@@ -12,7 +12,7 @@ async function main() {
     console.log('  JPD ↔ GitHub Sync Engine');
     console.log('='.repeat(60) + '\n');
 
-    const configPath = process.env.CONFIG_PATH || path.join(process.cwd(), 'config', 'sync-config.yaml');
+    const configPath = process.env.CONFIG_PATH || path.join(process.cwd(), 'config', 'gluecraft.yaml');
     
     if (!process.env.GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required');
     if (!process.env.JPD_API_KEY) throw new Error('JPD_API_KEY is required');

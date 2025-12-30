@@ -18,7 +18,7 @@ dotenv.config();
 async function main() {
   console.log(chalk.cyan.bold('\n✅ Configuration Validator\n'));
 
-  const configPath = process.argv[2] || process.env.CONFIG_PATH || './config/sync-config.yaml';
+  const configPath = process.argv[2] || process.env.CONFIG_PATH || './config/gluecraft.yaml';
   
   console.log(chalk.gray(`Validating: ${configPath}\n`));
 

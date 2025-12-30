@@ -1,0 +1,117 @@
+# ============================================================================
+# GLUECRAFT GITHUB ACTION WORKFLOW EXAMPLE
+# ============================================================================
+#
+# This example shows how to use Gluecraft as a GitHub Action with the config
+# file living alongside the workflow in .github/workflows/
+#
+# Repository: https://github.com/the-craftlab/gluecraft
+# Documentation: https://gluecraft.thecraftlab.dev
+#
+# ============================================================================
+
+name: Gluecraft JPD Sync
+
+# Run on schedule or manually
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:        # Manual trigger
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/gluecraft.yaml'  # Re-run when config changes
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Checkout is required to access the config file
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # Run Gluecraft sync using the central action
+      - name: Sync JPD ↔ GitHub
+        uses: the-craftlab/gluecraft@v1
+        with:
+          # Specify which integration to use
+          integration: jpd
+          
+          # Config file lives in .github/workflows/ with the workflow
+          config-path: .github/workflows/gluecraft.yaml
+          
+          # Optional: Dry run mode for testing
+          # dry-run: true
+        
+        env:
+          # Credentials via environment variables (recommended)
+          JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
+          JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
+          JPD_BASE_URL: ${{ secrets.JPD_BASE_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# ============================================================================
+# ALTERNATIVE PATTERNS
+# ============================================================================
+#
+# Pattern 1: Use integration-specific action directly
+# ----------------------------------------------------------------------------
+# - name: Sync JPD ↔ GitHub
+#   uses: the-craftlab/gluecraft-jpd@v1
+#   with:
+#     config-path: .github/workflows/gluecraft.yaml
+#   env:
+#     JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
+#     JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
+#     JPD_BASE_URL: ${{ secrets.JPD_BASE_URL }}
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# Pattern 2: Pass credentials as inputs instead of env vars
+# ----------------------------------------------------------------------------
+# - name: Sync JPD ↔ GitHub
+#   uses: the-craftlab/gluecraft-jpd@v1
+#   with:
+#     config-path: .github/workflows/gluecraft.yaml
+#     jpd-api-key: ${{ secrets.JPD_API_KEY }}
+#     jpd-email: ${{ secrets.JPD_EMAIL }}
+#     jpd-base-url: ${{ secrets.JPD_BASE_URL }}
+#     github-token: ${{ secrets.GITHUB_TOKEN }}
+#
+# Pattern 3: Dry run for testing
+# ----------------------------------------------------------------------------
+# - name: Sync JPD ↔ GitHub (Dry Run)
+#   uses: the-craftlab/gluecraft@v1
+#   with:
+#     integration: jpd
+#     config-path: .github/workflows/gluecraft.yaml
+#     dry-run: true
+#   env:
+#     JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
+#     JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
+#     JPD_BASE_URL: ${{ secrets.JPD_BASE_URL }}
+#     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#
+# ============================================================================
+
+# ============================================================================
+# SETUP INSTRUCTIONS
+# ============================================================================
+#
+# 1. Copy this file to: .github/workflows/sync.yml
+#
+# 2. Create your config file at: .github/workflows/gluecraft.yaml
+#    (You can generate one with: npx @thecraftlab/gluecraft-jpd setup)
+#
+# 3. Add repository secrets (Settings → Secrets → Actions):
+#    - JPD_API_KEY: Your Atlassian API token
+#    - JPD_EMAIL: Email for the API token
+#    - JPD_BASE_URL: Your Jira instance URL (e.g., https://yoursite.atlassian.net)
+#
+# 4. Commit both files and push to trigger the workflow
+#
+# 5. Monitor workflow runs in the Actions tab
+#
+# ============================================================================
+

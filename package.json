@@ -15,7 +15,7 @@
   },
   "files": [
     "dist",
-    "config/sync-config.minimal.yaml",
+    "config/gluecraft.minimal.yaml",
     "examples",
     "README.md",
     "LICENSE"

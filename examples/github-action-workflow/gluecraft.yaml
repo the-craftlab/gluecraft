@@ -1,0 +1,65 @@
+# ============================================================================
+# GLUECRAFT JPD CONFIGURATION
+# ============================================================================
+#
+# This config lives in .github/workflows/ alongside the workflow that uses it.
+# This keeps all sync-related files together in one place.
+#
+# Part of The Craft Lab: https://github.com/thecraftlab
+# Documentation: https://gluecraft.thecraftlab.dev
+#
+# ============================================================================
+
+# Sync configuration
+sync:
+  direction: bidirectional
+  jql: 'project = MYPROJECT AND status != Done'
+
+# Field mappings
+mappings:
+  - jpd: "fields.summary"
+    github: "title"
+  
+  - jpd: "fields.description"
+    github: "body"
+  
+  - jpd: "fields.priority.name"
+    github: "labels"
+    template: "priority:{{fields.priority.name | lowercase}}"
+
+# Status mappings
+statuses:
+  "To Do":
+    github_state: open
+    sync: true
+  
+  "In Progress":
+    github_state: open
+    sync: true
+  
+  "Done":
+    github_state: closed
+    sync: true
+
+# Optional: Enable hierarchy support
+hierarchy:
+  enabled: true
+  use_native_hierarchy: true
+
+# Optional: GitHub Projects integration
+# projects:
+#   enabled: true
+#   project_number: 1
+#   status_field_name: "Status"
+
+# ============================================================================
+# NOTES
+# ============================================================================
+#
+# - This file is referenced by .github/workflows/sync.yml
+# - To update mappings, edit this file and commit
+# - The workflow will automatically pick up changes
+# - Generate a full config with: npx @thecraftlab/gluecraft-jpd setup
+#
+# ============================================================================
+

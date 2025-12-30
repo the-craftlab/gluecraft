@@ -8,6 +8,11 @@ This document summarizes the rebranding from `@expedition/jpd-github-connector` 
 - **Old:** `@expedition/jpd-github-connector`
 - **New:** `@thecraftlab/gluecraft-jpd`
 
+### Configuration File
+- **Old:** `config/sync-config.yaml`
+- **New:** `config/gluecraft.yaml`
+- **Template:** `config/gluecraft.minimal.yaml`
+
 ### CLI Commands
 All CLI commands have been renamed with the `gluecraft-jpd` prefix:
 
@@ -22,11 +27,13 @@ All CLI commands have been renamed with the `gluecraft-jpd` prefix:
 
 ### Repository URLs
 - **Old:** `https://github.com/expedition/jpd-to-github-connector`
-- **New:** `https://github.com/thecraftlab/gluecraft-jpd`
+- **New (Integration):** `https://github.com/thecraftlab/gluecraft-jpd`
+- **New (Action Hub):** `https://github.com/the-craftlab/gluecraft`
 
 ### Documentation Site
 - **Old:** `https://expedition.github.io/jpd-to-github-connector/`
-- **New:** `https://thecraftlab.github.io/gluecraft-jpd/`
+- **New:** `https://gluecraft.thecraftlab.dev` (primary)
+- **Alternate:** `https://thecraftlab.github.io/gluecraft-jpd/`
 
 ## Brand Identity
 
@@ -48,9 +55,23 @@ Gluecraft JPD is now part of **The Craft Lab** - a collection of specialized too
 ## Files Updated
 
 ### Root Level
-- ✅ `package.json` - Package name, author, repository URLs, keywords
-- ✅ `action.yml` - GitHub Action name, description, author
+- ✅ `package.json` - Package name, author, repository URLs, keywords, config file reference
+- ✅ `action.yml` - GitHub Action name, description, author, default config path
 - ✅ `README.md` - All references, badges, installation commands, examples
+- ✅ `env.example` - Config path reference
+
+### Configuration
+- ✅ `config/sync-config.minimal.yaml` → `config/gluecraft.minimal.yaml` (renamed)
+- ✅ Template updated with Gluecraft branding and docs link
+- ✅ All CLI commands updated to reference `gluecraft.yaml`
+
+### Source Code
+- ✅ `src/index.ts` - Default config path
+- ✅ `src/cli/setup.ts` - Config file name, template references
+- ✅ `src/cli/validate-config.ts` - Default config path
+- ✅ `src/cli/setup-labels.ts` - Default config path
+- ✅ `src/cli/health-check.ts` - Config path references
+- ✅ `src/cli/discover-fields.ts` - Config snippet output
 
 ### Documentation
 - ✅ `docs/package.json` - Package metadata
@@ -92,14 +113,25 @@ jobs:
         run: npx @expedition/jpd-github-connector sync
 ```
 
-**New:**
+**New (using central action hub):**
 ```yaml
 name: Gluecraft JPD Sync
 jobs:
   sync:
+    runs-on: ubuntu-latest
     steps:
-      - name: Sync JPD <-> GitHub
-        run: npx @thecraftlab/gluecraft-jpd sync
+      - uses: actions/checkout@v4
+      - uses: the-craftlab/gluecraft@v1
+        with:
+          integration: jpd
+          config-path: .github/workflows/gluecraft.yaml
+```
+
+**Alternative (using integration-specific action):**
+```yaml
+- uses: the-craftlab/gluecraft-jpd@v1
+  with:
+    config-path: .github/workflows/gluecraft.yaml
 ```
 
 ### Package.json Scripts
@@ -128,10 +160,18 @@ jobs:
 
 ### Before Publishing
 
-1. **Update GitHub Repository**
+1. **Update GitHub Repositories**
+   
+   **Action Hub (the-craftlab/gluecraft):**
+   - Create composite action that routes to integrations
+   - Add action.yml with routing logic
+   - Document all available integrations
+   
+   **Integration Repo (the-craftlab/gluecraft-jpd):**
    - Create new repository: `https://github.com/thecraftlab/gluecraft-jpd`
    - Transfer or migrate from old repository
    - Update repository settings and webhooks
+   - Ensure action.yml is properly configured
 
 2. **Verify NPM Scope**
    - Ensure `@thecraftlab` org exists on NPM
@@ -174,19 +214,50 @@ Users upgrading from the old package should:
 
 4. **Update GitHub Actions workflows** (replace package name and workflow names)
 
-5. **No configuration changes needed** - Config files remain compatible
+5. **Rename config file (optional but recommended):**
+   ```bash
+   mv config/sync-config.yaml config/gluecraft.yaml
+   ```
+   
+   Or update `CONFIG_PATH` environment variable if keeping old name
 
 ## Brand Architecture
 
 ```
 The Craft Lab (Organization)
-├── Gluecraft (Tool Family)
-│   ├── Gluecraft JPD (@thecraftlab/gluecraft-jpd)
-│   ├── Gluecraft Jira (@thecraftlab/gluecraft-jira) [future]
-│   ├── Gluecraft Linear (@thecraftlab/gluecraft-linear) [future]
-│   └── Gluecraft Notion (@thecraftlab/gluecraft-notion) [future]
+│
+├── gluecraft
+│   ├── Purpose: GitHub Action hub (composite action)
+│   ├── Repository: https://github.com/the-craftlab/gluecraft
+│   └── Routes to integration-specific actions
+│
+├── Gluecraft Integrations (Tool Family)
+│   ├── gluecraft-jpd
+│   │   ├── NPM: @thecraftlab/gluecraft-jpd
+│   │   ├── CLI: gluecraft-jpd
+│   │   └── Action: the-craftlab/gluecraft-jpd@v1
+│   │
+│   ├── gluecraft-jira [future]
+│   │   ├── NPM: @thecraftlab/gluecraft-jira
+│   │   ├── CLI: gluecraft-jira
+│   │   └── Action: the-craftlab/gluecraft-jira@v1
+│   │
+│   ├── gluecraft-linear [future]
+│   └── gluecraft-notion [future]
+│
 └── [Other Craft Tools]
 ```
+
+### Repository Structure
+
+**Central Action Hub:**
+- `the-craftlab/gluecraft` - Composite GitHub Action that routes to integrations
+- Usage: `uses: the-craftlab/gluecraft@v1` with `integration: jpd`
+
+**Integration Repositories:**
+- Each integration is a separate repo (e.g., `the-craftlab/gluecraft-jpd`)
+- Contains both NPM package (CLI) and GitHub Action
+- Can be used directly: `uses: the-craftlab/gluecraft-jpd@v1`
 
 Each tool in The Craft Lab is a specialized "craft" - Gluecraft specializes in syncing/gluing systems together.
 
@@ -197,6 +268,64 @@ New NPM keywords for better discoverability:
 - `the-craft-lab`
 
 All existing keywords retained for continuity.
+
+## GitHub Action Usage Patterns
+
+### Pattern 1: Config in Workflows Directory (Recommended)
+
+Everything lives together in `.github/workflows/`:
+
+```
+.github/
+└── workflows/
+    ├── sync.yml           # The workflow
+    └── gluecraft.yaml     # The config (lives here!)
+```
+
+**Benefits:**
+- ✅ Everything in one place
+- ✅ Easy to review in PRs
+- ✅ No separate config directory needed
+- ✅ Workflow auto-runs when config changes
+
+**Example:** See `examples/github-action-workflow/`
+
+### Pattern 2: Config in Root Config Directory
+
+Traditional approach with config in `config/`:
+
+```
+config/
+└── gluecraft.yaml
+
+.github/
+└── workflows/
+    └── sync.yml
+```
+
+**Usage:**
+```yaml
+with:
+  config-path: config/gluecraft.yaml
+```
+
+## Configuration File Changes
+
+### New Default Name
+The configuration file is now named `gluecraft.yaml` instead of `sync-config.yaml` to make it immediately clear where it comes from.
+
+### Template Updates
+The `config/gluecraft.minimal.yaml` template now includes:
+- **Gluecraft branding** in the header
+- **Documentation link:** `https://gluecraft.thecraftlab.dev`
+- **Updated CLI commands** (all using `gluecraft-jpd` prefix)
+- **The Craft Lab** attribution
+
+### Backward Compatibility
+The tool still respects the `CONFIG_PATH` environment variable, so existing configs at any path will continue to work. Users can:
+- Keep their existing `sync-config.yaml` and set `CONFIG_PATH`
+- Rename to `gluecraft.yaml` for the new default
+- Use any custom path they prefer
 
 ---
 

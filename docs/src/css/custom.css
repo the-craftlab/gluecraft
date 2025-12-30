@@ -41,61 +41,70 @@
    TYPOGRAPHY HIERARCHY - Clear visual distinction between heading levels
    ============================================================================ */
 
-/* Page Title (H1) - Significantly larger and bolder */
+/* Page Title (H1) - Hero-sized, maximum impact */
 .markdown h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 700;
   margin-top: 0;
-  margin-bottom: 2rem;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
+  margin-bottom: 2.5rem;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ifm-heading-color);
 }
 
-/* Major Sections (H2) - Clear secondary hierarchy */
+/* Major Sections (H2) - Clear secondary hierarchy with strong visual break */
 .markdown h2 {
   font-size: 2rem;
-  font-weight: 600;
-  margin-top: 3rem;
+  font-weight: 700;
+  margin-top: 4rem;
   margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--ifm-color-emphasis-200);
-  line-height: 1.3;
-  letter-spacing: -0.01em;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--ifm-color-emphasis-300);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--ifm-heading-color);
 }
 
-/* Subsections (H3) - Notable but smaller */
+/* First H2 doesn't need large top margin */
+.markdown h1 + h2,
+.markdown > h2:first-of-type {
+  margin-top: 2rem;
+}
+
+/* Subsections (H3) - Clearly smaller than H2 */
 .markdown h3 {
   font-size: 1.5rem;
   font-weight: 600;
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   margin-bottom: 1rem;
-  line-height: 1.4;
+  line-height: 1.35;
+  color: var(--ifm-heading-color);
 }
 
-/* Sub-subsections (H4) - Slightly larger than body */
+/* Sub-subsections (H4) - More subtle, but still distinct */
 .markdown h4 {
   font-size: 1.25rem;
   font-weight: 600;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   margin-bottom: 0.75rem;
   line-height: 1.4;
-  color: var(--ifm-color-emphasis-800);
+  color: var(--ifm-color-emphasis-900);
 }
 
-/* Minor headings (H5, H6) - Close to body size but distinct */
+/* Minor headings (H5, H6) - Close to body size but bolded */
 .markdown h5 {
   font-size: 1.125rem;
   font-weight: 600;
-  margin-top: 1.25rem;
+  margin-top: 1.5rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
-  color: var(--ifm-color-emphasis-700);
+  color: var(--ifm-color-emphasis-800);
 }
 
 .markdown h6 {
   font-size: 1rem;
-  font-weight: 600;
-  margin-top: 1rem;
+  font-weight: 700;
+  margin-top: 1.25rem;
   margin-bottom: 0.5rem;
   line-height: 1.5;
   color: var(--ifm-color-emphasis-700);
@@ -111,45 +120,97 @@
 }
 
 /* ============================================================================
-   CONTENT SPACING - Better readability
+   CONTENT SPACING - Better readability and breathing room
    ============================================================================ */
 
-/* Paragraphs */
+/* Paragraphs - generous spacing */
 .markdown p {
-  margin-bottom: 1.25rem;
-  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  line-height: 1.75;
+  font-size: 1rem;
 }
 
-/* Lists */
+/* Lists - clear hierarchy */
 .markdown ul,
 .markdown ol {
-  margin-bottom: 1.5rem;
-  line-height: 1.7;
+  margin-bottom: 1.75rem;
+  margin-top: 0.75rem;
+  line-height: 1.75;
 }
 
 .markdown li {
   margin-bottom: 0.5rem;
 }
 
-/* Code blocks */
+.markdown li > p {
+  margin-bottom: 0.5rem;
+}
+
+/* Nested lists */
+.markdown li > ul,
+.markdown li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Code blocks - prominent and well-spaced */
 .markdown pre {
-  margin-bottom: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  border-radius: 8px;
+}
+
+/* Inline code */
+.markdown code {
+  font-size: 0.9em;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+}
+
+/* Blockquotes */
+.markdown blockquote {
+  margin: 1.5rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--ifm-color-primary);
+}
+
+/* Tables */
+.markdown table {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* Horizontal rules */
+.markdown hr {
+  margin: 3rem 0;
+  border: none;
+  border-top: 2px solid var(--ifm-color-emphasis-200);
 }
 
 /* ============================================================================
-   ADMONITIONS - Better visual hierarchy
+   ADMONITIONS - Stand out from body content
    ============================================================================ */
 
 .admonition {
-  margin-bottom: 1.5rem;
+  margin: 2rem 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .admonition-heading h5 {
   margin: 0;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: none;
   letter-spacing: normal;
+}
+
+.admonition-content {
+  line-height: 1.7;
+}
+
+.admonition-content p:last-child {
+  margin-bottom: 0;
 }
 
 /* ============================================================================

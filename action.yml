@@ -1,23 +1,38 @@
 name: 'Gluecraft JPD'
-description: 'Bidirectional sync between Jira Product Discovery and GitHub Issues by The Craft Lab'
+description: 'Bidirectional sync between Jira Product Discovery and GitHub Issues - Part of The Craft Lab'
 author: 'The Craft Lab'
+
+branding:
+  icon: 'link-2'
+  color: 'blue'
+
 inputs:
   config-path:
-    description: 'Path to the configuration file'
+    description: 'Path to the gluecraft.yaml configuration file'
     required: false
-    default: 'config/sync-config.yaml'
+    default: 'config/gluecraft.yaml'
+  
   jpd-api-key:
-    description: 'JPD API Token'
-    required: true
+    description: 'JPD API Token (or set JPD_API_KEY environment variable)'
+    required: false
+  
   jpd-email:
-    description: 'JPD Email Address'
-    required: true
+    description: 'JPD Email Address (or set JPD_EMAIL environment variable)'
+    required: false
+  
   jpd-base-url:
-    description: 'JPD Base URL (e.g. https://your-domain.atlassian.net)'
-    required: true
+    description: 'JPD Base URL, e.g. https://your-domain.atlassian.net (or set JPD_BASE_URL environment variable)'
+    required: false
+  
   github-token:
-    description: 'GitHub Token'
-    required: true
+    description: 'GitHub Token (or set GITHUB_TOKEN environment variable)'
+    required: false
+  
+  dry-run:
+    description: 'Run in dry-run mode (no actual changes)'
+    required: false
+    default: 'false'
+
 runs:
   using: 'node20'
   main: 'dist/index.js'

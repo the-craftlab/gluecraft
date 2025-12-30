@@ -7,7 +7,7 @@ import chalk from 'chalk';
 
 dotenv.config();
 
-const CONFIG_PATH = process.env.CONFIG_PATH || path.resolve(process.cwd(), 'config', 'sync-config.yaml');
+const CONFIG_PATH = process.env.CONFIG_PATH || path.resolve(process.cwd(), 'config', 'gluecraft.yaml');
 
 interface LabelDefinition {
   name: string;
