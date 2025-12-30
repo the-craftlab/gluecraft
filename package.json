@@ -1,17 +1,12 @@
 {
-  "name": "@thecraftlab/gluecraft-jpd",
-  "version": "1.0.0",
+  "name": "@thecraftlab/gluecraft",
+  "version": "2.0.0",
   "type": "module",
   "description": "Gluecraft JPD: Bidirectional sync between Jira Product Discovery and GitHub Issues with support for custom fields, hierarchies, and workflows",
-  "main": "dist/index.cjs",
-  "types": "dist/index.d.ts",
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
   "bin": {
-    "gluecraft-jpd": "./dist/index.cjs",
-    "gluecraft-jpd-setup": "./dist/cli/setup.cjs",
-    "gluecraft-jpd-discover": "./dist/cli/discover-fields.cjs",
-    "gluecraft-jpd-health": "./dist/cli/health-check.cjs",
-    "gluecraft-jpd-validate": "./dist/cli/validate-config.cjs",
-    "gluecraft-jpd-setup-labels": "./dist/cli/setup-labels.cjs"
+    "gluecraft": "./dist/cli.js"
   },
   "files": [
     "dist",
@@ -24,15 +19,16 @@
     "test": "vitest",
     "test:e2e": "vitest run tests/e2e",
     "test:capture-fixtures": "tsx tests/e2e/capture-fixtures.ts",
-    "build": "tsup",
-    "dev": "tsx src/index.ts",
-    "setup": "tsx src/cli/setup.ts",
+    "build": "tsup && chmod +x dist/cli.js",
+    "dev": "tsx src/cli.ts",
+    "sync": "tsx src/cli.ts sync",
+    "setup": "tsx src/cli.ts setup",
+    "discover": "tsx src/cli.ts discover",
+    "health": "tsx src/cli.ts health",
+    "validate": "tsx src/cli.ts validate",
+    "setup-labels": "tsx src/cli.ts setup-labels",
     "test-connection": "tsx src/cli/test-connection.ts",
     "test-simple": "tsx src/cli/test-connection-simple.ts",
-    "discover-fields": "tsx src/cli/discover-fields.ts",
-    "validate-config": "tsx src/cli/validate-config.ts",
-    "health-check": "tsx src/cli/health-check.ts",
-    "setup-labels": "tsx src/cli/setup-labels.ts",
     "clear-labels": "tsx src/cli/clear-labels.ts",
     "clear-all-labels": "tsx src/cli/clear-all-labels.ts",
     "docs:dev": "pnpm --filter website start",
@@ -60,12 +56,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thecraftlab/gluecraft-jpd.git"
+    "url": "https://github.com/thecraftlab/gluecraft.git"
   },
   "bugs": {
-    "url": "https://github.com/thecraftlab/gluecraft-jpd/issues"
+    "url": "https://github.com/thecraftlab/gluecraft/issues"
   },
-  "homepage": "https://github.com/thecraftlab/gluecraft-jpd#readme",
+  "homepage": "https://github.com/thecraftlab/gluecraft#readme",
   "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">=20.0.0",
@@ -73,12 +69,14 @@
   },
   "dependencies": {
     "@octokit/rest": "^22.0.1",
+    "commander": "^14.0.2",
     "dotenv": "^17.2.3",
     "node-fetch": "^3.3.2",
     "yaml": "^2.8.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/commander": "^2.12.5",
     "@types/inquirer": "^9.0.9",
     "@types/node": "^25.0.3",
     "@types/yaml": "^1.9.7",

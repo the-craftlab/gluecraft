@@ -319,10 +319,19 @@ class HealthCheck {
   }
 }
 
-// Run health check
-const healthCheck = new HealthCheck();
-healthCheck.run().catch(error => {
-  console.error(chalk.red('Health check failed:'), error.message);
-  process.exit(1);
-});
+/**
+ * Export the health check function for CLI router integration
+ */
+export async function healthCheck() {
+  const check = new HealthCheck();
+  await check.run();
+}
+
+// Support direct execution for development
+if (import.meta.url === `file://${process.argv[1]}`) {
+  healthCheck().catch(error => {
+    console.error(chalk.red('Health check failed:'), error.message);
+    process.exit(1);
+  });
+}
 

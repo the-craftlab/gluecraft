@@ -369,35 +369,21 @@ export class SetupCLI {
       
       spinner.succeed('Configuration generated from generic template');
       
-      const config = {
-        _note: 'Config generated from gluecraft.minimal.yaml template',
-        _template_used: true,
-        content: configContent
-      },
-      hierarchy: {
-        parent_field_in_body: true,
-        use_github_parent_issue: true
-      },
-      fields: this.state.customFields?.map(field => ({
-        id: field.id,
-        name: field.name,
-        type: field.type,
-        required: ['number', 'select', 'multiselect'].includes(field.type),
-        description: `Auto-discovered ${field.type} field`
-      })) || []
-    };
+      // Save config (write the template content directly)
+      const configPath = path.join(process.cwd(), 'config', 'gluecraft.yaml');
+      fs.mkdirSync(path.dirname(configPath), { recursive: true });
+      
+      // Write the template content with replacements, not a YAML object
+      fs.writeFileSync(configPath, configContent);
 
-    // Save config (write the template content directly)
-    const configPath = path.join(process.cwd(), 'config', 'gluecraft.yaml');
-    fs.mkdirSync(path.dirname(configPath), { recursive: true });
-    
-    // Write the template content with replacements, not a YAML object
-    fs.writeFileSync(configPath, config.content);
-
-    spinner.succeed(chalk.green('Configuration created from generic template: config/gluecraft.yaml'));
-    console.log(chalk.gray('\n  📝 Your config was generated from config/gluecraft.minimal.yaml'));
-    console.log(chalk.gray('  📋 Discovered custom fields are included as commented examples'));
-    console.log(chalk.gray('  ✏️  Uncomment and customize the field mappings you need\n'));
+      spinner.succeed(chalk.green('Configuration created from generic template: config/gluecraft.yaml'));
+      console.log(chalk.gray('\n  📝 Your config was generated from config/gluecraft.minimal.yaml'));
+      console.log(chalk.gray('  📋 Discovered custom fields are included as commented examples'));
+      console.log(chalk.gray('  ✏️  Uncomment and customize the field mappings you need\n'));
+    } catch (error: any) {
+      spinner.fail(chalk.red('Failed to generate configuration'));
+      throw error;
+    }
   }
 
   private async saveEnvFile() {

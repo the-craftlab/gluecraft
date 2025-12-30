@@ -59,7 +59,7 @@ jobs:
 # Pattern 1: Use integration-specific action directly
 # ----------------------------------------------------------------------------
 # - name: Sync JPD ↔ GitHub
-#   uses: the-craftlab/gluecraft-jpd@v1
+#   uses: the-craftlab/gluecraft@v1
 #   with:
 #     config-path: .github/workflows/gluecraft.yaml
 #   env:
@@ -71,7 +71,7 @@ jobs:
 # Pattern 2: Pass credentials as inputs instead of env vars
 # ----------------------------------------------------------------------------
 # - name: Sync JPD ↔ GitHub
-#   uses: the-craftlab/gluecraft-jpd@v1
+#   uses: the-craftlab/gluecraft@v1
 #   with:
 #     config-path: .github/workflows/gluecraft.yaml
 #     jpd-api-key: ${{ secrets.JPD_API_KEY }}
@@ -102,7 +102,7 @@ jobs:
 # 1. Copy this file to: .github/workflows/sync.yml
 #
 # 2. Create your config file at: .github/workflows/gluecraft.yaml
-#    (You can generate one with: npx @thecraftlab/gluecraft-jpd setup)
+#    (You can generate one with: npx @thecraftlab/gluecraft setup)
 #
 # 3. Add repository secrets (Settings → Secrets → Actions):
 #    - JPD_API_KEY: Your Atlassian API token

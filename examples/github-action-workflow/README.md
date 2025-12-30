@@ -37,7 +37,7 @@ Instead of copying the example config, generate one tailored to your project:
 
 ```bash
 # Run the setup wizard
-npx @thecraftlab/gluecraft-jpd setup
+npx @thecraftlab/gluecraft setup
 
 # This creates config/gluecraft.yaml
 # Move it to your workflows directory
@@ -124,7 +124,7 @@ with:
 Use the specific integration action directly:
 
 ```yaml
-uses: the-craftlab/gluecraft-jpd@v1
+uses: the-craftlab/gluecraft@v1
 with:
   config-path: .github/workflows/gluecraft.yaml
 ```
@@ -155,7 +155,7 @@ Trigger a sync immediately:
 If syncs fail:
 1. Check the Actions tab for error messages
 2. Verify secrets are set correctly
-3. Test locally: `npx @thecraftlab/gluecraft-jpd sync --dry-run`
+3. Test locally: `npx @thecraftlab/gluecraft sync --dry-run`
 4. Check the [troubleshooting guide](https://gluecraft.thecraftlab.dev/docs/troubleshooting)
 
 ## Alternative: Config in Root
@@ -177,7 +177,7 @@ Both approaches work - choose what fits your team's preferences.
 - 📚 [Full Documentation](https://gluecraft.thecraftlab.dev)
 - 🛠️ [Configuration Guide](https://gluecraft.thecraftlab.dev/docs/configuration)
 - 💬 [GitHub Discussions](https://github.com/the-craftlab/gluecraft/discussions)
-- 🐛 [Report Issues](https://github.com/the-craftlab/gluecraft-jpd/issues)
+- 🐛 [Report Issues](https://github.com/the-craftlab/gluecraft/issues)
 
 ---
 

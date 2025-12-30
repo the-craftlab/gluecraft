@@ -98,7 +98,7 @@ Choose your path:
 ## Support
 
 - **Documentation:** Browse the guides in this documentation site
-- **Issues:** Report bugs or request features on [GitHub Issues](https://github.com/thecraftlab/gluecraft-jpd/issues)
+- **Issues:** Report bugs or request features on [GitHub Issues](https://github.com/thecraftlab/gluecraft/issues)
 - **Contributing:** See the [Contributing Guide](./guides/contributing) for development setup
 
 ---

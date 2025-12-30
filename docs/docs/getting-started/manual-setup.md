@@ -16,8 +16,8 @@ Choose manual setup if you:
 Clone the repository and install packages:
 
 ```bash
-git clone https://github.com/thecraftlab/gluecraft-jpd.git
-cd gluecraft-jpd
+git clone https://github.com/thecraftlab/gluecraft.git
+cd gluecraft
 pnpm install
 ```
 

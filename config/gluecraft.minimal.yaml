@@ -9,8 +9,8 @@
 # JPD project structure. Replace ALL_CAPS placeholders with your actual values.
 #
 # Discovery Tools (find your field IDs and statuses):
-# - gluecraft-jpd discover-fields YOUR_PROJECT_KEY
-# - gluecraft-jpd setup (interactive wizard)
+# - gluecraft discover-fields YOUR_PROJECT_KEY
+# - gluecraft setup (interactive wizard)
 #
 # ============================================================================
 
@@ -33,7 +33,7 @@ sync:
 # ============================================================================
 # Map JPD fields to GitHub fields
 # 
-# Discovery: Run `gluecraft-jpd discover-fields YOUR_PROJECT_KEY` to find your field IDs
+# Discovery: Run `gluecraft discover-fields YOUR_PROJECT_KEY` to find your field IDs
 #
 # Pattern 1: Direct mapping (no transform)
 # Pattern 2: Template string ({{field | filter}})
@@ -171,7 +171,7 @@ statuses:
 #   
 #   # IMPORTANT: Specify custom field IDs for category and priority
 #   # Without these, the tool cannot set these fields in JPD
-#   # Run `gluecraft-jpd discover-fields YOUR_PROJECT_KEY` to find your field IDs
+#   # Run `gluecraft discover-fields YOUR_PROJECT_KEY` to find your field IDs
 #   field_mappings:
 #     category_field_id: "customfield_XXXXX"   # Replace with your category field ID
 #     priority_field_id: "customfield_YYYYY"   # Replace with your priority field ID
@@ -182,7 +182,7 @@ statuses:
 # Validate that JPD fields exist before syncing
 # This prevents sync failures from typos or missing fields
 #
-# Run `gluecraft-jpd discover-fields YOUR_PROJECT_KEY` to find field info
+# Run `gluecraft discover-fields YOUR_PROJECT_KEY` to find field info
 #
 # fields:
 #   # Example: Validate a custom field
@@ -198,7 +198,7 @@ statuses:
 # Define labels to auto-create in GitHub with custom colors
 #
 # Labels are automatically created the first time they're used in a sync,
-# or you can pre-create them with: gluecraft-jpd setup-labels
+# or you can pre-create them with: gluecraft setup-labels
 #
 # Colors are hex codes WITHOUT the # prefix (e.g., "0052CC" not "#0052CC")
 #
@@ -268,7 +268,7 @@ statuses:
 # ============================================================================
 #
 # 1. Find your field IDs:
-#    gluecraft-jpd discover-fields YOUR_PROJECT_KEY
+#    gluecraft discover-fields YOUR_PROJECT_KEY
 #
 # 2. Replace placeholders:
 #    - YOUR_PROJECT_KEY → your actual project key
@@ -278,25 +278,25 @@ statuses:
 # 3. Uncomment sections you want to use
 #
 # 4. (Optional) Pre-create labels in GitHub:
-#    gluecraft-jpd setup-labels --preview  # Preview labels first
-#    gluecraft-jpd setup-labels            # Create labels
+#    gluecraft setup-labels --preview  # Preview labels first
+#    gluecraft setup-labels            # Create labels
 #
 # 5. Validate your config:
-#    gluecraft-jpd validate-config
+#    gluecraft validate-config
 #
 # 6. Test with dry-run:
-#    gluecraft-jpd sync --dry-run
+#    gluecraft sync --dry-run
 #
 # 7. Run actual sync:
-#    gluecraft-jpd sync
+#    gluecraft sync
 #
 # ============================================================================
 # RESOURCES
 # ============================================================================
 #
 # Documentation: https://gluecraft.thecraftlab.dev
-# GitHub: https://github.com/thecraftlab/gluecraft-jpd
-# NPM: https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd
+# GitHub: https://github.com/thecraftlab/gluecraft
+# NPM: https://www.npmjs.com/package/@thecraftlab/gluecraft
 #
 # Example Configs:
 # - examples/mtt/config.yaml

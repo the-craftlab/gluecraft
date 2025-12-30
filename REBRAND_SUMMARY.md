@@ -1,12 +1,12 @@
 # Gluecraft Rebrand Summary
 
-This document summarizes the rebranding from `@expedition/jpd-github-connector` to `@thecraftlab/gluecraft-jpd`.
+This document summarizes the rebranding from `@expedition/jpd-github-connector` to `@thecraftlab/gluecraft`.
 
 ## Package Changes
 
 ### NPM Package
 - **Old:** `@expedition/jpd-github-connector`
-- **New:** `@thecraftlab/gluecraft-jpd`
+- **New:** `@thecraftlab/gluecraft`
 
 ### Configuration File
 - **Old:** `config/sync-config.yaml`
@@ -14,26 +14,26 @@ This document summarizes the rebranding from `@expedition/jpd-github-connector` 
 - **Template:** `config/gluecraft.minimal.yaml`
 
 ### CLI Commands
-All CLI commands have been renamed with the `gluecraft-jpd` prefix:
+All CLI commands have been renamed with the `gluecraft` prefix:
 
 | Old Command | New Command |
 |-------------|-------------|
-| `jpd-sync` | `gluecraft-jpd` |
-| `jpd-setup` | `gluecraft-jpd-setup` |
-| `jpd-discover` | `gluecraft-jpd-discover` |
-| `jpd-health` | `gluecraft-jpd-health` |
-| `jpd-validate` | `gluecraft-jpd-validate` |
-| `jpd-setup-labels` | `gluecraft-jpd-setup-labels` |
+| `jpd-sync` | `gluecraft` |
+| `jpd-setup` | `gluecraft-setup` |
+| `jpd-discover` | `gluecraft-discover` |
+| `jpd-health` | `gluecraft-health` |
+| `jpd-validate` | `gluecraft-validate` |
+| `jpd-setup-labels` | `gluecraft-setup-labels` |
 
 ### Repository URLs
 - **Old:** `https://github.com/expedition/jpd-to-github-connector`
-- **New (Integration):** `https://github.com/thecraftlab/gluecraft-jpd`
+- **New (Integration):** `https://github.com/thecraftlab/gluecraft`
 - **New (Action Hub):** `https://github.com/the-craftlab/gluecraft`
 
 ### Documentation Site
 - **Old:** `https://expedition.github.io/jpd-to-github-connector/`
 - **New:** `https://gluecraft.thecraftlab.dev` (primary)
-- **Alternate:** `https://thecraftlab.github.io/gluecraft-jpd/`
+- **Alternate:** `https://thecraftlab.github.io/gluecraft/`
 
 ## Brand Identity
 
@@ -97,8 +97,8 @@ npm install -g @expedition/jpd-github-connector
 
 **New:**
 ```bash
-npx @thecraftlab/gluecraft-jpd setup
-npm install -g @thecraftlab/gluecraft-jpd
+npx @thecraftlab/gluecraft setup
+npm install -g @thecraftlab/gluecraft
 ```
 
 ### GitHub Actions
@@ -129,7 +129,7 @@ jobs:
 
 **Alternative (using integration-specific action):**
 ```yaml
-- uses: the-craftlab/gluecraft-jpd@v1
+- uses: the-craftlab/gluecraft@v1
   with:
     config-path: .github/workflows/gluecraft.yaml
 ```
@@ -150,8 +150,8 @@ jobs:
 ```json
 {
   "scripts": {
-    "sync:setup": "gluecraft-jpd setup",
-    "sync:run": "gluecraft-jpd sync"
+    "sync:setup": "gluecraft setup",
+    "sync:run": "gluecraft sync"
   }
 }
 ```
@@ -167,8 +167,8 @@ jobs:
    - Add action.yml with routing logic
    - Document all available integrations
    
-   **Integration Repo (the-craftlab/gluecraft-jpd):**
-   - Create new repository: `https://github.com/thecraftlab/gluecraft-jpd`
+   **Integration Repo (the-craftlab/gluecraft):**
+   - Create new repository: `https://github.com/thecraftlab/gluecraft`
    - Transfer or migrate from old repository
    - Update repository settings and webhooks
    - Ensure action.yml is properly configured
@@ -207,10 +207,10 @@ Users upgrading from the old package should:
 
 2. **Install new package:**
    ```bash
-   npm install @thecraftlab/gluecraft-jpd
+   npm install @thecraftlab/gluecraft
    ```
 
-3. **Update scripts in package.json** (replace `jpd-github-connector` with `gluecraft-jpd`)
+3. **Update scripts in package.json** (replace `jpd-github-connector` with `gluecraft`)
 
 4. **Update GitHub Actions workflows** (replace package name and workflow names)
 
@@ -232,10 +232,10 @@ The Craft Lab (Organization)
 │   └── Routes to integration-specific actions
 │
 ├── Gluecraft Integrations (Tool Family)
-│   ├── gluecraft-jpd
-│   │   ├── NPM: @thecraftlab/gluecraft-jpd
-│   │   ├── CLI: gluecraft-jpd
-│   │   └── Action: the-craftlab/gluecraft-jpd@v1
+│   ├── gluecraft
+│   │   ├── NPM: @thecraftlab/gluecraft
+│   │   ├── CLI: gluecraft
+│   │   └── Action: the-craftlab/gluecraft@v1
 │   │
 │   ├── gluecraft-jira [future]
 │   │   ├── NPM: @thecraftlab/gluecraft-jira
@@ -255,9 +255,9 @@ The Craft Lab (Organization)
 - Usage: `uses: the-craftlab/gluecraft@v1` with `integration: jpd`
 
 **Integration Repositories:**
-- Each integration is a separate repo (e.g., `the-craftlab/gluecraft-jpd`)
+- Each integration is a separate repo (e.g., `the-craftlab/gluecraft`)
 - Contains both NPM package (CLI) and GitHub Action
-- Can be used directly: `uses: the-craftlab/gluecraft-jpd@v1`
+- Can be used directly: `uses: the-craftlab/gluecraft@v1`
 
 Each tool in The Craft Lab is a specialized "craft" - Gluecraft specializes in syncing/gluing systems together.
 
@@ -318,7 +318,7 @@ The configuration file is now named `gluecraft.yaml` instead of `sync-config.yam
 The `config/gluecraft.minimal.yaml` template now includes:
 - **Gluecraft branding** in the header
 - **Documentation link:** `https://gluecraft.thecraftlab.dev`
-- **Updated CLI commands** (all using `gluecraft-jpd` prefix)
+- **Updated CLI commands** (all using `gluecraft` prefix)
 - **The Craft Lab** attribution
 
 ### Backward Compatibility

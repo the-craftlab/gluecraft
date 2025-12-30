@@ -145,5 +145,21 @@ function formatSampleValue(value: any): string {
   return String(value).substring(0, 40);
 }
 
-main();
+/**
+ * Export the main function for CLI router integration
+ * @param projectKey - JPD project key to discover fields for
+ */
+export async function discoverFields(projectKey: string) {
+  // Set projectKey in argv for the main function
+  process.argv[2] = projectKey;
+  await main();
+}
+
+// Support direct execution for development
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(error => {
+    console.error(chalk.red('\nError:'), error.message);
+    process.exit(1);
+  });
+}
 

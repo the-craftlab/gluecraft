@@ -15,7 +15,15 @@ interface LabelDefinition {
   description?: string;
 }
 
-async function setupLabels() {
+/**
+ * Setup GitHub labels from configuration
+ * @param preview - If true, only preview labels without creating them
+ */
+export async function setupLabels(preview?: boolean) {
+  // Add preview flag to argv if provided
+  if (preview && !process.argv.includes('--preview')) {
+    process.argv.push('--preview');
+  }
   Logger.section('GitHub Label Setup');
   console.log(`Config: ${CONFIG_PATH}\n`);
 
@@ -131,5 +139,11 @@ labels:
   }
 }
 
-setupLabels();
+// Support direct execution for development
+if (import.meta.url === `file://${process.argv[1]}`) {
+  setupLabels().catch(error => {
+    console.error(chalk.red('\nError:'), error.message);
+    process.exit(1);
+  });
+}
 

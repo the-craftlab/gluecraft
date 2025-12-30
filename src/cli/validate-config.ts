@@ -127,8 +127,23 @@ async function main() {
   console.log(chalk.cyan('  pnpm run dev               ') + chalk.gray('# Run actual sync\n'));
 }
 
-main().catch(error => {
-  console.error(chalk.red('\n❌ Unexpected error:'), error);
-  process.exit(1);
-});
+/**
+ * Export the validate config function for CLI router integration
+ * @param configPath - Optional path to config file
+ */
+export async function validateConfig(configPath?: string) {
+  // Set configPath in argv if provided
+  if (configPath) {
+    process.argv[2] = configPath;
+  }
+  await main();
+}
+
+// Support direct execution for development
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(error => {
+    console.error(chalk.red('\n❌ Unexpected error:'), error);
+    process.exit(1);
+  });
+}
 

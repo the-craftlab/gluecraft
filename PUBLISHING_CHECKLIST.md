@@ -15,7 +15,7 @@ This checklist covers everything needed to publish Gluecraft to production.
 
 ### 1.2 Create/Update Integration Repository
 
-- [ ] Create repository: `the-craftlab/gluecraft-jpd` (or transfer this one)
+- [ ] Create repository: `the-craftlab/gluecraft` (or transfer this one)
 - [ ] Push all code from current repo
 - [ ] Verify `action.yml` works standalone
 - [ ] Update repository settings:
@@ -30,11 +30,11 @@ This checklist covers everything needed to publish Gluecraft to production.
 Current `package.json` settings:
 ```json
 {
-  "name": "@thecraftlab/gluecraft-jpd",
+  "name": "@thecraftlab/gluecraft",
   "version": "1.0.0",
   "description": "A Craft Lab tool for syncing Jira Product Discovery with GitHub Issues",
-  "repository": "https://github.com/thecraftlab/gluecraft-jpd",
-  "homepage": "https://github.com/thecraftlab/gluecraft-jpd#readme",
+  "repository": "https://github.com/thecraftlab/gluecraft",
+  "homepage": "https://github.com/thecraftlab/gluecraft#readme",
   "keywords": ["gluecraft", "the-craft-lab", ...]
 }
 ```
@@ -74,19 +74,19 @@ npm login
 npm publish --access public
 
 # Verify it's published
-npm info @thecraftlab/gluecraft-jpd
+npm info @thecraftlab/gluecraft
 ```
 
 - [ ] Package published successfully
-- [ ] Package visible at https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd
-- [ ] Can install: `npm install -g @thecraftlab/gluecraft-jpd`
+- [ ] Package visible at https://www.npmjs.com/package/@thecraftlab/gluecraft
+- [ ] Can install: `npm install -g @thecraftlab/gluecraft`
 
 ## Phase 3: GitHub Action Publishing
 
 ### 3.1 Tag Integration Repo
 
 ```bash
-cd gluecraft-jpd
+cd gluecraft
 
 # Create and push v1 tag
 git tag -a v1.0.0 -m "Release v1.0.0"
@@ -103,7 +103,7 @@ git push origin v1 --force
 
 ### 3.2 Publish to GitHub Marketplace
 
-Go to `the-craftlab/gluecraft-jpd` repository:
+Go to `the-craftlab/gluecraft` repository:
 
 1. **Create Release:**
    - [ ] Click "Releases" → "Create a new release"
@@ -190,8 +190,8 @@ Verify these URLs work:
 - [ ] https://gluecraft.thecraftlab.dev/docs/getting-started
 - [ ] https://gluecraft.thecraftlab.dev/docs/configuration
 - [ ] https://github.com/the-craftlab/gluecraft
-- [ ] https://github.com/the-craftlab/gluecraft-jpd
-- [ ] https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd
+- [ ] https://github.com/the-craftlab/gluecraft
+- [ ] https://www.npmjs.com/package/@thecraftlab/gluecraft
 
 ## Phase 5: Announcement
 
@@ -252,10 +252,10 @@ After publishing, these should all work:
 |----------|-----|
 | **Docs** | https://gluecraft.thecraftlab.dev |
 | **Hub Repo** | https://github.com/the-craftlab/gluecraft |
-| **JPD Repo** | https://github.com/the-craftlab/gluecraft-jpd |
-| **NPM Package** | https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd |
+| **JPD Repo** | https://github.com/the-craftlab/gluecraft |
+| **NPM Package** | https://www.npmjs.com/package/@thecraftlab/gluecraft |
 | **Action (Hub)** | https://github.com/marketplace/actions/gluecraft |
-| **Action (JPD)** | https://github.com/marketplace/actions/gluecraft-jpd |
+| **Action (JPD)** | https://github.com/marketplace/actions/gluecraft |
 | **Org** | https://github.com/the-craftlab |
 
 ## Pre-Flight Check
@@ -277,7 +277,7 @@ Before making anything public:
 
 You'll know publishing is complete when:
 
-✅ Users can run: `npx @thecraftlab/gluecraft-jpd setup`  
+✅ Users can run: `npx @thecraftlab/gluecraft setup`  
 ✅ Users can use: `uses: the-craftlab/gluecraft@v1`  
 ✅ Docs load at: `https://gluecraft.thecraftlab.dev`  
 ✅ Package appears in NPM search  

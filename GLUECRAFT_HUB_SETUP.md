@@ -54,7 +54,7 @@ runs:
     # JPD Integration
     - name: Route to Gluecraft JPD
       if: inputs.integration == 'jpd'
-      uses: the-craftlab/gluecraft-jpd@v1
+      uses: the-craftlab/gluecraft@v1
       with:
         config-path: ${{ inputs.config-path }}
         jpd-api-key: ${{ env.JPD_API_KEY }}
@@ -142,7 +142,7 @@ jobs:
 
 | Integration | Status | Repository | NPM Package |
 |-------------|--------|------------|-------------|
-| **JPD** (Jira Product Discovery) | ✅ Available | [gluecraft-jpd](https://github.com/the-craftlab/gluecraft-jpd) | [@thecraftlab/gluecraft-jpd](https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd) |
+| **JPD** (Jira Product Discovery) | ✅ Available | [gluecraft](https://github.com/the-craftlab/gluecraft) | [@thecraftlab/gluecraft](https://www.npmjs.com/package/@thecraftlab/gluecraft) |
 | **Jira** (Jira Software/Cloud) | 🚧 Coming Soon | [gluecraft-jira](https://github.com/the-craftlab/gluecraft-jira) | @thecraftlab/gluecraft-jira |
 | **Linear** | 🚧 Coming Soon | [gluecraft-linear](https://github.com/the-craftlab/gluecraft-linear) | @thecraftlab/gluecraft-linear |
 | **Notion** | 🚧 Coming Soon | [gluecraft-notion](https://github.com/the-craftlab/gluecraft-notion) | @thecraftlab/gluecraft-notion |
@@ -186,7 +186,7 @@ Use the unified action with routing:
 Use the integration directly:
 
 ```yaml
-- uses: the-craftlab/gluecraft-jpd@v1
+- uses: the-craftlab/gluecraft@v1
 ```
 
 ## Documentation
@@ -234,11 +234,11 @@ MIT © The Craft Lab
 
 1. **Phase 1: Create hub repo** (this document)
    - Set up the-craftlab/gluecraft with composite action
-   - Add routing to gluecraft-jpd
+   - Add routing to gluecraft
 
-2. **Phase 2: Publish gluecraft-jpd**
-   - Move current repo to the-craftlab/gluecraft-jpd
-   - Publish NPM package @thecraftlab/gluecraft-jpd
+2. **Phase 2: Publish gluecraft**
+   - Move current repo to the-craftlab/gluecraft
+   - Publish NPM package @thecraftlab/gluecraft
    - Ensure action.yml works standalone
 
 3. **Phase 3: Add more integrations**
@@ -254,7 +254,7 @@ MIT © The Craft Lab
 
 1. ✅ Rebrand current repo (completed)
 2. ⬜ Create the-craftlab/gluecraft hub repo
-3. ⬜ Move current repo to the-craftlab/gluecraft-jpd
+3. ⬜ Move current repo to the-craftlab/gluecraft
 4. ⬜ Test action routing
 5. ⬜ Update documentation
 6. ⬜ Publish NPM package

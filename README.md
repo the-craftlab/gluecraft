@@ -1,6 +1,6 @@
 # Gluecraft JPD
 
-[![npm version](https://badge.fury.io/js/@thecraftlab%2Fgluecraft-jpd.svg)](https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd)
+[![npm version](https://badge.fury.io/js/@thecraftlab%2Fgluecraft.svg)](https://www.npmjs.com/package/@thecraftlab/gluecraft)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
 
@@ -8,7 +8,7 @@
 
 Bidirectional sync between Jira Product Discovery (JPD) and GitHub Issues. Keep your product roadmap in Jira while developers work in GitHub—automatically synchronized with full hierarchy support, custom fields, and stateless operation.
 
-📚 **[Complete Documentation](https://thecraftlab.github.io/gluecraft-jpd/)** • [Getting Started](GETTING_STARTED.md) • [Examples](examples/) • [CLI Guide](CLI_GUIDE.md)
+📚 **[Complete Documentation](https://thecraftlab.github.io/gluecraft/)** • [Getting Started](GETTING_STARTED.md) • [Examples](examples/) • [CLI Guide](CLI_GUIDE.md)
 
 ---
 
@@ -18,7 +18,7 @@ Get synchronized in three commands:
 
 ```bash
 # Install and run interactive setup wizard
-npx @thecraftlab/gluecraft-jpd setup
+npx @thecraftlab/gluecraft setup
 
 # The wizard will:
 # - Test your API connections (with smart rate limit handling)
@@ -27,10 +27,10 @@ npx @thecraftlab/gluecraft-jpd setup
 # - Set up GitHub labels automatically
 
 # Test sync without making changes
-npx @thecraftlab/gluecraft-jpd sync --dry-run
+npx @thecraftlab/gluecraft sync --dry-run
 
 # Run actual sync
-npx @thecraftlab/gluecraft-jpd sync
+npx @thecraftlab/gluecraft sync
 ```
 
 That's it. Your JPD issues are now in GitHub, and status updates flow both ways. The wizard handles API discovery, field validation, and configuration—you just provide credentials.
@@ -66,8 +66,8 @@ That's it. Your JPD issues are now in GitHub, and status updates flow both ways.
 No installation required—just run commands directly:
 
 ```bash
-npx @thecraftlab/gluecraft-jpd setup
-npx @thecraftlab/gluecraft-jpd sync
+npx @thecraftlab/gluecraft setup
+npx @thecraftlab/gluecraft sync
 ```
 
 ### Global installation
@@ -75,8 +75,8 @@ npx @thecraftlab/gluecraft-jpd sync
 Install once, use everywhere:
 
 ```bash
-npm install -g @thecraftlab/gluecraft-jpd
-gluecraft-jpd setup
+npm install -g @thecraftlab/gluecraft
+gluecraft setup
 ```
 
 ### Local project installation
@@ -84,7 +84,7 @@ gluecraft-jpd setup
 Add to your project's dev dependencies:
 
 ```bash
-npm install --save-dev @thecraftlab/gluecraft-jpd
+npm install --save-dev @thecraftlab/gluecraft
 ```
 
 Then add scripts to your `package.json`:
@@ -92,10 +92,10 @@ Then add scripts to your `package.json`:
 ```json
 {
   "scripts": {
-    "sync:setup": "gluecraft-jpd setup",
-    "sync:run": "gluecraft-jpd sync",
-    "sync:dry-run": "gluecraft-jpd sync --dry-run",
-    "sync:validate": "gluecraft-jpd validate-config"
+    "sync:setup": "gluecraft setup",
+    "sync:run": "gluecraft sync",
+    "sync:dry-run": "gluecraft sync --dry-run",
+    "sync:validate": "gluecraft validate-config"
   }
 }
 ```
@@ -143,7 +143,7 @@ hierarchy:
   max_depth: 8  # GitHub's limit
 ```
 
-Run `gluecraft-jpd sync` and you get:
+Run `gluecraft sync` and you get:
 
 * **JPD issues synced to GitHub** - Each JPD issue becomes a GitHub issue with mapped fields
 * **Hierarchies as sub-issues** - Parent-child relationships from JPD appear as GitHub sub-issues with task lists
@@ -225,18 +225,18 @@ The connector provides focused commands for setup, validation, and operation:
 
 ```bash
 # Setup and configuration
-gluecraft-jpd setup                    # Interactive wizard
-gluecraft-jpd discover-fields PROJ     # List JPD fields with IDs
-gluecraft-jpd validate-config          # Check config before sync
+gluecraft setup                    # Interactive wizard
+gluecraft discover-fields PROJ     # List JPD fields with IDs
+gluecraft validate-config          # Check config before sync
 
 # Label management
-gluecraft-jpd setup-labels --preview   # Preview labels
-gluecraft-jpd setup-labels             # Create all labels
+gluecraft setup-labels --preview   # Preview labels
+gluecraft setup-labels             # Create all labels
 
 # Sync operations
-gluecraft-jpd sync --dry-run           # Test without changes
-gluecraft-jpd sync                     # Run actual sync
-gluecraft-jpd health-check             # Verify connections
+gluecraft sync --dry-run           # Test without changes
+gluecraft sync                     # Run actual sync
+gluecraft health-check             # Verify connections
 ```
 
 See the [CLI Guide](CLI_GUIDE.md) for complete command documentation with examples.
@@ -264,7 +264,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync JPD <-> GitHub
-        run: npx @thecraftlab/gluecraft-jpd sync
+        run: npx @thecraftlab/gluecraft sync
         env:
           JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
           JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
@@ -342,7 +342,7 @@ labels:
 **Preview before creating:**
 
 ```bash
-gluecraft-jpd setup-labels --preview
+gluecraft setup-labels --preview
 ```
 
 For teams with changing membership, focus on permanent labels (type, priority) and use GitHub assignees for "who's working on what." See [Label Strategy Guide](LABEL_STRATEGY_FLUID_TEAMS.md) for recommendations.
@@ -414,27 +414,27 @@ Common issues and quick fixes:
 **Rate limit errors:**
 ```bash
 # Built-in caching and retry usually handles this
-gluecraft-jpd health-check
+gluecraft health-check
 ```
 
 **Field validation errors:**
 ```bash
 # Discover correct field IDs
-gluecraft-jpd discover-fields YOUR_PROJECT
+gluecraft discover-fields YOUR_PROJECT
 ```
 
 **Config errors:**
 ```bash
 # Validate before syncing
-gluecraft-jpd validate-config
+gluecraft validate-config
 ```
 
 **Test sync without changes:**
 ```bash
-gluecraft-jpd sync --dry-run
+gluecraft sync --dry-run
 ```
 
-See the [CLI Guide](CLI_GUIDE.md) for complete command documentation. For questions and discussions, visit [GitHub Discussions](https://github.com/thecraftlab/gluecraft-jpd/discussions). To report bugs, open an [issue](https://github.com/thecraftlab/gluecraft-jpd/issues).
+See the [CLI Guide](CLI_GUIDE.md) for complete command documentation. For questions and discussions, visit [GitHub Discussions](https://github.com/thecraftlab/gluecraft/discussions). To report bugs, open an [issue](https://github.com/thecraftlab/gluecraft/issues).
 
 ## FAQ
 
@@ -454,7 +454,7 @@ No. Sync is idempotent—running it multiple times only updates changed issues. 
 Yes. Create separate config files or use JQL filters spanning multiple projects: `project IN (PROJ1, PROJ2)`.
 
 **How do I find custom field IDs?**  
-Run `gluecraft-jpd discover-fields YOUR_PROJECT` to list all available fields with IDs and types.
+Run `gluecraft discover-fields YOUR_PROJECT` to list all available fields with IDs and types.
 
 **Can I exclude certain issues?**  
 Yes. Use JQL filters in your config to limit which issues sync: `jql_filter: "project = PROD AND status != Archived"`.
@@ -474,8 +474,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 Quick development setup:
 
 ```bash
-git clone https://github.com/thecraftlab/gluecraft-jpd.git
-cd gluecraft-jpd
+git clone https://github.com/thecraftlab/gluecraft.git
+cd gluecraft
 pnpm install
 pnpm test
 ```
@@ -490,4 +490,4 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 **Part of [The Craft Lab](https://github.com/thecraftlab)** - Specialized tools for modern development workflows.
 
-[Documentation](https://thecraftlab.github.io/gluecraft-jpd/) · [Report Bug](https://github.com/thecraftlab/gluecraft-jpd/issues) · [Request Feature](https://github.com/thecraftlab/gluecraft-jpd/issues)
+[Documentation](https://thecraftlab.github.io/gluecraft/) · [Report Bug](https://github.com/thecraftlab/gluecraft/issues) · [Request Feature](https://github.com/thecraftlab/gluecraft/issues)

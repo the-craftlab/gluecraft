@@ -12,13 +12,44 @@ async function main() {
     console.log('  JPD ↔ GitHub Sync Engine');
     console.log('='.repeat(60) + '\n');
 
-    const configPath = process.env.CONFIG_PATH || path.join(process.cwd(), 'config', 'gluecraft.yaml');
+    // GitHub Actions pass inputs as INPUT_* environment variables
+    // Support both GitHub Action inputs and direct environment variables
+    const configPath = 
+      process.env.INPUT_CONFIG_PATH || 
+      process.env.CONFIG_PATH || 
+      path.join(process.cwd(), 'config', 'gluecraft.yaml');
     
-    if (!process.env.GITHUB_TOKEN) throw new Error('GITHUB_TOKEN is required');
-    if (!process.env.JPD_API_KEY) throw new Error('JPD_API_KEY is required');
+    // Get credentials from inputs or environment variables
+    const githubToken = 
+      process.env.INPUT_GITHUB_TOKEN || 
+      process.env.GITHUB_TOKEN;
+    
+    const jpdApiKey = 
+      process.env.INPUT_JPD_API_KEY || 
+      process.env.JPD_API_KEY;
+    
+    const jpdEmail = 
+      process.env.INPUT_JPD_EMAIL || 
+      process.env.JPD_EMAIL;
+    
+    const jpdBaseUrl = 
+      process.env.INPUT_JPD_BASE_URL || 
+      process.env.JPD_BASE_URL;
 
-    const args = process.argv.slice(2);
-    const dryRun = args.includes('--dry-run');
+    // Validate required environment variables
+    if (!githubToken) throw new Error('GITHUB_TOKEN is required (set via input or env var)');
+    if (!jpdApiKey) throw new Error('JPD_API_KEY is required (set via input or env var)');
+
+    // Set environment variables for SyncEngine (it reads from process.env)
+    if (githubToken) process.env.GITHUB_TOKEN = githubToken;
+    if (jpdApiKey) process.env.JPD_API_KEY = jpdApiKey;
+    if (jpdEmail) process.env.JPD_EMAIL = jpdEmail;
+    if (jpdBaseUrl) process.env.JPD_BASE_URL = jpdBaseUrl;
+
+    // Check for dry-run mode (from input or command line arg)
+    const dryRunInput = process.env.INPUT_DRY_RUN;
+    const dryRunArg = process.argv.slice(2).includes('--dry-run');
+    const dryRun = dryRunInput === 'true' || dryRunArg;
 
     if (dryRun) {
       console.log('⚠️  DRY RUN MODE - No changes will be made\n');

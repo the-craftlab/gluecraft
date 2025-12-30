@@ -59,7 +59,7 @@ hierarchy:
 # - This file is referenced by .github/workflows/sync.yml
 # - To update mappings, edit this file and commit
 # - The workflow will automatically pick up changes
-# - Generate a full config with: npx @thecraftlab/gluecraft-jpd setup
+# - Generate a full config with: npx @thecraftlab/gluecraft setup
 #
 # ============================================================================
 

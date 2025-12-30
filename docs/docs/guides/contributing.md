@@ -22,12 +22,12 @@ This project adheres to the Contributor Covenant Code of Conduct. By participati
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/gluecraft-jpd.git
-   cd gluecraft-jpd
+   git clone https://github.com/your-username/gluecraft.git
+   cd gluecraft
    ```
 3. **Add the upstream repository**:
    ```bash
-   git remote add upstream https://github.com/thecraftlab/gluecraft-jpd.git
+   git remote add upstream https://github.com/thecraftlab/gluecraft.git
    ```
 
 ## Development Setup

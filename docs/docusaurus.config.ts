@@ -18,12 +18,12 @@ const config: Config = {
   url: 'https://thecraftlab.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/gluecraft-jpd/',
+  baseUrl: '/gluecraft/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'thecraftlab', // Usually your GitHub org/user name.
-  projectName: 'gluecraft-jpd', // Usually your repo name.
+  projectName: 'gluecraft', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -42,7 +42,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/thecraftlab/gluecraft-jpd/tree/main/docs/',
+            'https://github.com/thecraftlab/gluecraft/tree/main/docs/',
         },
         blog: false, // Disable blog feature
         theme: {
@@ -72,7 +72,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/thecraftlab/gluecraft-jpd',
+          href: 'https://github.com/thecraftlab/gluecraft',
           label: 'GitHub',
           position: 'right',
         },
@@ -103,11 +103,11 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Repository',
-              href: 'https://github.com/thecraftlab/gluecraft-jpd',
+              href: 'https://github.com/thecraftlab/gluecraft',
             },
             {
               label: 'Issue Tracker',
-              href: 'https://github.com/thecraftlab/gluecraft-jpd/issues',
+              href: 'https://github.com/thecraftlab/gluecraft/issues',
             },
             {
               label: 'The Craft Lab',

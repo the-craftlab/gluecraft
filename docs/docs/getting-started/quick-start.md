@@ -16,8 +16,8 @@ The setup wizard automates the entire configuration process:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/thecraftlab/gluecraft-jpd.git
-cd gluecraft-jpd
+git clone https://github.com/thecraftlab/gluecraft.git
+cd gluecraft
 pnpm install
 ```
 
