@@ -1,17 +1,17 @@
 {
-  "name": "@expedition/jpd-github-connector",
+  "name": "@thecraftlab/gluecraft-jpd",
   "version": "1.0.0",
   "type": "module",
-  "description": "Bidirectional sync between Jira Product Discovery and GitHub Issues with support for custom fields, hierarchies, and workflows",
+  "description": "Gluecraft JPD: Bidirectional sync between Jira Product Discovery and GitHub Issues with support for custom fields, hierarchies, and workflows",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",
   "bin": {
-    "jpd-sync": "./dist/index.cjs",
-    "jpd-setup": "./dist/cli/setup.cjs",
-    "jpd-discover": "./dist/cli/discover-fields.cjs",
-    "jpd-health": "./dist/cli/health-check.cjs",
-    "jpd-validate": "./dist/cli/validate-config.cjs",
-    "jpd-setup-labels": "./dist/cli/setup-labels.cjs"
+    "gluecraft-jpd": "./dist/index.cjs",
+    "gluecraft-jpd-setup": "./dist/cli/setup.cjs",
+    "gluecraft-jpd-discover": "./dist/cli/discover-fields.cjs",
+    "gluecraft-jpd-health": "./dist/cli/health-check.cjs",
+    "gluecraft-jpd-validate": "./dist/cli/validate-config.cjs",
+    "gluecraft-jpd-setup-labels": "./dist/cli/setup-labels.cjs"
   },
   "files": [
     "dist",
@@ -35,9 +35,13 @@
     "setup-labels": "tsx src/cli/setup-labels.ts",
     "clear-labels": "tsx src/cli/clear-labels.ts",
     "clear-all-labels": "tsx src/cli/clear-all-labels.ts",
+    "docs:dev": "pnpm --filter website start",
+    "docs:build": "pnpm --filter website build",
+    "docs:serve": "pnpm --filter website serve",
     "prepublishOnly": "pnpm run build"
   },
   "keywords": [
+    "gluecraft",
     "jira",
     "jpd",
     "jira-product-discovery",
@@ -49,18 +53,19 @@
     "atlassian",
     "project-management",
     "issue-tracking",
-    "workflow-automation"
+    "workflow-automation",
+    "the-craft-lab"
   ],
-  "author": "Expedition",
+  "author": "The Craft Lab",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/expedition/jpd-to-github-connector.git"
+    "url": "https://github.com/thecraftlab/gluecraft-jpd.git"
   },
   "bugs": {
-    "url": "https://github.com/expedition/jpd-to-github-connector/issues"
+    "url": "https://github.com/thecraftlab/gluecraft-jpd/issues"
   },
-  "homepage": "https://github.com/expedition/jpd-to-github-connector#readme",
+  "homepage": "https://github.com/thecraftlab/gluecraft-jpd#readme",
   "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">=20.0.0",

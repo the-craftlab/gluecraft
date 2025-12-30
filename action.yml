@@ -1,6 +1,6 @@
-name: 'JPD to GitHub Sync'
-description: 'Bidirectional sync between Jira Product Discovery and GitHub Issues'
-author: 'James Villarrubia'
+name: 'Gluecraft JPD'
+description: 'Bidirectional sync between Jira Product Discovery and GitHub Issues by The Craft Lab'
+author: 'The Craft Lab'
 inputs:
   config-path:
     description: 'Path to the configuration file'

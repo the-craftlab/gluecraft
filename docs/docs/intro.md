@@ -1,57 +1,104 @@
-# Getting Started
+# Introduction
 
-Welcome to the **JPD-GitHub Connector** documentation! This tool provides bidirectional synchronization between Jira Product Discovery (JPD) and GitHub Issues.
+The JPD-GitHub Connector provides bidirectional synchronization between Jira Product Discovery (JPD) and GitHub Issues, enabling seamless workflow integration between product planning and development execution.
 
 ## What is JPD-GitHub Connector?
 
-The JPD-GitHub Connector is a powerful sync engine that:
+A powerful sync engine that automatically keeps JPD and GitHub in sync, allowing product teams to plan in JPD while development teams work in GitHub, with changes flowing bidirectionally.
 
-- ✅ **Bidirectional Sync** - Keep JPD and GitHub in sync automatically
-- ✅ **Native Sub-Issues** - Real GitHub parent-child relationships for hierarchy
-- ✅ **Comment Sync** - Sync comments between both platforms
-- ✅ **Custom Field Mapping** - Flexible field mapping via configuration
-- ✅ **Rate Limit Handling** - Intelligent caching and exponential backoff
-- ✅ **Transform Functions** - Custom TypeScript transformations
-- ✅ **Auto-Label Creation** - Configurable label colors and descriptions
+## Core Capabilities
 
-## Quick Links
+- **Bidirectional Sync** - Automatic two-way synchronization between JPD and GitHub
+- **Native Sub-Issues** - Real GitHub parent-child relationships for Epic > Story > Task hierarchy
+- **Custom Field Mapping** - Flexible configuration for mapping JPD custom fields to GitHub labels and content
+- **Comment Sync** - Team discussions synchronized across both platforms with author attribution
+- **Status Workflows** - Configurable status mappings between JPD workflows and GitHub states
+- **Transform Functions** - Custom TypeScript functions for complex data transformations
+- **Auto-Label Creation** - Automatic GitHub label generation with configurable colors and descriptions
+- **Rate Limit Handling** - Intelligent caching and exponential backoff for API rate limits
 
-- [Installation](./installation) - Set up the connector
-- [Quick Start](./quick-start) - Get running in 5 minutes
-- [CLI Guide](./cli) - Command-line interface reference
-- [Configuration](./configuration/sync-config) - Configure sync behavior
+## Quick Navigation
 
-## Key Features
+### Getting Started
+Start here if you're new to the connector:
+- [Prerequisites](./getting-started/prerequisites) - System requirements and credentials
+- [Quick Start](./getting-started/quick-start) - 5-minute setup with wizard
+- [First Sync](./getting-started/first-sync) - Run and verify your first synchronization
 
-### Hierarchy & Sub-Issues
+### Configuration
+Configure sync behavior and field mappings:
+- [Configuration Overview](./configuration/overview) - Understanding the config file
+- [Field Mappings](./configuration/field-mappings) - Map JPD fields to GitHub
+- [Status Workflows](./configuration/status-workflows) - Configure status sync
+- [Labels](./configuration/labels) - Define label strategy
 
-Create real GitHub sub-issues that maintain parent-child relationships from JPD. Epics, Stories, and Tasks are automatically mapped with progress tracking.
+### CLI Tools
+Command-line tools for setup and operation:
+- [CLI Overview](./cli/overview) - Available commands
+- [Setup Wizard](./cli/setup-wizard) - Interactive configuration
+- [Sync Commands](./cli/sync-commands) - Running synchronization
+- [Validation Tools](./cli/validation) - Testing and validation
 
-### Comment Synchronization
+### Features
+Advanced features and capabilities:
+- [Sub-Issues](./features/sub-issues) - Epic/Story/Task hierarchy
+- [Comment Sync](./features/comment-sync) - Bidirectional comments
+- [Field Validation](./features/field-validation) - Field type validation
 
-Keep team discussions in sync - comments added in JPD appear in GitHub and vice versa.
+### Troubleshooting
+Solutions for common problems:
+- [Common Issues](./troubleshooting/common-issues) - Connection and config errors
+- [Field Configuration](./troubleshooting/field-configuration) - Field mapping problems
+- [Sync Problems](./troubleshooting/sync-problems) - Issues not syncing
+- [Debugging](./troubleshooting/debugging) - Advanced debugging
 
-### Flexible Configuration
+## Use Cases
 
-Define custom field mappings, status workflows, label strategies, and more through a declarative YAML configuration.
+**Product Management**
+- Plan in JPD with RICE scoring and themes
+- Automatically sync refined issues to GitHub for development
+- Track implementation progress in JPD
 
-### Production Ready
+**Development Teams**
+- Work in familiar GitHub Issues environment
+- Status updates automatically sync back to JPD
+- Comment on issues in either platform
 
-Built with enterprise features:
-- Comprehensive error handling
-- Structured logging
-- Health check endpoint
-- Docker support
-- GitHub Actions integration
+**Cross-Functional Collaboration**
+- Product and engineering stay in sync automatically
+- Eliminate manual copy-paste between systems
+- Single source of truth maintained across both platforms
+
+## Architecture
+
+```mermaid
+graph LR
+    JPD[Jira Product Discovery] <--> Connector[JPD-GitHub Connector]
+    Connector <--> GitHub[GitHub Issues]
+    
+    Connector --> Labels[Auto-Create Labels]
+    Connector --> Hierarchy[Maintain Hierarchy]
+    Connector --> Comments[Sync Comments]
+```
+
+The connector runs as a scheduled job (via GitHub Actions, cron, or manual execution) and maintains sync state using metadata stored in GitHub issue bodies.
 
 ## Next Steps
 
-1. [Install the connector](./installation)
-2. [Configure your first sync](./configuration/sync-config)
-3. [Run your first sync](./quick-start)
-4. [Explore advanced features](./features/sub-issues)
+Choose your path:
 
-## Need Help?
+**New Users:** Start with [Prerequisites](./getting-started/prerequisites) then run the [Quick Start](./getting-started/quick-start) wizard.
 
-- [GitHub Issues](https://github.com/expedition/jpd-to-github-connector/issues) - Report bugs or request features
-- [Contributing Guide](./guides/contributing) - Contribute to the project
+**Advanced Users:** Review [Manual Setup](./getting-started/manual-setup) for full control over configuration.
+
+**Existing Users:** Jump to [CLI Tools](./cli/overview) or [Configuration](./configuration/overview) for reference.
+
+## Support
+
+- **Documentation:** Browse the guides in this documentation site
+- **Issues:** Report bugs or request features on [GitHub Issues](https://github.com/expedition/jpd-to-github-connector/issues)
+- **Contributing:** See the [Contributing Guide](./guides/contributing) for development setup
+
+---
+
+Ready to get started? Head to [Prerequisites](./getting-started/prerequisites) to begin your setup.

@@ -1,12 +1,14 @@
-# JPD to GitHub Connector
+# Gluecraft JPD
 
-[![npm version](https://badge.fury.io/js/@expedition%2Fjpd-github-connector.svg)](https://www.npmjs.com/package/@expedition/jpd-github-connector)
+[![npm version](https://badge.fury.io/js/@thecraftlab%2Fgluecraft-jpd.svg)](https://www.npmjs.com/package/@thecraftlab/gluecraft-jpd)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
 
+**Part of [The Craft Lab](https://github.com/thecraftlab)** - A collection of specialized tools for development workflows.
+
 Bidirectional sync between Jira Product Discovery (JPD) and GitHub Issues. Keep your product roadmap in Jira while developers work in GitHub—automatically synchronized with full hierarchy support, custom fields, and stateless operation.
 
-📚 **[Complete Documentation](https://expedition.github.io/jpd-to-github-connector/)** • [Getting Started](GETTING_STARTED.md) • [Examples](examples/) • [CLI Guide](CLI_GUIDE.md)
+📚 **[Complete Documentation](https://thecraftlab.github.io/gluecraft-jpd/)** • [Getting Started](GETTING_STARTED.md) • [Examples](examples/) • [CLI Guide](CLI_GUIDE.md)
 
 ---
 
@@ -16,7 +18,7 @@ Get synchronized in three commands:
 
 ```bash
 # Install and run interactive setup wizard
-npx @expedition/jpd-github-connector setup
+npx @thecraftlab/gluecraft-jpd setup
 
 # The wizard will:
 # - Test your API connections (with smart rate limit handling)
@@ -25,10 +27,10 @@ npx @expedition/jpd-github-connector setup
 # - Set up GitHub labels automatically
 
 # Test sync without making changes
-npx @expedition/jpd-github-connector sync --dry-run
+npx @thecraftlab/gluecraft-jpd sync --dry-run
 
 # Run actual sync
-npx @expedition/jpd-github-connector sync
+npx @thecraftlab/gluecraft-jpd sync
 ```
 
 That's it. Your JPD issues are now in GitHub, and status updates flow both ways. The wizard handles API discovery, field validation, and configuration—you just provide credentials.
@@ -141,7 +143,7 @@ hierarchy:
   max_depth: 8  # GitHub's limit
 ```
 
-Run `jpd-github-connector sync` and you get:
+Run `gluecraft-jpd sync` and you get:
 
 * **JPD issues synced to GitHub** - Each JPD issue becomes a GitHub issue with mapped fields
 * **Hierarchies as sub-issues** - Parent-child relationships from JPD appear as GitHub sub-issues with task lists

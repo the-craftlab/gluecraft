@@ -37,16 +37,21 @@ RATE_LIMIT_SHORT=1    # Quick operations (issue creation)
 RATE_LIMIT_MEDIUM=2   # Standard operations (before/after sync)
 RATE_LIMIT_LONG=3     # After major sync operations
 
-# Example: Run tests with faster waits (use if APIs allow)
+# ✅ VALIDATED: Recommended for standard JPD/GitHub APIs
 RATE_LIMIT_SHORT=0.5 RATE_LIMIT_MEDIUM=1 RATE_LIMIT_LONG=1.5 \
-  ./tests/scripts/test-integration-fast.sh
+  ./tests/scripts/test-sync-integration.sh
 
-# Example: Conservative for strict rate limits
+# Conservative for strict rate limits or shared API quotas
 RATE_LIMIT_SHORT=2 RATE_LIMIT_MEDIUM=3 RATE_LIMIT_LONG=5 \
   ./tests/scripts/test-sync-integration.sh
 ```
 
-**Tip**: Start with defaults. If you see rate limit errors, increase the values. If tests are stable, you can decrease them for faster runs.
+**Validated Performance** (Tests 1-5):
+- Recommended settings: ~2 minutes ✅
+- Default settings: ~5 minutes
+- Conservative settings: ~8 minutes
+
+**Tip**: Start with recommended settings. If you see rate limit errors, increase the values. For faster iteration during development, you can go lower (but watch for 429 errors).
 
 ## Running Tests
 
