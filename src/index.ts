@@ -13,26 +13,33 @@ async function main() {
     console.log('='.repeat(60) + '\n');
 
     // GitHub Actions pass inputs as INPUT_* environment variables
+    // GitHub converts kebab-case to SCREAMING_SNAKE_CASE, so config-path becomes INPUT_CONFIG-PATH
     // Support both GitHub Action inputs and direct environment variables
     const configPath = 
+      process.env['INPUT_CONFIG-PATH'] ||
       process.env.INPUT_CONFIG_PATH || 
       process.env.CONFIG_PATH || 
       path.join(process.cwd(), 'config', 'gluecraft.yaml');
     
     // Get credentials from inputs or environment variables
+    // Support both hyphenated and underscored INPUT_ variable names
     const githubToken = 
+      process.env['INPUT_GITHUB-TOKEN'] ||
       process.env.INPUT_GITHUB_TOKEN || 
       process.env.GITHUB_TOKEN;
     
     const jpdApiKey = 
+      process.env['INPUT_JPD-API-KEY'] ||
       process.env.INPUT_JPD_API_KEY || 
       process.env.JPD_API_KEY;
     
     const jpdEmail = 
+      process.env['INPUT_JPD-EMAIL'] ||
       process.env.INPUT_JPD_EMAIL || 
       process.env.JPD_EMAIL;
     
     const jpdBaseUrl = 
+      process.env['INPUT_JPD-BASE-URL'] ||
       process.env.INPUT_JPD_BASE_URL || 
       process.env.JPD_BASE_URL;
 
@@ -47,7 +54,7 @@ async function main() {
     if (jpdBaseUrl) process.env.JPD_BASE_URL = jpdBaseUrl;
 
     // Check for dry-run mode (from input or command line arg)
-    const dryRunInput = process.env.INPUT_DRY_RUN;
+    const dryRunInput = process.env['INPUT_DRY-RUN'] || process.env.INPUT_DRY_RUN;
     const dryRunArg = process.argv.slice(2).includes('--dry-run');
     const dryRun = dryRunInput === 'true' || dryRunArg;
 
