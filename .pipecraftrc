@@ -1,0 +1,32 @@
+# PipeCraft Configuration for Gluecraft
+# Automated versioning, tagging, and GitHub releases for GitHub Action publishing
+
+ciProvider: github
+mergeStrategy: fast-forward
+requireConventionalCommits: true
+
+# Simple single-branch workflow for library/action publishing
+# Code flows: main (production)
+initialBranch: main
+finalBranch: main
+
+# Single branch flow - no promotion needed for library
+branchFlow:
+  - main
+
+# No domain-based testing needed (single package)
+# But we can define a single domain for the action itself
+domains:
+  action:
+    description: 'GitHub Action and CLI package'
+    paths:
+      - '**/*'
+
+# Release configuration
+# When code is merged to main, PipeCraft will:
+# 1. Calculate version from conventional commits
+# 2. Create git tag (v2.0.0, v2.1.0, etc.)
+# 3. Update major version tag (v2) to point to latest
+# 4. Create GitHub release
+# 5. Optionally publish to NPM (handled separately or in custom job)
+
