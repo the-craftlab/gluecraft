@@ -136,7 +136,16 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Output" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          cat sync-summary.txt >> $GITHUB_STEP_SUMMARY
+          if [ -f "sync-summary.txt" ]; then
+            cat sync-summary.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No sync output available. Sync step may have failed before generating output." >> $GITHUB_STEP_SUMMARY
+            if [ -f "sync.log" ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "Last 20 lines from sync.log:" >> $GITHUB_STEP_SUMMARY
+              tail -20 sync.log >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
           echo '```' >> $GITHUB_STEP_SUMMARY
       
       # Optional: Notify on failure
