@@ -5,13 +5,14 @@ ciProvider: github
 mergeStrategy: fast-forward
 requireConventionalCommits: true
 
-# Simple single-branch workflow for library/action publishing
-# Code flows: main (production)
-initialBranch: main
+# PipeCraft branch flow for library/action publishing
+# Code flows: develop → main (production)
+initialBranch: develop
 finalBranch: main
 
-# Single branch flow - no promotion needed for library
+# Branch promotion flow: develop → main
 branchFlow:
+  - develop
   - main
 
 # No domain-based testing needed (single package)
