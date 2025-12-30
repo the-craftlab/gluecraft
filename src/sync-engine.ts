@@ -686,11 +686,24 @@ export class SyncEngine {
 
       // Check if metadata exists before trying to remove
       if (!issue.body.includes('jpd-sync-metadata')) {
+        this.logger.debug(`#${githubIssueNumber} has no metadata, skipping cleanup`);
         return; // Already clean
       }
 
       // Remove the hidden sync metadata comment
-      const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata\s*:\s*{.*?}\s*-->/gs, '').trim();
+      // Format: <!-- jpd-sync-metadata\n{...}\n-->
+      const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata[\s\S]*?-->/g, '').trim();
+
+      // Debug: Check if the replacement actually worked
+      const hadMetadata = issue.body.includes('jpd-sync-metadata');
+      const hasMetadata = cleanBody.includes('jpd-sync-metadata');
+      
+      if (hadMetadata && hasMetadata) {
+        this.logger.warn(`Regex failed to remove metadata from #${githubIssueNumber}!`);
+        this.logger.debug(`Original length: ${issue.body.length}, Clean length: ${cleanBody.length}`);
+        // Log first 200 chars to see the format
+        this.logger.debug(`Metadata snippet: ${issue.body.substring(issue.body.indexOf('jpd-sync-metadata') - 20, issue.body.indexOf('jpd-sync-metadata') + 100)}`);
+      }
 
       // Cleanup happens even in dry-run mode - call the cleanup method
       await this.github.cleanupStaleMetadata(

@@ -22787,12 +22787,18 @@ var GitHubClient = class {
    * This bypasses dry-run mode because it's fixing broken data, not syncing new data
    */
   async cleanupStaleMetadata(owner, repo, issueNumber, cleanedBody) {
-    await this.octokit.issues.update({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      body: cleanedBody
-    });
+    try {
+      const response = await this.octokit.issues.update({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        body: cleanedBody
+      });
+      this.logger.debug(`Successfully updated #${issueNumber}, status: ${response.status}`);
+    } catch (error) {
+      this.logger.error(`Failed to cleanup #${issueNumber}: ${error.message}`);
+      throw error;
+    }
   }
   /**
    * Get comments for a GitHub issue
@@ -24553,9 +24559,17 @@ Results:`);
       );
       if (!issue || !issue.body) return;
       if (!issue.body.includes("jpd-sync-metadata")) {
+        this.logger.debug(`#${githubIssueNumber} has no metadata, skipping cleanup`);
         return;
       }
-      const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata\s*:\s*{.*?}\s*-->/gs, "").trim();
+      const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata[\s\S]*?-->/g, "").trim();
+      const hadMetadata = issue.body.includes("jpd-sync-metadata");
+      const hasMetadata = cleanBody.includes("jpd-sync-metadata");
+      if (hadMetadata && hasMetadata) {
+        this.logger.warn(`Regex failed to remove metadata from #${githubIssueNumber}!`);
+        this.logger.debug(`Original length: ${issue.body.length}, Clean length: ${cleanBody.length}`);
+        this.logger.debug(`Metadata snippet: ${issue.body.substring(issue.body.indexOf("jpd-sync-metadata") - 20, issue.body.indexOf("jpd-sync-metadata") + 100)}`);
+      }
       await this.github.cleanupStaleMetadata(
         this.githubOwner,
         this.githubRepo,

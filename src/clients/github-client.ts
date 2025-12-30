@@ -269,14 +269,21 @@ export class GitHubClient {
     issueNumber: number,
     cleanedBody: string
   ): Promise<void> {
-    // Always execute cleanup, even in dry-run mode
-    // This is maintenance, not sync - broken references should be cleaned
-    await this.octokit.issues.update({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      body: cleanedBody
-    });
+    try {
+      // Always execute cleanup, even in dry-run mode
+      // This is maintenance, not sync - broken references should be cleaned
+      const response = await this.octokit.issues.update({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        body: cleanedBody
+      });
+      
+      this.logger.debug(`Successfully updated #${issueNumber}, status: ${response.status}`);
+    } catch (error: any) {
+      this.logger.error(`Failed to cleanup #${issueNumber}: ${error.message}`);
+      throw error;
+    }
   }
 
   /**
