@@ -27,10 +27,18 @@ if [ ! -f .env ]; then
   exit 1
 fi
 
+# Save CONFIG_PATH if provided via environment before sourcing .env
+SAVED_CONFIG_PATH="${CONFIG_PATH}"
+
 source .env
 
-# Configuration
-CONFIG_PATH="${CONFIG_PATH:-./config/mtt-clean.yaml}"
+# Configuration - use saved value if it was provided, otherwise use default
+if [ -n "$SAVED_CONFIG_PATH" ]; then
+  CONFIG_PATH="$SAVED_CONFIG_PATH"
+else
+  CONFIG_PATH="${CONFIG_PATH:-./config/mtt-clean.yaml}"
+fi
+
 TEST_ISSUE_PREFIX="[TEST-AUTO]"
 TIMESTAMP=$(date +%s)
 CLEANUP_ONLY="${1:-false}"
@@ -46,11 +54,11 @@ TEST_FAILED=0
 # ==========================================
 
 log_section() {
-  echo ""
-  echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
-  echo -e "${BLUE}  $1${NC}"
-  echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}"
-  echo ""
+  echo "" >&2
+  echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}" >&2
+  echo -e "${BLUE}  $1${NC}" >&2
+  echo -e "${BLUE}═══════════════════════════════════════════════════════${NC}" >&2
+  echo "" >&2
 }
 
 log_test() {
@@ -58,23 +66,23 @@ log_test() {
 }
 
 log_success() {
-  echo -e "${GREEN}✓ $1${NC}"
+  echo -e "${GREEN}✓ $1${NC}" >&2
   ((TEST_PASSED++))
 }
 
 log_error() {
-  echo -e "${RED}✗ $1${NC}"
+  echo -e "${RED}✗ $1${NC}" >&2
   ((TEST_FAILED++))
 }
 
 log_info() {
-  echo -e "  $1"
+  echo -e "  $1" >&2
 }
 
 # Wait for rate limits to reset
 wait_for_rate_limit() {
   local seconds="${1:-3}"
-  echo -e "${YELLOW}⏳ Waiting ${seconds}s for rate limits...${NC}"
+  echo -e "${YELLOW}⏳ Waiting ${seconds}s for rate limits...${NC}" >&2
   sleep "$seconds"
 }
 
@@ -121,11 +129,10 @@ jpd_create_issue() {
     return 1
   fi
   
-  CREATED_JPD_KEYS+=("$key")
   log_success "Created JPD issue: $key"
   
-  # Transition to desired status if not default
-  if [ "$status" != "Backlog" ]; then
+  # Always transition to the desired status (JPD defaults to "Idea" status on creation)
+  if [ -n "$status" ]; then
     jpd_transition_issue "$key" "$status"
   fi
   
@@ -356,6 +363,9 @@ test_jpd_to_github_create() {
     "High" \
     "Backlog")
   
+  # Add to tracking array (command substitution runs in subshell, so array updates don't persist)
+  CREATED_JPD_KEYS+=("$key")
+  
   wait_for_rate_limit 2
   
   # Run sync
@@ -498,6 +508,7 @@ test_existing_issue_parent_sync() {
     "Epic" \
     "High" \
     "Backlog")
+  CREATED_JPD_KEYS+=("$epic_key")
   
   wait_for_rate_limit 2
   
@@ -507,6 +518,7 @@ test_existing_issue_parent_sync() {
     "Story" \
     "Medium" \
     "Backlog")
+  CREATED_JPD_KEYS+=("$story_key")
   
   wait_for_rate_limit 2
   
@@ -630,6 +642,7 @@ test_sub_issues_hierarchy() {
     "Epic" \
     "High" \
     "Backlog")
+  CREATED_JPD_KEYS+=("$epic_key")
   
   wait_for_rate_limit 2
   
@@ -640,6 +653,7 @@ test_sub_issues_hierarchy() {
     "Story" \
     "Medium" \
     "Backlog")
+  CREATED_JPD_KEYS+=("$story_key")
   
   wait_for_rate_limit 2
   
@@ -655,6 +669,7 @@ test_sub_issues_hierarchy() {
     "Task" \
     "Low" \
     "Backlog")
+  CREATED_JPD_KEYS+=("$task_key")
   
   wait_for_rate_limit 2
   
