@@ -53,6 +53,44 @@ RATE_LIMIT_SHORT=2 RATE_LIMIT_MEDIUM=3 RATE_LIMIT_LONG=5 \
 
 **Tip**: Start with recommended settings. If you see rate limit errors, increase the values. For faster iteration during development, you can go lower (but watch for 429 errors).
 
+## Test Coverage
+
+### Shell Integration Tests (`test-sync-integration.sh`)
+
+**✅ Core Tests (1-6)** - Production Validated
+- **TEST 1**: JPD → GitHub (Create) - Issue creation and field sync
+- **TEST 2**: JPD → GitHub (Update) - Summary and field updates
+- **TEST 3**: JPD → GitHub (Priority Change) - Label updates from field changes
+- **TEST 4**: GitHub → JPD (Status Change) - Bidirectional status sync (closed → Done)
+- **TEST 5**: Existing Issue Parent Sync - Epic → Story relationships with task lists
+- **TEST 6**: Checkbox State Preservation - Task list checkbox state management across syncs
+
+**⚠️ Advanced Tests (7+)** - Disabled/Experimental
+- **TEST 7**: Multi-level Hierarchy (Epic → Story → Task) - **DISABLED**
+  - **Reason**: JPD does not support "Task" as a valid category
+  - **Valid JPD categories**: `Bug`, `Epic`, `Story`
+  - **Note**: Core hierarchy (Epic → Story) is validated in TEST 5
+  - Test code preserved in source for reference
+
+### JPD Data Model Limitations
+
+**Issue Categories** (cannot be extended):
+- ✅ `Bug` - Bug reports
+- ✅ `Epic` - Large initiatives (can have Story children)
+- ✅ `Story` - User stories (can have Story children as subtasks)
+- ❌ `Task` - Not a valid category (use Story with appropriate status instead)
+
+**Hierarchy Support**:
+- ✅ Epic → Story (validated in TEST 5)
+- ✅ Story → Story (supported via subtasks/issuelinks)
+- ✅ Arbitrary depth via issuelinks
+- ❌ Epic → Story → Task (Task category doesn't exist)
+
+**Workarounds**:
+- Use Stories with task-like statuses for leaf nodes
+- Use JPD's native subtask system within Stories
+- Model multi-level hierarchies as Story → Story
+
 ## Running Tests
 
 ### Quick Start

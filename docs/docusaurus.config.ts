@@ -5,8 +5,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: 'JPD-GitHub Connector',
-  tagline: 'Bidirectional sync between Jira Product Discovery and GitHub Issues',
+  title: 'Gluecraft JPD',
+  tagline: 'Bidirectional sync between Jira Product Discovery and GitHub Issues by The Craft Lab',
   favicon: 'img/favicon.ico',
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
@@ -15,15 +15,15 @@ const config: Config = {
   },
 
   // Set the production url of your site here
-  url: 'https://expedition.github.io',
+  url: 'https://thecraftlab.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/jpd-to-github-connector/',
+  baseUrl: '/gluecraft-jpd/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'expedition', // Usually your GitHub org/user name.
-  projectName: 'jpd-to-github-connector', // Usually your repo name.
+  organizationName: 'thecraftlab', // Usually your GitHub org/user name.
+  projectName: 'gluecraft-jpd', // Usually your repo name.
 
   onBrokenLinks: 'throw',
 
@@ -42,7 +42,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           editUrl:
-            'https://github.com/expedition/jpd-to-github-connector/tree/main/docs/',
+            'https://github.com/thecraftlab/gluecraft-jpd/tree/main/docs/',
         },
         blog: false, // Disable blog feature
         theme: {
@@ -59,9 +59,9 @@ const config: Config = {
       respectPrefersColorScheme: true,
     },
     navbar: {
-      title: 'JPD-GitHub Connector',
+      title: 'Gluecraft JPD',
       logo: {
-        alt: 'JPD-GitHub Connector Logo',
+        alt: 'Gluecraft JPD Logo',
         src: 'img/logo.svg',
       },
       items: [
@@ -72,7 +72,7 @@ const config: Config = {
           label: 'Docs',
         },
         {
-          href: 'https://github.com/expedition/jpd-to-github-connector',
+          href: 'https://github.com/thecraftlab/gluecraft-jpd',
           label: 'GitHub',
           position: 'right',
         },
@@ -103,16 +103,20 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Repository',
-              href: 'https://github.com/expedition/jpd-to-github-connector',
+              href: 'https://github.com/thecraftlab/gluecraft-jpd',
             },
             {
               label: 'Issue Tracker',
-              href: 'https://github.com/expedition/jpd-to-github-connector/issues',
+              href: 'https://github.com/thecraftlab/gluecraft-jpd/issues',
+            },
+            {
+              label: 'The Craft Lab',
+              href: 'https://github.com/thecraftlab',
             },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} Expedition. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} The Craft Lab. Built with Docusaurus.`,
     },
     prism: {
       theme: prismThemes.github,

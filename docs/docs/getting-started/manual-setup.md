@@ -1,6 +1,6 @@
 # Manual Setup
 
-This guide walks you through manually configuring the JPD to GitHub Connector without using the setup wizard. Recommended for advanced users who want full control over their configuration.
+This guide walks you through manually configuring Gluecraft JPD without using the setup wizard. Recommended for advanced users who want full control over their configuration.
 
 ## When to Use Manual Setup
 
@@ -16,8 +16,8 @@ Choose manual setup if you:
 Clone the repository and install packages:
 
 ```bash
-git clone https://github.com/expedition/jpd-to-github-connector.git
-cd jpd-to-github-connector
+git clone https://github.com/thecraftlab/gluecraft-jpd.git
+cd gluecraft-jpd
 pnpm install
 ```
 

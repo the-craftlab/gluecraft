@@ -1,8 +1,10 @@
 # Introduction
 
-The JPD-GitHub Connector provides bidirectional synchronization between Jira Product Discovery (JPD) and GitHub Issues, enabling seamless workflow integration between product planning and development execution.
+**Gluecraft JPD** provides bidirectional synchronization between Jira Product Discovery (JPD) and GitHub Issues, enabling seamless workflow integration between product planning and development execution.
 
-## What is JPD-GitHub Connector?
+Part of **[The Craft Lab](https://github.com/thecraftlab)** - specialized tools for modern development workflows.
+
+## What is Gluecraft JPD?
 
 A powerful sync engine that automatically keeps JPD and GitHub in sync, allowing product teams to plan in JPD while development teams work in GitHub, with changes flowing bidirectionally.
 
@@ -73,7 +75,7 @@ Solutions for common problems:
 
 ```mermaid
 graph LR
-    JPD[Jira Product Discovery] <--> Connector[JPD-GitHub Connector]
+    JPD[Jira Product Discovery] <--> Connector[Gluecraft JPD]
     Connector <--> GitHub[GitHub Issues]
     
     Connector --> Labels[Auto-Create Labels]
@@ -96,7 +98,7 @@ Choose your path:
 ## Support
 
 - **Documentation:** Browse the guides in this documentation site
-- **Issues:** Report bugs or request features on [GitHub Issues](https://github.com/expedition/jpd-to-github-connector/issues)
+- **Issues:** Report bugs or request features on [GitHub Issues](https://github.com/thecraftlab/gluecraft-jpd/issues)
 - **Contributing:** See the [Contributing Guide](./guides/contributing) for development setup
 
 ---

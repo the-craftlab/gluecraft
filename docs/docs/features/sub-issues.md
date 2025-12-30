@@ -1,6 +1,6 @@
 # Native GitHub Sub-Issues
 
-The JPD-GitHub Connector supports **native GitHub sub-issues** for managing Epic → Story → Task hierarchies.
+**Gluecraft JPD** supports **native GitHub sub-issues** for managing Epic → Story → Task hierarchies.
 
 ## Overview
 

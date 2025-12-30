@@ -66,8 +66,8 @@ That's it. Your JPD issues are now in GitHub, and status updates flow both ways.
 No installation required—just run commands directly:
 
 ```bash
-npx @expedition/jpd-github-connector setup
-npx @expedition/jpd-github-connector sync
+npx @thecraftlab/gluecraft-jpd setup
+npx @thecraftlab/gluecraft-jpd sync
 ```
 
 ### Global installation
@@ -75,8 +75,8 @@ npx @expedition/jpd-github-connector sync
 Install once, use everywhere:
 
 ```bash
-npm install -g @expedition/jpd-github-connector
-jpd-github-connector setup
+npm install -g @thecraftlab/gluecraft-jpd
+gluecraft-jpd setup
 ```
 
 ### Local project installation
@@ -84,7 +84,7 @@ jpd-github-connector setup
 Add to your project's dev dependencies:
 
 ```bash
-npm install --save-dev @expedition/jpd-github-connector
+npm install --save-dev @thecraftlab/gluecraft-jpd
 ```
 
 Then add scripts to your `package.json`:
@@ -92,10 +92,10 @@ Then add scripts to your `package.json`:
 ```json
 {
   "scripts": {
-    "sync:setup": "jpd-github-connector setup",
-    "sync:run": "jpd-github-connector sync",
-    "sync:dry-run": "jpd-github-connector sync --dry-run",
-    "sync:validate": "jpd-github-connector validate-config"
+    "sync:setup": "gluecraft-jpd setup",
+    "sync:run": "gluecraft-jpd sync",
+    "sync:dry-run": "gluecraft-jpd sync --dry-run",
+    "sync:validate": "gluecraft-jpd validate-config"
   }
 }
 ```
@@ -225,18 +225,18 @@ The connector provides focused commands for setup, validation, and operation:
 
 ```bash
 # Setup and configuration
-jpd-github-connector setup                    # Interactive wizard
-jpd-github-connector discover-fields PROJ     # List JPD fields with IDs
-jpd-github-connector validate-config          # Check config before sync
+gluecraft-jpd setup                    # Interactive wizard
+gluecraft-jpd discover-fields PROJ     # List JPD fields with IDs
+gluecraft-jpd validate-config          # Check config before sync
 
 # Label management
-jpd-github-connector setup-labels --preview   # Preview labels
-jpd-github-connector setup-labels             # Create all labels
+gluecraft-jpd setup-labels --preview   # Preview labels
+gluecraft-jpd setup-labels             # Create all labels
 
 # Sync operations
-jpd-github-connector sync --dry-run           # Test without changes
-jpd-github-connector sync                     # Run actual sync
-jpd-github-connector health-check             # Verify connections
+gluecraft-jpd sync --dry-run           # Test without changes
+gluecraft-jpd sync                     # Run actual sync
+gluecraft-jpd health-check             # Verify connections
 ```
 
 See the [CLI Guide](CLI_GUIDE.md) for complete command documentation with examples.
@@ -250,7 +250,7 @@ Deploy sync to run automatically in GitHub Actions:
 Add `.github/workflows/jpd-sync.yml` to your repository:
 
 ```yaml
-name: JPD Sync
+name: Gluecraft JPD Sync
 
 on:
   schedule:
@@ -264,7 +264,7 @@ jobs:
       - uses: actions/checkout@v4
       
       - name: Sync JPD <-> GitHub
-        run: npx @expedition/jpd-github-connector sync
+        run: npx @thecraftlab/gluecraft-jpd sync
         env:
           JPD_API_KEY: ${{ secrets.JPD_API_KEY }}
           JPD_EMAIL: ${{ secrets.JPD_EMAIL }}
@@ -342,7 +342,7 @@ labels:
 **Preview before creating:**
 
 ```bash
-jpd-github-connector setup-labels --preview
+gluecraft-jpd setup-labels --preview
 ```
 
 For teams with changing membership, focus on permanent labels (type, priority) and use GitHub assignees for "who's working on what." See [Label Strategy Guide](LABEL_STRATEGY_FLUID_TEAMS.md) for recommendations.
@@ -414,27 +414,27 @@ Common issues and quick fixes:
 **Rate limit errors:**
 ```bash
 # Built-in caching and retry usually handles this
-jpd-github-connector health-check
+gluecraft-jpd health-check
 ```
 
 **Field validation errors:**
 ```bash
 # Discover correct field IDs
-jpd-github-connector discover-fields YOUR_PROJECT
+gluecraft-jpd discover-fields YOUR_PROJECT
 ```
 
 **Config errors:**
 ```bash
 # Validate before syncing
-jpd-github-connector validate-config
+gluecraft-jpd validate-config
 ```
 
 **Test sync without changes:**
 ```bash
-jpd-github-connector sync --dry-run
+gluecraft-jpd sync --dry-run
 ```
 
-See the [CLI Guide](CLI_GUIDE.md) for complete command documentation. For questions and discussions, visit [GitHub Discussions](https://github.com/expedition/jpd-to-github-connector/discussions). To report bugs, open an [issue](https://github.com/expedition/jpd-to-github-connector/issues).
+See the [CLI Guide](CLI_GUIDE.md) for complete command documentation. For questions and discussions, visit [GitHub Discussions](https://github.com/thecraftlab/gluecraft-jpd/discussions). To report bugs, open an [issue](https://github.com/thecraftlab/gluecraft-jpd/issues).
 
 ## FAQ
 
@@ -454,7 +454,7 @@ No. Sync is idempotent—running it multiple times only updates changed issues. 
 Yes. Create separate config files or use JQL filters spanning multiple projects: `project IN (PROJ1, PROJ2)`.
 
 **How do I find custom field IDs?**  
-Run `jpd-github-connector discover-fields YOUR_PROJECT` to list all available fields with IDs and types.
+Run `gluecraft-jpd discover-fields YOUR_PROJECT` to list all available fields with IDs and types.
 
 **Can I exclude certain issues?**  
 Yes. Use JQL filters in your config to limit which issues sync: `jql_filter: "project = PROD AND status != Archived"`.
@@ -474,8 +474,8 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 Quick development setup:
 
 ```bash
-git clone https://github.com/expedition/jpd-to-github-connector.git
-cd jpd-to-github-connector
+git clone https://github.com/thecraftlab/gluecraft-jpd.git
+cd gluecraft-jpd
 pnpm install
 pnpm test
 ```
@@ -488,4 +488,6 @@ MIT License - see the [LICENSE](LICENSE) file for details.
 
 **Built for teams that want the best of both worlds: Jira's product management and GitHub's developer experience**
 
-[Documentation](https://expedition.github.io/jpd-to-github-connector/) · [Report Bug](https://github.com/expedition/jpd-to-github-connector/issues) · [Request Feature](https://github.com/expedition/jpd-to-github-connector/issues)
+**Part of [The Craft Lab](https://github.com/thecraftlab)** - Specialized tools for modern development workflows.
+
+[Documentation](https://thecraftlab.github.io/gluecraft-jpd/) · [Report Bug](https://github.com/thecraftlab/gluecraft-jpd/issues) · [Request Feature](https://github.com/thecraftlab/gluecraft-jpd/issues)

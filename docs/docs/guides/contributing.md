@@ -1,4 +1,4 @@
-# Contributing to JPD to GitHub Connector
+# Contributing to Gluecraft JPD
 
 Thank you for your interest in contributing! This document provides guidelines and instructions for contributing to the project.
 
@@ -22,12 +22,12 @@ This project adheres to the Contributor Covenant Code of Conduct. By participati
 1. **Fork the repository** on GitHub
 2. **Clone your fork** locally:
    ```bash
-   git clone https://github.com/your-username/jpd-to-github-connector.git
-   cd jpd-to-github-connector
+   git clone https://github.com/your-username/gluecraft-jpd.git
+   cd gluecraft-jpd
    ```
 3. **Add the upstream repository**:
    ```bash
-   git remote add upstream https://github.com/expedition/jpd-to-github-connector.git
+   git remote add upstream https://github.com/thecraftlab/gluecraft-jpd.git
    ```
 
 ## Development Setup

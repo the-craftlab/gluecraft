@@ -45,7 +45,7 @@ pnpm run dev -- --dry-run
 #### Standard Sync Output
 
 ```
-JPD to GitHub Sync
+Gluecraft JPD Sync
 ==================
 
 Connecting to services...
@@ -77,7 +77,7 @@ Duration: 45 seconds
 #### Dry-Run Output
 
 ```
-JPD to GitHub Sync (DRY RUN)
+Gluecraft JPD Sync (DRY RUN)
 ============================
 
 Would create 15 new GitHub issues:

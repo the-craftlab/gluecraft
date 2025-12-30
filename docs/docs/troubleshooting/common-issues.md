@@ -1,6 +1,6 @@
 # Common Issues
 
-Solutions for frequently encountered problems when using the JPD to GitHub Connector.
+Solutions for frequently encountered problems when using Gluecraft JPD.
 
 ## Connection Issues
 

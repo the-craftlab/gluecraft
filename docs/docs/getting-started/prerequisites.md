@@ -1,6 +1,6 @@
 # Prerequisites
 
-Before setting up the JPD to GitHub Connector, ensure you have the following requirements in place.
+Before setting up Gluecraft JPD, ensure you have the following requirements in place.
 
 ## System Requirements
 

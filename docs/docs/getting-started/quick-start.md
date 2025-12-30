@@ -1,6 +1,6 @@
 # Quick Start
 
-Get up and running with the JPD to GitHub Connector in 5 minutes using the interactive setup wizard.
+Get up and running with Gluecraft JPD in 5 minutes using the interactive setup wizard.
 
 ## Overview
 
@@ -16,8 +16,8 @@ The setup wizard automates the entire configuration process:
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/expedition/jpd-to-github-connector.git
-cd jpd-to-github-connector
+git clone https://github.com/thecraftlab/gluecraft-jpd.git
+cd gluecraft-jpd
 pnpm install
 ```
 
