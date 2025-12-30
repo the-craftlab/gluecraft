@@ -8,6 +8,16 @@ dist/
 .env
 .env.local
 .env.*.local
+.env.*
+*.env
+.env copy
+.env.bak
+.env.backup
+.env.old
+.env.*.*
+# But allow example files
+!.env.example
+!env.example
 
 # Connection cache (temporary)
 .connection-cache.json
@@ -34,6 +44,11 @@ Thumbs.db
 # Temporary files
 *.tmp
 .tmp/
+*.bak
+*.backup
+*.old
+*copy
+* copy
 
 # Docusaurus
 docs/node_modules/
