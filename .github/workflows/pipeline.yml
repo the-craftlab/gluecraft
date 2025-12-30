@@ -301,7 +301,16 @@ jobs:
 
   promote:
     needs: [ version, tag ]
-    if: false  # Skip promotion - single branch workflow (main → main)
+    if: ${{
+        always() &&
+        (github.event_name == 'push' ||
+        github.event_name == 'workflow_dispatch') &&
+        github.ref_name == 'develop' &&
+        needs.version.result == 'success' &&
+        needs.version.outputs.version != '' &&
+        (needs.tag.result == 'success' ||
+        needs.tag.result == 'skipped')
+      }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -312,7 +321,7 @@ jobs:
         with:
           version: ${{ needs.version.outputs.version }}
           sourceBranch: ${{ github.ref_name }}
-          targetBranch: ${{ '' }}
+          targetBranch: main
           autoMerge: ${{ 'false' }}
           run_number: ${{ inputs.run_number || github.run_number }}
 
