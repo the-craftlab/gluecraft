@@ -51,7 +51,7 @@ Some content
 -->
     `;
 
-    const metadata = MetadataParser.extract(bodyWithCorruptedMetadata);
+    const metadata = MetadataParser.parse(bodyWithCorruptedMetadata);
     
     // Should return null for corrupted metadata
     expect(metadata).toBeNull();
@@ -64,13 +64,13 @@ Some content
 Regular issue body without any metadata.
     `;
 
-    const metadata = MetadataParser.extract(bodyWithoutMetadata);
+    const metadata = MetadataParser.parse(bodyWithoutMetadata);
     
     expect(metadata).toBeNull();
   });
 
   test('should handle empty body', () => {
-    const metadata = MetadataParser.extract('');
+    const metadata = MetadataParser.parse('');
     
     expect(metadata).toBeNull();
   });
@@ -82,7 +82,7 @@ Regular issue body without any metadata.
 -->
     `;
 
-    const metadata = MetadataParser.extract(bodyWithMalformedJSON);
+    const metadata = MetadataParser.parse(bodyWithMalformedJSON);
     
     expect(metadata).toBeNull();
   });

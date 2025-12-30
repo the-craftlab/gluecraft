@@ -194,8 +194,9 @@ jobs:
           fi
           echo "✅ All build artifacts present"
 
-      - name: Run tests
-        run: pnpm test
+      - name: Run unit and integration tests
+        run: |
+          pnpm test tests/unit tests/integration --run
         env:
           CI: true
 

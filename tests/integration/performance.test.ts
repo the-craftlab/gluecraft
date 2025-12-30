@@ -118,7 +118,7 @@ ${JSON.stringify({
     const startTime = Date.now();
     
     bodies.forEach(body => {
-      MetadataParser.extract(body);
+      MetadataParser.parse(body);
     });
     
     const duration = Date.now() - startTime;
