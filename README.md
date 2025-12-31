@@ -39,13 +39,15 @@ That's it. Your JPD issues are now in GitHub, and status updates flow both ways.
 
 **Bidirectional sync** - JPD issues sync to GitHub, GitHub status updates sync back to JPD. Work where you want, stay in sync automatically. Sync runs on schedule, manual trigger, or real-time webhooks.
 
-**Native GitHub sub-issues** - Epic → Story → Task hierarchies from JPD become GitHub sub-issues with visual task lists and progress tracking. Parent-child relationships work both directions—create in either tool.
+**Epic + Story sync (v0.0.3)** - Sync both Epics AND Stories to GitHub as separate issues with proper hierarchy. Automatic `[EPIC]`/`[STORY]` title prefixes, epic:* labels, and visual parent-child relationships. See [EPIC_STORY_SYNC.md](EPIC_STORY_SYNC.md) for details.
+
+**Fully configurable** - Zero hardcoded values. All field IDs, category values, status names, and workflows are configurable per project. Use environment variables for multi-project setups. See [CONFIGURABILITY.md](CONFIGURABILITY.md) for details.
 
 **Smart field mapping** - Automatically discovers JPD custom fields with IDs and types. Interactive wizard helps you map fields correctly. Validates configuration before first sync to catch errors early.
 
 **No database required** - Sync state lives in hidden GitHub issue comments. Zero infrastructure, zero maintenance. Delete and recreate issues—sync picks up where it left off automatically.
 
-**Custom transformations** - Need complex logic? Write TypeScript functions for field transformations. Combine multiple JPD fields, compute values, or implement business rules. See [`examples/mtt/transforms/`](examples/mtt/transforms/) for real implementations.
+**Custom transformations** - Need complex logic? Write TypeScript functions for field transformations. Combine multiple JPD fields, compute values, or implement business rules. All configurable via environment variables for reusability.
 
 **Production-ready** - Built-in rate limit handling with exponential backoff. Connection caching reduces API calls by 80%. Comprehensive error messages with fix instructions. Docker support and GitHub Actions integration included.
 

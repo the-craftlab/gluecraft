@@ -1,6 +1,6 @@
 {
   "name": "@thecraftlab/gluecraft",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Gluecraft JPD: Bidirectional sync between Jira Product Discovery and GitHub Issues with support for custom fields, hierarchies, and workflows",
   "main": "dist/cli.js",
   "types": "dist/cli.d.ts",

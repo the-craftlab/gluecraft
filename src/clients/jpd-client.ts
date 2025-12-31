@@ -222,5 +222,101 @@ export class JpdClient {
     const response = await this.fetch('/rest/api/3/field');
     return await response.json() as any[];
   }
+
+  /**
+   * Get field contexts for a custom field
+   * Each context can have different options depending on project/issue type
+   */
+  async getFieldContexts(fieldId: string): Promise<any[]> {
+    const response = await this.fetch(`/rest/api/3/field/${fieldId}/context`);
+    const data = await response.json() as any;
+    return data.values || [];
+  }
+
+  /**
+   * Get options for a specific field context
+   */
+  async getFieldContextOptions(fieldId: string, contextId: number): Promise<any[]> {
+    const response = await this.fetch(
+      `/rest/api/3/field/${fieldId}/context/${contextId}/option?maxResults=1000`
+    );
+    const data = await response.json() as any;
+    return data.values || [];
+  }
+
+  /**
+   * Update options for a custom select field
+   * This replaces all existing options with the provided ones
+   * @param fieldId - The custom field ID (e.g., "customfield_14459")
+   * @param options - Array of option values (e.g., ["MTT-123: Mobile App", "MTT-124: API"])
+   * @param projectKey - Optional project key to scope the options
+   */
+  async updateFieldOptions(
+    fieldId: string,
+    options: string[],
+    projectKey?: string
+  ): Promise<void> {
+    // Get field contexts
+    const contexts = await this.getFieldContexts(fieldId);
+    
+    if (contexts.length === 0) {
+      throw new Error(`No contexts found for field ${fieldId}`);
+    }
+
+    // Use the first context (usually global or project-specific)
+    // In a multi-project setup, you'd filter by projectKey
+    const context = contexts[0];
+    const contextId = context.id;
+
+    // Get existing options to preserve IDs where possible
+    const existingOptions = await this.getFieldContextOptions(fieldId, contextId);
+    const existingMap = new Map(
+      existingOptions.map((opt: any) => [opt.value, opt.id])
+    );
+
+    // Build payload: keep existing IDs, add new options
+    const optionsPayload = options.map((value) => {
+      const existingId = existingMap.get(value);
+      if (existingId) {
+        return { id: existingId, value, disabled: false };
+      } else {
+        return { value, disabled: false };
+      }
+    });
+
+    // Disable options that are no longer in the list
+    for (const [value, id] of existingMap.entries()) {
+      if (!options.includes(value)) {
+        optionsPayload.push({ id, value, disabled: true });
+      }
+    }
+
+    // Update via Jira's field options API
+    await this.fetch(`/rest/api/3/field/${fieldId}/context/${contextId}/option`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        options: optionsPayload
+      })
+    });
+  }
+
+  /**
+   * Add a single option to a custom select field (without replacing existing ones)
+   */
+  async addFieldOption(fieldId: string, optionValue: string): Promise<void> {
+    const contexts = await this.getFieldContexts(fieldId);
+    if (contexts.length === 0) {
+      throw new Error(`No contexts found for field ${fieldId}`);
+    }
+
+    const contextId = contexts[0].id;
+
+    await this.fetch(`/rest/api/3/field/${fieldId}/context/${contextId}/option`, {
+      method: 'POST',
+      body: JSON.stringify({
+        options: [{ value: optionValue, disabled: false }]
+      })
+    });
+  }
 }
 
