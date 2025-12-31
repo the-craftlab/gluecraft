@@ -702,27 +702,27 @@ export class GitHubClient {
    * Get default color for a label based on naming conventions
    */
   private getDefaultLabelColor(labelName: string): string {
-    // Hierarchy labels
-    if (labelName === 'epic') return '0052CC';
-    if (labelName === 'story') return '2684FF';
-    if (labelName === 'task') return 'B3D4FF';
-    if (labelName === 'idea') return 'C5DEF5';
+    // Category type labels (from JPD Category field)
+    if (labelName === 'bug') return 'DE350B';          // Red
+    if (labelName === 'epic') return '0052CC';         // Blue
+    if (labelName === 'story') return 'FFC400';        // Yellow
+    if (labelName === 'enhancement') return '7FE5B3';  // Light green
+    if (labelName === 'task') return 'B3D4FF';         // Light blue
 
     // Dynamic epic labels (epic:name) inherit epic color
     if (labelName.startsWith('epic:')) return '0052CC';
 
-    // Type labels
-    if (labelName.startsWith('type:bug')) return 'DE350B';
-    if (labelName.startsWith('type:feature')) return '6554C0';
-    if (labelName.startsWith('type:tech-debt')) return 'FF8B00';
-    if (labelName.startsWith('type:docs')) return '00B8D9';
-    if (labelName.startsWith('type:security')) return 'FF5630';
+    // Priority labels (from JPD Dev Priority field)
+    if (labelName === 'critical') return 'DE350B';     // Red
+    if (labelName === 'high') return 'FF8B00';         // Orange
+    if (labelName === 'medium') return '00B8D9';       // Blue-green
+    if (labelName === 'low') return '8B5CF6';          // Purple
 
-    // Priority labels
+    // Legacy priority labels (for backwards compatibility)
     if (labelName.startsWith('priority:critical')) return 'DE350B';
     if (labelName.startsWith('priority:high')) return 'FF8B00';
-    if (labelName.startsWith('priority:normal')) return 'FFC400';
-    if (labelName.startsWith('priority:low')) return '8993A4';
+    if (labelName.startsWith('priority:medium')) return '00B8D9';
+    if (labelName.startsWith('priority:low')) return '8B5CF6';
 
     // Status labels
     if (labelName === 'blocked') return 'DE350B';

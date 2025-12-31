@@ -49586,20 +49586,20 @@ var init_github_client = __esm({
        * Get default color for a label based on naming conventions
        */
       getDefaultLabelColor(labelName) {
+        if (labelName === "bug") return "DE350B";
         if (labelName === "epic") return "0052CC";
-        if (labelName === "story") return "2684FF";
+        if (labelName === "story") return "FFC400";
+        if (labelName === "enhancement") return "7FE5B3";
         if (labelName === "task") return "B3D4FF";
-        if (labelName === "idea") return "C5DEF5";
         if (labelName.startsWith("epic:")) return "0052CC";
-        if (labelName.startsWith("type:bug")) return "DE350B";
-        if (labelName.startsWith("type:feature")) return "6554C0";
-        if (labelName.startsWith("type:tech-debt")) return "FF8B00";
-        if (labelName.startsWith("type:docs")) return "00B8D9";
-        if (labelName.startsWith("type:security")) return "FF5630";
+        if (labelName === "critical") return "DE350B";
+        if (labelName === "high") return "FF8B00";
+        if (labelName === "medium") return "00B8D9";
+        if (labelName === "low") return "8B5CF6";
         if (labelName.startsWith("priority:critical")) return "DE350B";
         if (labelName.startsWith("priority:high")) return "FF8B00";
-        if (labelName.startsWith("priority:normal")) return "FFC400";
-        if (labelName.startsWith("priority:low")) return "8993A4";
+        if (labelName.startsWith("priority:medium")) return "00B8D9";
+        if (labelName.startsWith("priority:low")) return "8B5CF6";
         if (labelName === "blocked") return "DE350B";
         if (labelName === "needs-review") return "00B8D9";
         if (labelName === "ready-for-dev") return "36B37E";
