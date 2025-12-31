@@ -23025,11 +23025,17 @@ var GitHubClient = class {
       return;
     }
     try {
-      await this.octokit.issues.getLabel({
+      const existingLabel = await this.octokit.issues.getLabel({
         owner,
         repo,
         name: labelName
       });
+      const labelDef = this.labelConfig.get(labelName);
+      const expectedColor = labelDef?.color || this.getDefaultLabelColor(labelName);
+      const expectedDescription = labelDef?.description || "";
+      if (existingLabel.data.color !== expectedColor || existingLabel.data.description !== expectedDescription) {
+        await this.updateLabel(owner, repo, labelName, expectedColor, expectedDescription);
+      }
       this.labelCache.set(cacheKey, true);
       this.logger.debug(`Label exists: ${labelName}`);
     } catch (error) {
@@ -23063,6 +23069,28 @@ var GitHubClient = class {
       });
     } catch (error) {
       this.logger.error(`Failed to create label ${labelName}: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * Update an existing label's color and description
+   */
+  async updateLabel(owner, repo, labelName, color, description) {
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would update label: ${labelName} (color: ${color})`);
+      return;
+    }
+    this.logger.info(`Updating label: ${labelName} (color: ${color})`);
+    try {
+      await this.octokit.issues.updateLabel({
+        owner,
+        repo,
+        name: labelName,
+        color,
+        description
+      });
+    } catch (error) {
+      this.logger.error(`Failed to update label ${labelName}: ${error.message}`);
       throw error;
     }
   }

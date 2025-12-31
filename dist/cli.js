@@ -49176,6 +49176,24 @@ var init_github_client = __esm({
         await this.octokit.issues.update(updatePayload);
       }
       /**
+       * Clean up stale JPD metadata from an issue
+       * This bypasses dry-run mode because it's fixing broken data, not syncing new data
+       */
+      async cleanupStaleMetadata(owner, repo, issueNumber, cleanedBody) {
+        try {
+          const response = await this.octokit.issues.update({
+            owner,
+            repo,
+            issue_number: issueNumber,
+            body: cleanedBody
+          });
+          this.logger.debug(`Successfully updated #${issueNumber}, status: ${response.status}`);
+        } catch (error2) {
+          this.logger.error(`Failed to cleanup #${issueNumber}: ${error2.message}`);
+          throw error2;
+        }
+      }
+      /**
        * Get comments for a GitHub issue
        */
       async getComments(owner, repo, issueNumber) {
@@ -49400,11 +49418,17 @@ var init_github_client = __esm({
           return;
         }
         try {
-          await this.octokit.issues.getLabel({
+          const existingLabel = await this.octokit.issues.getLabel({
             owner,
             repo,
             name: labelName
           });
+          const labelDef = this.labelConfig.get(labelName);
+          const expectedColor = labelDef?.color || this.getDefaultLabelColor(labelName);
+          const expectedDescription = labelDef?.description || "";
+          if (existingLabel.data.color !== expectedColor || existingLabel.data.description !== expectedDescription) {
+            await this.updateLabel(owner, repo, labelName, expectedColor, expectedDescription);
+          }
           this.labelCache.set(cacheKey, true);
           this.logger.debug(`Label exists: ${labelName}`);
         } catch (error2) {
@@ -49438,6 +49462,28 @@ var init_github_client = __esm({
           });
         } catch (error2) {
           this.logger.error(`Failed to create label ${labelName}: ${error2.message}`);
+          throw error2;
+        }
+      }
+      /**
+       * Update an existing label's color and description
+       */
+      async updateLabel(owner, repo, labelName, color, description) {
+        if (this.dryRun) {
+          this.logger.info(`[DRY RUN] Would update label: ${labelName} (color: ${color})`);
+          return;
+        }
+        this.logger.info(`Updating label: ${labelName} (color: ${color})`);
+        try {
+          await this.octokit.issues.updateLabel({
+            owner,
+            repo,
+            name: labelName,
+            color,
+            description
+          });
+        } catch (error2) {
+          this.logger.error(`Failed to update label ${labelName}: ${error2.message}`);
           throw error2;
         }
       }
@@ -50977,7 +51023,8 @@ Results:`);
         }
         const jpdIssue = await this.jpd.searchIssues(`key = ${jpdKey}`, ["status"], 1);
         if (jpdIssue.issues.length === 0 || !jpdIssue.issues[0]?.fields) {
-          this.logger.error(`${jpdKey} not found or has no fields`);
+          this.logger.info(`${jpdKey} no longer exists in JPD - removing stale metadata from #${ghIssue.number}`);
+          await this.removeStaleMetadata(ghIssue.number);
           return null;
         }
         const currentJpdStatus = jpdIssue.issues[0].fields.status?.name;
@@ -50997,6 +51044,45 @@ Results:`);
           from: currentJpdStatus,
           to: targetJpdStatus
         };
+      }
+      /**
+       * Remove stale JPD metadata from a GitHub issue
+       * Called when the linked JPD issue no longer exists
+       * 
+       * Note: This runs even in dry-run mode because it's cleanup of broken data,
+       * not creation of new sync data. Stale metadata causes errors and confusion.
+       */
+      async removeStaleMetadata(githubIssueNumber) {
+        try {
+          const issue = await this.github.getIssueByNumber(
+            this.githubOwner,
+            this.githubRepo,
+            githubIssueNumber
+          );
+          if (!issue || !issue.body) return;
+          if (!issue.body.includes("jpd-sync-metadata")) {
+            this.logger.debug(`#${githubIssueNumber} has no metadata, skipping cleanup`);
+            return;
+          }
+          const cleanBody = issue.body.replace(/<!--\s*jpd-sync-metadata[\s\S]*?-->/g, "").trim();
+          const hadMetadata = issue.body.includes("jpd-sync-metadata");
+          const hasMetadata = cleanBody.includes("jpd-sync-metadata");
+          if (hadMetadata && hasMetadata) {
+            this.logger.warn(`Regex failed to remove metadata from #${githubIssueNumber}!`);
+            this.logger.debug(`Original length: ${issue.body.length}, Clean length: ${cleanBody.length}`);
+            this.logger.debug(`Metadata snippet: ${issue.body.substring(issue.body.indexOf("jpd-sync-metadata") - 20, issue.body.indexOf("jpd-sync-metadata") + 100)}`);
+          }
+          await this.github.cleanupStaleMetadata(
+            this.githubOwner,
+            this.githubRepo,
+            githubIssueNumber,
+            cleanBody
+          );
+          const mode = this.dryRun ? "[DRY RUN] " : "";
+          this.logger.info(`${mode}\u{1F9F9} Cleaned stale metadata from #${githubIssueNumber}`);
+        } catch (error2) {
+          this.logger.warn(`Failed to remove stale metadata from #${githubIssueNumber}: ${error2.message}`);
+        }
       }
       async getGitHubIssueProjectStatus(issueNumber) {
         if (!this.projects || !this.config.projects?.project_number) {
@@ -51221,7 +51307,12 @@ ${JSON.stringify(metadata, null, 2)}
             const count = await this.syncIssueComments(ghIssue.metadata.jpd_id, ghIssue.number);
             synced += count;
           } catch (error2) {
-            this.logger.error(`Failed to sync comments for ${ghIssue.metadata.jpd_id}: ${error2.message}`);
+            if (error2.message && error2.message.includes("404")) {
+              this.logger.info(`${ghIssue.metadata.jpd_id} no longer exists in JPD - removing stale metadata from #${ghIssue.number}`);
+              await this.removeStaleMetadata(ghIssue.number);
+            } else {
+              this.logger.error(`Failed to sync comments for ${ghIssue.metadata.jpd_id}: ${error2.message}`);
+            }
           }
         }
         console.log(`
