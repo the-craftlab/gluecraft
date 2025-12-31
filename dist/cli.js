@@ -49590,6 +49590,7 @@ var init_github_client = __esm({
         if (labelName === "story") return "2684FF";
         if (labelName === "task") return "B3D4FF";
         if (labelName === "idea") return "C5DEF5";
+        if (labelName.startsWith("epic:")) return "0052CC";
         if (labelName.startsWith("type:bug")) return "DE350B";
         if (labelName.startsWith("type:feature")) return "6554C0";
         if (labelName.startsWith("type:tech-debt")) return "FF8B00";
