@@ -213,5 +213,14 @@ export class JpdClient {
       })
     });
   }
+
+  /**
+   * Get all field metadata from Jira
+   * This returns proper field definitions with names, types, and schemas
+   */
+  async getFields(): Promise<any[]> {
+    const response = await this.fetch('/rest/api/3/field');
+    return await response.json() as any[];
+  }
 }
 
