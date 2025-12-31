@@ -36,7 +36,7 @@ async function main() {
     process.exit(1);
   }
 
-  const spinner = ora(`Fetching fields from ${projectKey}...`).start();
+  const spinner = ora(`Fetching field metadata...`).start();
 
   try {
     const jpd = new JpdClient({
@@ -45,8 +45,25 @@ async function main() {
       apiToken: process.env.JPD_API_KEY
     });
 
-    // Fetch sample issue
-    const result = await jpd.searchIssues(`project = ${projectKey}`, ['*all'], 1);
+    // Step 1: Fetch field metadata from Jira API
+    spinner.text = 'Fetching field definitions...';
+    const allFields = await jpd.getFields();
+    const fieldMetadata = new Map(
+      allFields
+        .filter((f: any) => f.id && f.id.startsWith('customfield_'))
+        .map((f: any) => [
+          f.id,
+          {
+            name: f.name || f.id,
+            schema: f.schema?.type || 'unknown',
+            custom: f.schema?.custom || null
+          }
+        ])
+    );
+
+    // Step 2: Fetch sample issues to find populated values
+    spinner.text = `Sampling issues from ${projectKey}...`;
+    const result = await jpd.searchIssues(`project = ${projectKey}`, ['*all'], 20);
     
     if (!result.issues || result.issues.length === 0) {
       spinner.fail(chalk.red(`No issues found in project ${projectKey}`));
@@ -54,46 +71,64 @@ async function main() {
       process.exit(1);
     }
 
-    const issue = result.issues[0];
-    const fields = issue.fields || {};
+    // Step 3: Merge field metadata with sample data from all issues
+    const fieldSamples = new Map<string, any>();
+    for (const issue of result.issues) {
+      const fields = issue.fields || {};
+      for (const [id, value] of Object.entries(fields)) {
+        if (id.startsWith('customfield_') && value !== null && value !== undefined) {
+          // Store first non-null value we find
+          if (!fieldSamples.has(id)) {
+            fieldSamples.set(id, value);
+          }
+        }
+      }
+    }
 
-    // Extract custom fields
-    const customFields = Object.entries(fields)
-      .filter(([key]) => key.startsWith('customfield_'))
-      .map(([id, value]) => ({
-        id,
-        type: detectFieldType(value),
-        populated: value !== null && value !== undefined,
-        sample: formatSampleValue(value)
-      }))
+    // Step 4: Combine metadata and samples
+    const customFields = Array.from(fieldMetadata.entries())
+      .map(([id, meta]) => {
+        const sampleValue = fieldSamples.get(id);
+        return {
+          id,
+          name: meta.name,
+          schemaType: meta.schema,
+          type: sampleValue ? detectFieldType(sampleValue) : meta.schema,
+          populated: fieldSamples.has(id),
+          sample: sampleValue ? formatSampleValue(sampleValue) : null
+        };
+      })
       .sort((a, b) => {
-        // Sort: populated first, then by ID
+        // Sort: populated first, then by name
         if (a.populated && !b.populated) return -1;
         if (!a.populated && b.populated) return 1;
-        return a.id.localeCompare(b.id);
+        return a.name.localeCompare(b.name);
       });
 
-    spinner.succeed(chalk.green(`Found ${customFields.length} custom fields in ${projectKey}-${issue.key}`));
+    const populatedCount = customFields.filter(f => f.populated).length;
+    spinner.succeed(chalk.green(`Found ${customFields.length} custom fields (${populatedCount} populated) from ${result.issues.length} sample issues`));
 
     // Display in table
     console.log('\n');
     const table = new Table({
       head: [
+        chalk.cyan('Field Name'),
         chalk.cyan('Field ID'),
         chalk.cyan('Type'),
         chalk.cyan('Status'),
         chalk.cyan('Sample Value')
       ],
-      colWidths: [25, 15, 12, 50],
+      colWidths: [30, 20, 15, 12, 40],
       wordWrap: true
     });
 
     customFields.forEach(field => {
       table.push([
+        field.name,
         field.id,
         field.type,
         field.populated ? chalk.green('✓ Set') : chalk.gray('Empty'),
-        field.populated ? field.sample : chalk.gray('(null)')
+        field.populated ? field.sample : chalk.gray('(not in samples)')
       ]);
     });
 
@@ -101,18 +136,23 @@ async function main() {
 
     // Show config snippet
     const populatedFields = customFields.filter(f => f.populated);
-    console.log(chalk.cyan.bold('\n📝 Config Snippet (copy to gluecraft.yaml):\n'));
-    console.log(chalk.gray('fields:'));
-    populatedFields.slice(0, 5).forEach(field => {
-      console.log(chalk.gray(`  - id: "${field.id}"`));
-      console.log(chalk.gray(`    name: "Field ${field.id.replace('customfield_', '')}"`));
-      console.log(chalk.gray(`    type: "${field.type}"`));
-      console.log(chalk.gray(`    required: ${['number', 'select', 'multiselect'].includes(field.type)}`));
-      console.log(chalk.gray(`    description: "Auto-discovered ${field.type} field"\n`));
-    });
+    if (populatedFields.length === 0) {
+      console.log(chalk.yellow('\n⚠️  Warning: No populated custom fields found in sampled issues.'));
+      console.log(chalk.gray('   Try populating some custom fields in your JPD issues first.\n'));
+    } else {
+      console.log(chalk.cyan.bold('\n📝 Config Snippet (copy to gluecraft.yaml):\n'));
+      console.log(chalk.gray('fields:'));
+      populatedFields.slice(0, 5).forEach(field => {
+        console.log(chalk.gray(`  - id: "${field.id}"`));
+        console.log(chalk.gray(`    name: "${field.name}"`));
+        console.log(chalk.gray(`    type: "${field.type}"`));
+        console.log(chalk.gray(`    required: ${['number', 'select', 'multiselect'].includes(field.type)}`));
+        console.log(chalk.gray(`    description: "Auto-discovered ${field.type} field"\n`));
+      });
 
-    if (populatedFields.length > 5) {
-      console.log(chalk.gray(`  # ... ${populatedFields.length - 5} more fields\n`));
+      if (populatedFields.length > 5) {
+        console.log(chalk.gray(`  # ... ${populatedFields.length - 5} more fields\n`));
+      }
     }
 
   } catch (error: any) {
