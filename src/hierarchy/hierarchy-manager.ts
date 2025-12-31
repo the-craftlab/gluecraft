@@ -25,6 +25,69 @@ export class HierarchyManager {
   }
 
   /**
+   * Extract Parent Epic from a JPD issue using the Parent Epic select field
+   * Returns the selected Epic option (e.g., "MTT-123: Mobile App")
+   * This is the primary hierarchy mechanism when parent_epic_field_id is configured
+   */
+  extractParentEpic(jpdIssue: Record<string, any>): string | null {
+    const parentEpicFieldId = this.config.hierarchy?.parent_epic_field_id;
+    if (!parentEpicFieldId) return null;
+    
+    const parentEpic = jpdIssue.fields?.[parentEpicFieldId];
+    if (!parentEpic) return null;
+    
+    // Parent Epic is a select field with .value
+    return parentEpic.value || null;
+  }
+
+  /**
+   * Extract Epic key from Parent Epic field value
+   * Converts "MTT-123: Mobile App" → "MTT-123"
+   */
+  extractEpicKeyFromParentEpic(parentEpicValue: string | null): string | null {
+    if (!parentEpicValue) return null;
+    
+    // Match pattern "KEY: Title" and extract KEY
+    const match = parentEpicValue.match(/^([A-Z]+-\d+):/);
+    return match ? match[1] : null;
+  }
+
+  /**
+   * Extract Epic Link from a JPD issue (LEGACY)
+   * Returns the JPD key of the parent Epic if this is a Story
+   * This is kept for backward compatibility with existing configs
+   */
+  extractEpicLink(jpdIssue: Record<string, any>): string | null {
+    // Try new Parent Epic field first
+    const parentEpicValue = this.extractParentEpic(jpdIssue);
+    if (parentEpicValue) {
+      return this.extractEpicKeyFromParentEpic(parentEpicValue);
+    }
+
+    // Fall back to legacy Epic Link field
+    const epicLinkFieldId = this.config.hierarchy?.epic_link_field_id;
+    if (!epicLinkFieldId) return null;
+    
+    const epicLink = jpdIssue.fields?.[epicLinkFieldId];
+    if (!epicLink) return null;
+    
+    // Epic Link is an issue reference with key
+    return epicLink.key || null;
+  }
+
+  /**
+   * Get the issue category/type from a JPD issue
+   * Returns the category value (e.g., "Epic", "Story", "Bug")
+   */
+  getIssueCategory(jpdIssue: Record<string, any>): string | null {
+    const categoryFieldId = this.config.hierarchy?.category_field_id;
+    if (!categoryFieldId) return null;
+    
+    const category = jpdIssue.fields?.[categoryFieldId];
+    return category?.value || null;
+  }
+
+  /**
    * Extract parent-child relationships from a JPD issue
    */
   extractRelationships(jpdIssue: Record<string, any>): IssueRelationships {

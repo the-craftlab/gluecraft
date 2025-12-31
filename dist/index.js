@@ -17124,8 +17124,22 @@ var HierarchySchema = external_exports.object({
   // JPD statuses that represent Epics
   story_statuses: external_exports.array(external_exports.string()).optional(),
   // JPD statuses that represent Stories
-  task_statuses: external_exports.array(external_exports.string()).optional()
+  task_statuses: external_exports.array(external_exports.string()).optional(),
   // JPD statuses that represent Tasks
+  category_field_id: external_exports.string().optional(),
+  // e.g., "customfield_14385" - Field that stores issue type (Epic/Story/Bug)
+  epic_link_field_id: external_exports.string().optional(),
+  // e.g., "customfield_10008" - Field that links Stories to parent Epic (legacy)
+  parent_epic_field_id: external_exports.string().optional(),
+  // e.g., "customfield_14459" - Custom "Parent Epic" select field
+  parent_link_field_id: external_exports.string().optional(),
+  // e.g., "customfield_12213" - Generic parent link field
+  sync_types: external_exports.array(external_exports.enum(["Epic", "Story", "Bug", "Task"])).optional(),
+  // Which issue types to sync to GitHub
+  auto_update_epic_options: external_exports.boolean().default(false),
+  // Auto-update Parent Epic field options with active Epics
+  epic_option_template: external_exports.string().optional()
+  // Template for Epic option labels (default: "{{key}}: {{summary}}")
 });
 var TeamSchema = external_exports.object({
   auto_detect: external_exports.boolean().default(true),
@@ -18658,6 +18672,87 @@ var JpdClient = class {
         outwardIssue: {
           key: parentKey
         }
+      })
+    });
+  }
+  /**
+   * Get all field metadata from Jira
+   * This returns proper field definitions with names, types, and schemas
+   */
+  async getFields() {
+    const response = await this.fetch("/rest/api/3/field");
+    return await response.json();
+  }
+  /**
+   * Get field contexts for a custom field
+   * Each context can have different options depending on project/issue type
+   */
+  async getFieldContexts(fieldId) {
+    const response = await this.fetch(`/rest/api/3/field/${fieldId}/context`);
+    const data = await response.json();
+    return data.values || [];
+  }
+  /**
+   * Get options for a specific field context
+   */
+  async getFieldContextOptions(fieldId, contextId) {
+    const response = await this.fetch(
+      `/rest/api/3/field/${fieldId}/context/${contextId}/option?maxResults=1000`
+    );
+    const data = await response.json();
+    return data.values || [];
+  }
+  /**
+   * Update options for a custom select field
+   * This replaces all existing options with the provided ones
+   * @param fieldId - The custom field ID (e.g., "customfield_14459")
+   * @param options - Array of option values (e.g., ["MTT-123: Mobile App", "MTT-124: API"])
+   * @param projectKey - Optional project key to scope the options
+   */
+  async updateFieldOptions(fieldId, options, projectKey) {
+    const contexts = await this.getFieldContexts(fieldId);
+    if (contexts.length === 0) {
+      throw new Error(`No contexts found for field ${fieldId}`);
+    }
+    const context = contexts[0];
+    const contextId = context.id;
+    const existingOptions = await this.getFieldContextOptions(fieldId, contextId);
+    const existingMap = new Map(
+      existingOptions.map((opt) => [opt.value, opt.id])
+    );
+    const optionsPayload = options.map((value) => {
+      const existingId = existingMap.get(value);
+      if (existingId) {
+        return { id: existingId, value, disabled: false };
+      } else {
+        return { value, disabled: false };
+      }
+    });
+    for (const [value, id] of existingMap.entries()) {
+      if (!options.includes(value)) {
+        optionsPayload.push({ id, value, disabled: true });
+      }
+    }
+    await this.fetch(`/rest/api/3/field/${fieldId}/context/${contextId}/option`, {
+      method: "PUT",
+      body: JSON.stringify({
+        options: optionsPayload
+      })
+    });
+  }
+  /**
+   * Add a single option to a custom select field (without replacing existing ones)
+   */
+  async addFieldOption(fieldId, optionValue) {
+    const contexts = await this.getFieldContexts(fieldId);
+    if (contexts.length === 0) {
+      throw new Error(`No contexts found for field ${fieldId}`);
+    }
+    const contextId = contexts[0].id;
+    await this.fetch(`/rest/api/3/field/${fieldId}/context/${contextId}/option`, {
+      method: "POST",
+      body: JSON.stringify({
+        options: [{ value: optionValue, disabled: false }]
       })
     });
   }
@@ -23444,6 +23539,53 @@ var HierarchyManager = class {
     return this.config.hierarchy?.enabled !== false;
   }
   /**
+   * Extract Parent Epic from a JPD issue using the Parent Epic select field
+   * Returns the selected Epic option (e.g., "MTT-123: Mobile App")
+   * This is the primary hierarchy mechanism when parent_epic_field_id is configured
+   */
+  extractParentEpic(jpdIssue) {
+    const parentEpicFieldId = this.config.hierarchy?.parent_epic_field_id;
+    if (!parentEpicFieldId) return null;
+    const parentEpic = jpdIssue.fields?.[parentEpicFieldId];
+    if (!parentEpic) return null;
+    return parentEpic.value || null;
+  }
+  /**
+   * Extract Epic key from Parent Epic field value
+   * Converts "MTT-123: Mobile App" → "MTT-123"
+   */
+  extractEpicKeyFromParentEpic(parentEpicValue) {
+    if (!parentEpicValue) return null;
+    const match = parentEpicValue.match(/^([A-Z]+-\d+):/);
+    return match ? match[1] : null;
+  }
+  /**
+   * Extract Epic Link from a JPD issue (LEGACY)
+   * Returns the JPD key of the parent Epic if this is a Story
+   * This is kept for backward compatibility with existing configs
+   */
+  extractEpicLink(jpdIssue) {
+    const parentEpicValue = this.extractParentEpic(jpdIssue);
+    if (parentEpicValue) {
+      return this.extractEpicKeyFromParentEpic(parentEpicValue);
+    }
+    const epicLinkFieldId = this.config.hierarchy?.epic_link_field_id;
+    if (!epicLinkFieldId) return null;
+    const epicLink = jpdIssue.fields?.[epicLinkFieldId];
+    if (!epicLink) return null;
+    return epicLink.key || null;
+  }
+  /**
+   * Get the issue category/type from a JPD issue
+   * Returns the category value (e.g., "Epic", "Story", "Bug")
+   */
+  getIssueCategory(jpdIssue) {
+    const categoryFieldId = this.config.hierarchy?.category_field_id;
+    if (!categoryFieldId) return null;
+    const category = jpdIssue.fields?.[categoryFieldId];
+    return category?.value || null;
+  }
+  /**
    * Extract parent-child relationships from a JPD issue
    */
   extractRelationships(jpdIssue) {
@@ -24185,8 +24327,48 @@ var SyncEngine = class {
     }
     return null;
   }
+  /**
+   * Auto-update Parent Epic field options with active Epics
+   * This ensures PMs always see current Epics in the dropdown
+   */
+  async autoUpdateEpicFieldOptions() {
+    const categoryFieldId = this.config.hierarchy?.category_field_id;
+    const parentEpicFieldId = this.config.hierarchy?.parent_epic_field_id;
+    if (!categoryFieldId || !parentEpicFieldId) {
+      return;
+    }
+    this.logger.info("Auto-updating Parent Epic field options...");
+    try {
+      const projectKey = this.extractProjectKey();
+      if (!projectKey) {
+        this.logger.warn("Cannot auto-update Parent Epic field: no project key found in JQL or env");
+        return;
+      }
+      const epicJql = `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
+      const result = await this.jpd.searchIssues(epicJql, ["summary", "key", categoryFieldId], 100);
+      const template = this.config.hierarchy.epic_option_template || "{{key}}: {{summary}}";
+      const options = result.issues.map((epic) => {
+        return template.replace("{{key}}", epic.key).replace("{{summary}}", epic.fields.summary || "Untitled Epic");
+      });
+      options.unshift("None");
+      this.logger.debug(`Found ${result.issues.length} Epics, updating field options...`);
+      if (!this.dryRun) {
+        await this.jpd.updateFieldOptions(parentEpicFieldId, options);
+        this.logger.info(`\u2713 Updated Parent Epic field with ${result.issues.length} options`);
+      } else {
+        this.logger.info(`[DRY RUN] Would update Parent Epic field with ${result.issues.length} options:`);
+        options.forEach((opt) => this.logger.debug(`   - ${opt}`));
+      }
+    } catch (error) {
+      this.logger.warn(`Failed to auto-update Parent Epic field: ${error.message}`);
+      this.logger.debug("This is not critical - sync will continue");
+    }
+  }
   async syncJpdToGithub() {
     Logger.section("JPD \u2192 GitHub Sync");
+    if (this.config.hierarchy?.auto_update_epic_options && this.config.hierarchy?.parent_epic_field_id) {
+      await this.autoUpdateEpicFieldOptions();
+    }
     const jql = this.config.sync.jql || "updated > -1d";
     this.logger.debug(`Searching JPD with JQL: "${jql}"`);
     const result = await this.jpd.searchIssues(jql);
@@ -24202,6 +24384,7 @@ var SyncEngine = class {
     const stats = {
       created: [],
       updated: [],
+      skippedWrongType: [],
       skippedWrongStatus: [],
       skippedUpToDate: [],
       errors: []
@@ -24235,15 +24418,20 @@ Results:`);
         console.log(`   ... and ${stats.updated.length - 5} more`);
       }
     }
-    const totalSkipped = stats.skippedWrongStatus.length + stats.skippedUpToDate.length;
+    const totalSkipped = stats.skippedWrongType.length + stats.skippedWrongStatus.length + stats.skippedUpToDate.length;
     if (totalSkipped > 0) {
       if (stats.created.length === 0 && stats.updated.length === 0 && stats.skippedUpToDate.length > 0) {
         console.log(`\u2713 All synced issues up-to-date: ${stats.skippedUpToDate.length}`);
         this.logger.debug(`Issues: ${stats.skippedUpToDate.join(", ")}`);
       }
+      if (stats.skippedWrongType.length > 0) {
+        console.log(`Skipped (not in sync_types): ${stats.skippedWrongType.length}`);
+        console.log(`   \u{1F4A1} Check hierarchy.sync_types config (currently syncing: ${this.config.hierarchy?.sync_types?.join(", ") || "Epic, Story"})`);
+        this.logger.debug(`Issues: ${stats.skippedWrongType.join(", ")}`);
+      }
       if (stats.skippedWrongStatus.length > 0) {
-        console.log(`Skipped (not in Epic/Story status): ${stats.skippedWrongStatus.length}`);
-        console.log(`   \u{1F4A1} Move to "Impact" or "Ready for delivery" to sync`);
+        console.log(`Skipped (not in syncable status): ${stats.skippedWrongStatus.length}`);
+        console.log(`   \u{1F4A1} Check status mappings with sync: true`);
         this.logger.debug(`Issues: ${stats.skippedWrongStatus.join(", ")}`);
       }
     }
@@ -24259,9 +24447,16 @@ Results:`);
     console.log("");
   }
   async processJpdIssue(issue, jpdToGithubMap, existingGithubIssues, stats) {
+    const category = this.hierarchy.getIssueCategory(issue);
+    const syncTypes = this.config.hierarchy?.sync_types || ["Epic", "Story"];
+    if (category && !syncTypes.includes(category)) {
+      stats.skippedWrongType.push(issue.key);
+      this.logger.debug(`${issue.key}: Category "${category}" not in sync_types [${syncTypes.join(", ")}]`);
+      return;
+    }
     if (!this.statusHierarchy.shouldSync(issue)) {
       stats.skippedWrongStatus.push(issue.key);
-      this.logger.debug(`${issue.key}: not in Epic/Story status (${issue.fields.status.name})`);
+      this.logger.debug(`${issue.key}: not in syncable status (${issue.fields.status.name})`);
       return;
     }
     const hierarchyLevel = this.statusHierarchy.getHierarchyLevel(issue);
@@ -24301,8 +24496,15 @@ Results:`);
       }
     }
     const githubPayload = { labels: [] };
+    const epicLinkKey = this.hierarchy.extractEpicLink(issue);
+    const epicGithubNumber = epicLinkKey ? jpdToGithubMap.get(epicLinkKey) : void 0;
+    const enrichedIssue = {
+      ...issue,
+      _epic_link_key: epicLinkKey,
+      _epic_github_number: epicGithubNumber
+    };
     for (const mapping of this.config.mappings) {
-      const value = await TransformerEngine.transform(mapping, issue);
+      const value = await TransformerEngine.transform(mapping, enrichedIssue);
       if (value !== void 0) {
         if (mapping.github === "labels") {
           if (Array.isArray(value)) githubPayload.labels.push(...value);
@@ -24311,6 +24513,16 @@ Results:`);
           githubPayload[mapping.github] = value;
         }
       }
+    }
+    const issueCategory = this.hierarchy.getIssueCategory(issue);
+    if (issueCategory) {
+      const prefix = `[${issueCategory.toUpperCase()}]`;
+      const baseTitle = githubPayload.title || issue.fields.summary;
+      if (!baseTitle.startsWith(prefix)) {
+        githubPayload.title = `${prefix} ${baseTitle}`;
+      }
+    } else if (!githubPayload.title) {
+      githubPayload.title = issue.fields.summary;
     }
     if (this.config.statuses) {
       const statusName = issue.fields.status.name;

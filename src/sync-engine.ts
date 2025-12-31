@@ -150,8 +150,64 @@ export class SyncEngine {
     return null;
   }
 
+  /**
+   * Auto-update Parent Epic field options with active Epics
+   * This ensures PMs always see current Epics in the dropdown
+   */
+  private async autoUpdateEpicFieldOptions() {
+    const categoryFieldId = this.config.hierarchy?.category_field_id;
+    const parentEpicFieldId = this.config.hierarchy?.parent_epic_field_id;
+    
+    if (!categoryFieldId || !parentEpicFieldId) {
+      return;
+    }
+
+    this.logger.info('Auto-updating Parent Epic field options...');
+
+    try {
+      const projectKey = this.extractProjectKey();
+      if (!projectKey) {
+        this.logger.warn('Cannot auto-update Parent Epic field: no project key found in JQL or env');
+        return;
+      }
+
+      // Fetch all Epics from JPD (regardless of JQL filter)
+      const epicJql = `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
+      const result = await this.jpd.searchIssues(epicJql, ['summary', 'key', categoryFieldId], 100);
+      
+      // Build option values using template
+      const template = this.config.hierarchy.epic_option_template || '{{key}}: {{summary}}';
+      const options = result.issues.map((epic: any) => {
+        return template
+          .replace('{{key}}', epic.key)
+          .replace('{{summary}}', epic.fields.summary || 'Untitled Epic');
+      });
+
+      // Add "None" option for Stories without a parent
+      options.unshift('None');
+
+      this.logger.debug(`Found ${result.issues.length} Epics, updating field options...`);
+
+      if (!this.dryRun) {
+        await this.jpd.updateFieldOptions(parentEpicFieldId, options);
+        this.logger.info(`✓ Updated Parent Epic field with ${result.issues.length} options`);
+      } else {
+        this.logger.info(`[DRY RUN] Would update Parent Epic field with ${result.issues.length} options:`);
+        options.forEach(opt => this.logger.debug(`   - ${opt}`));
+      }
+    } catch (error: any) {
+      this.logger.warn(`Failed to auto-update Parent Epic field: ${error.message}`);
+      this.logger.debug('This is not critical - sync will continue');
+    }
+  }
+
   private async syncJpdToGithub() {
     Logger.section('JPD → GitHub Sync');
+    
+    // Auto-update Parent Epic field options if configured
+    if (this.config.hierarchy?.auto_update_epic_options && this.config.hierarchy?.parent_epic_field_id) {
+      await this.autoUpdateEpicFieldOptions();
+    }
     
     // Fetch relevant JPD issues
     const jql = this.config.sync.jql || 'updated > -1d';
@@ -175,6 +231,7 @@ export class SyncEngine {
     const stats = {
       created: [] as string[],
       updated: [] as string[],
+      skippedWrongType: [] as string[],
       skippedWrongStatus: [] as string[],
       skippedUpToDate: [] as string[],
       errors: [] as {key: string, error: string}[]
@@ -217,7 +274,7 @@ export class SyncEngine {
     }
 
     // Skipped - with reasons (only show if something's interesting)
-    const totalSkipped = stats.skippedWrongStatus.length + stats.skippedUpToDate.length;
+    const totalSkipped = stats.skippedWrongType.length + stats.skippedWrongStatus.length + stats.skippedUpToDate.length;
     if (totalSkipped > 0) {
       // Don't show "already up-to-date" unless there were other changes or DEBUG
       if (stats.created.length === 0 && stats.updated.length === 0 && stats.skippedUpToDate.length > 0) {
@@ -225,9 +282,15 @@ export class SyncEngine {
         this.logger.debug(`Issues: ${stats.skippedUpToDate.join(', ')}`);
       }
       
+      if (stats.skippedWrongType.length > 0) {
+        console.log(`Skipped (not in sync_types): ${stats.skippedWrongType.length}`);
+        console.log(`   💡 Check hierarchy.sync_types config (currently syncing: ${this.config.hierarchy?.sync_types?.join(', ') || 'Epic, Story'})`);
+        this.logger.debug(`Issues: ${stats.skippedWrongType.join(', ')}`);
+      }
+      
       if (stats.skippedWrongStatus.length > 0) {
-        console.log(`Skipped (not in Epic/Story status): ${stats.skippedWrongStatus.length}`);
-        console.log(`   💡 Move to "Impact" or "Ready for delivery" to sync`);
+        console.log(`Skipped (not in syncable status): ${stats.skippedWrongStatus.length}`);
+        console.log(`   💡 Check status mappings with sync: true`);
         this.logger.debug(`Issues: ${stats.skippedWrongStatus.join(', ')}`);
       }
     }
@@ -252,10 +315,20 @@ export class SyncEngine {
     existingGithubIssues: any[],
     stats: any
   ): Promise<void> {
-    // 1. Check if issue should be synced (only Epics and Stories, not raw Ideas)
+    // 1a. Filter by Category field if configured
+    const category = this.hierarchy.getIssueCategory(issue);
+    const syncTypes = this.config.hierarchy?.sync_types || ['Epic', 'Story'];
+    
+    if (category && !syncTypes.includes(category)) {
+      stats.skippedWrongType.push(issue.key);
+      this.logger.debug(`${issue.key}: Category "${category}" not in sync_types [${syncTypes.join(', ')}]`);
+      return;
+    }
+
+    // 1b. Check if issue should be synced based on status
     if (!this.statusHierarchy.shouldSync(issue)) {
       stats.skippedWrongStatus.push(issue.key);
-      this.logger.debug(`${issue.key}: not in Epic/Story status (${issue.fields.status.name})`);
+      this.logger.debug(`${issue.key}: not in syncable status (${issue.fields.status.name})`);
       return;
     }
 
@@ -316,9 +389,20 @@ export class SyncEngine {
     // 3. Transform Fields
     const githubPayload: any = { labels: [] };
     
+    // Enrich issue data with Epic context for transform functions
+    const epicLinkKey = this.hierarchy.extractEpicLink(issue);
+    const epicGithubNumber = epicLinkKey ? jpdToGithubMap.get(epicLinkKey) : undefined;
+    
+    // Create enriched context for transformers
+    const enrichedIssue = {
+      ...issue,
+      _epic_link_key: epicLinkKey,
+      _epic_github_number: epicGithubNumber,
+    };
+    
     // Mappings
     for (const mapping of this.config.mappings) {
-      const value = await TransformerEngine.transform(mapping, issue);
+      const value = await TransformerEngine.transform(mapping, enrichedIssue);
       if (value !== undefined) {
         if (mapping.github === 'labels') {
             if (Array.isArray(value)) githubPayload.labels.push(...value);
@@ -327,6 +411,20 @@ export class SyncEngine {
             githubPayload[mapping.github] = value;
         }
       }
+    }
+
+    // Add [EPIC]/[STORY] prefix to title if category is configured
+    const issueCategory = this.hierarchy.getIssueCategory(issue);
+    if (issueCategory) {
+      const prefix = `[${issueCategory.toUpperCase()}]`;
+      const baseTitle = githubPayload.title || issue.fields.summary;
+      // Only add prefix if it's not already there
+      if (!baseTitle.startsWith(prefix)) {
+        githubPayload.title = `${prefix} ${baseTitle}`;
+      }
+    } else if (!githubPayload.title) {
+      // No category and no title from mapping - use summary as fallback
+      githubPayload.title = issue.fields.summary;
     }
 
     // Status Mapping (optional if statuses not configured)

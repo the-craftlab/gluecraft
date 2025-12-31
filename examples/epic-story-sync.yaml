@@ -1,0 +1,200 @@
+# ============================================================================
+# Generic Epic + Story Sync Configuration Template
+# ============================================================================
+#
+# This is a TEMPLATE configuration for syncing both Epics and Stories from
+# JPD to GitHub as separate issues with proper hierarchy.
+#
+# SETUP INSTRUCTIONS:
+# 1. Copy this file to your project
+# 2. Run: pnpm run discover YOUR_PROJECT_KEY
+# 3. Replace all "customfield_XXXXX" placeholders with actual field IDs
+# 4. Customize sync_types to match your JPD category values
+# 5. Adjust status mappings to match your JPD workflow
+#
+# ============================================================================
+
+sync:
+  direction: bidirectional
+  jql: 'project = YOUR_PROJECT_KEY'  # Replace with your project key
+
+# ==========================================
+# HIERARCHY CONFIGURATION
+# ==========================================
+hierarchy:
+  enabled: true
+  
+  # REQUIRED: Field that stores issue type (Epic/Story/Bug/etc.)
+  # Find this by running: pnpm run discover YOUR_PROJECT_KEY
+  # Look for fields like "Category", "Type", "Issue Type"
+  category_field_id: "customfield_XXXXX"  # REPLACE ME
+  
+  # OPTIONAL: Field that links Stories to parent Epic
+  # Common field names: "Epic Link", "Parent Epic"
+  epic_link_field_id: "customfield_XXXXX"  # REPLACE ME (or remove if not used)
+  
+  # OPTIONAL: Generic parent-child relationship field
+  # Common field names: "Parent Link", "Parent"
+  parent_link_field_id: "customfield_XXXXX"  # REPLACE ME (or remove if not used)
+  
+  # REQUIRED: Which issue types to sync to GitHub
+  # Must match EXACT values in your category field (case-sensitive)
+  sync_types: ["Epic", "Story", "Bug"]  # Customize to your values
+  
+  # Display options
+  parent_field_in_body: true  # Include parent references in GitHub issue body
+  use_native_hierarchy: true  # Also use JPD's native issuelinks
+
+# ==========================================
+# FIELD MAPPINGS
+# ==========================================
+mappings:
+  # Title - [EPIC]/[STORY] prefix added automatically based on Category
+  - jpd: "fields.summary"
+    github: "title"
+
+  # Description/Body
+  - jpd: "fields.description"
+    github: "body"
+    # Optional: Use a custom transform function for rich body content
+    # transform_function: "./transforms/build-issue-body.ts"
+
+  # Category → Type labels (epic, story, bug)
+  - jpd: "fields.customfield_XXXXX.value"  # REPLACE with category field ID
+    github: "labels"
+    template: "{{fields.customfield_XXXXX.value | lowercase}}"
+
+  # Epic Link → epic:name label (for Stories)
+  # Remove this mapping if you don't use Epic Links
+  - jpd: "fields.customfield_XXXXX"  # REPLACE with epic link field ID
+    github: "labels"
+    template: "epic:{{fields.customfield_XXXXX.fields.summary | slugify}}"
+    condition: "fields.customfield_XXXXX != null"
+
+  # Priority → priority:* labels (optional)
+  # Remove this if you don't have a priority field
+  # - jpd: "fields.customfield_XXXXX.value"  # REPLACE with priority field ID
+  #   github: "labels"
+  #   template: "priority:{{fields.customfield_XXXXX.value | lowercase}}"
+
+# ==========================================
+# STATUS MAPPINGS
+# ==========================================
+# Map your JPD statuses to GitHub states
+# Use sync: false for statuses that shouldn't sync (e.g., "Idea", "Discovery")
+statuses:
+  # Planning statuses (don't sync yet)
+  "Idea":
+    sync: false
+  
+  "Discovery":
+    sync: false
+
+  # Ready for development (start syncing)
+  "Backlog":
+    github_state: open
+    sync: true
+
+  "Ready":
+    github_state: open
+    sync: true
+
+  # In progress
+  "In Progress":
+    github_state: open
+    sync: true
+
+  "In Review":
+    github_state: open
+    sync: true
+
+  # Complete
+  "Done":
+    github_state: closed
+    sync: true
+
+# ==========================================
+# GITHUB LABELS (Auto-created)
+# ==========================================
+# These labels will be automatically created in your GitHub repo
+labels:
+  # Hierarchy labels
+  hierarchy:
+    - name: "epic"
+      color: "0052CC"  # Blue
+      description: "High-level initiative"
+    
+    - name: "story"
+      color: "2684FF"  # Light blue
+      description: "Deliverable unit of work"
+    
+    - name: "task"
+      color: "B3D4FF"  # Lighter blue
+      description: "Implementation step"
+
+  # Type labels
+  types:
+    - name: "bug"
+      color: "DE350B"  # Red
+      description: "Bug fix"
+    
+    - name: "enhancement"
+      color: "6554C0"  # Purple
+      description: "New feature or enhancement"
+
+  # Priority labels (if you use priorities)
+  # priorities:
+  #   - name: "priority:critical"
+  #     color: "DE350B"
+  #     description: "Critical priority"
+  #   
+  #   - name: "priority:high"
+  #     color: "FF8B00"
+  #     description: "High priority"
+  #   
+  #   - name: "priority:normal"
+  #     color: "FFC400"
+  #     description: "Normal priority"
+  #   
+  #   - name: "priority:low"
+  #     color: "8993A4"
+  #     description: "Low priority"
+
+# ==========================================
+# FIELD VALIDATION (Recommended)
+# ==========================================
+# Validate that required fields exist before syncing
+fields:
+  - id: "customfield_XXXXX"  # REPLACE with category field ID
+    name: "Category"  # Or whatever your field is called
+    type: "select"
+    required: true
+    description: "Issue type (Epic/Story/Bug)"
+
+  - id: "customfield_XXXXX"  # REPLACE with epic link field ID
+    name: "Epic Link"
+    type: "select"
+    required: false
+    description: "Parent Epic for Stories"
+
+# ==========================================
+# GITHUB PROJECTS (Optional)
+# ==========================================
+# Uncomment to sync to GitHub Projects (Beta)
+# projects:
+#   enabled: true
+#   project_number: 1  # Your GitHub project number
+#   status_field_name: "Status"
+
+# ==========================================
+# GITHUB → JPD CREATION (Optional)
+# ==========================================
+# Uncomment to create JPD issues from GitHub issues
+# github_to_jpd_creation:
+#   enabled: false
+#   label_to_category:
+#     bug: "Bug"
+#     enhancement: "Story"
+#   default_category: "Story"
+#   default_status: "Backlog"
+

@@ -64,6 +64,13 @@ export const HierarchySchema = z.object({
   epic_statuses: z.array(z.string()).optional(), // JPD statuses that represent Epics
   story_statuses: z.array(z.string()).optional(), // JPD statuses that represent Stories
   task_statuses: z.array(z.string()).optional(), // JPD statuses that represent Tasks
+  category_field_id: z.string().optional(), // e.g., "customfield_14385" - Field that stores issue type (Epic/Story/Bug)
+  epic_link_field_id: z.string().optional(), // e.g., "customfield_10008" - Field that links Stories to parent Epic (legacy)
+  parent_epic_field_id: z.string().optional(), // e.g., "customfield_14459" - Custom "Parent Epic" select field
+  parent_link_field_id: z.string().optional(), // e.g., "customfield_12213" - Generic parent link field
+  sync_types: z.array(z.enum(['Epic', 'Story', 'Bug', 'Task'])).optional(), // Which issue types to sync to GitHub
+  auto_update_epic_options: z.boolean().default(false), // Auto-update Parent Epic field options with active Epics
+  epic_option_template: z.string().optional(), // Template for Epic option labels (default: "{{key}}: {{summary}}")
 });
 
 export const TeamSchema = z.object({
