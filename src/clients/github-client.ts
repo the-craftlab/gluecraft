@@ -708,6 +708,9 @@ export class GitHubClient {
     if (labelName === 'task') return 'B3D4FF';
     if (labelName === 'idea') return 'C5DEF5';
 
+    // Dynamic epic labels (epic:name) inherit epic color
+    if (labelName.startsWith('epic:')) return '0052CC';
+
     // Type labels
     if (labelName.startsWith('type:bug')) return 'DE350B';
     if (labelName.startsWith('type:feature')) return '6554C0';
