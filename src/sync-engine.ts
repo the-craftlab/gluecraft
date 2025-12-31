@@ -172,7 +172,11 @@ export class SyncEngine {
       }
 
       // Fetch all Epics from JPD (regardless of JQL filter)
-      const epicJql = `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
+      // Extract field number from customfield_XXXXX format for JQL
+      const fieldNumber = categoryFieldId.match(/\d+/)?.[0];
+      const epicJql = fieldNumber 
+        ? `project = ${projectKey} AND cf[${fieldNumber}] = Epic ORDER BY created DESC`
+        : `project = ${projectKey} AND Category = Epic ORDER BY created DESC`; // Fallback
       const result = await this.jpd.searchIssues(epicJql, ['summary', 'key', categoryFieldId], 100);
       
       // Build option values using template

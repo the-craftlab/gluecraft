@@ -50818,7 +50818,8 @@ var init_sync_engine = __esm({
             this.logger.warn("Cannot auto-update Parent Epic field: no project key found in JQL or env");
             return;
           }
-          const epicJql = `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
+          const fieldNumber = categoryFieldId.match(/\d+/)?.[0];
+          const epicJql = fieldNumber ? `project = ${projectKey} AND cf[${fieldNumber}] = Epic ORDER BY created DESC` : `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
           const result = await this.jpd.searchIssues(epicJql, ["summary", "key", categoryFieldId], 100);
           const template = this.config.hierarchy.epic_option_template || "{{key}}: {{summary}}";
           const options = result.issues.map((epic) => {
