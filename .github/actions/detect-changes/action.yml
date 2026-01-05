@@ -252,22 +252,8 @@ runs:
         echo "$CHANGES_JSON" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
         
-        # Build comma-separated list of affected domains without requiring jq
-        AFFECTED_DOMAINS=$(CHANGES_JSON="$CHANGES_JSON" node - <<'NODE'
-const data = process.env.CHANGES_JSON || '{}'
-let parsed = {}
-try {
-  parsed = JSON.parse(data)
-} catch (error) {
-  console.warn('⚠️  Unable to parse change detection JSON:', error.message)
-}
-const affected = Object.entries(parsed)
-  .filter(([, value]) => value === true)
-  .map(([key]) => key)
-  .join(',')
-process.stdout.write(affected)
-NODE
-)
+        # Build comma-separated list of affected domains
+        AFFECTED_DOMAINS=$(echo "$CHANGES_JSON" | grep -oP '"\K[^"]+(?=":true)' | tr '\n' ',' | sed 's/,$//')
         echo "affectedDomains=$AFFECTED_DOMAINS" >> $GITHUB_OUTPUT
         
         echo "📋 Change Detection Results:"
