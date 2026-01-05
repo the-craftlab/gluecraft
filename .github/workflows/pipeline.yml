@@ -24,7 +24,7 @@
 
 name: Pipeline
 
-run-name: "${{ github.event_name == 'pull_request' && !contains('main', github.head_ref) && github.event.pull_request.title || github.ref_name }} #${{ inputs.run_number || github.run_number }}${{ inputs.version && format(' - {0}', inputs.version) || '' }}"
+run-name: "${{ github.event_name == 'pull_request' && !contains('develop,main', github.head_ref) && github.event.pull_request.title || github.ref_name }} #${{ inputs.run_number || github.run_number }}${{ inputs.version && format(' - {0}', inputs.version) || '' }}"
 
 #Git fetch depth configuration
 # - FETCH_DEPTH_AFFECTED: For change detection and Nx affected analysis
@@ -38,8 +38,8 @@ run-name: "${{ github.event_name == 'pull_request' && !contains('main', github.h
 env:
   FETCH_DEPTH_AFFECTED: "100"
   FETCH_DEPTH_VERSIONING: "0"
-  NODE_VERSION: "20"
-  PNPM_VERSION: "10.20.0"
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10"
 
 on:
   workflow_dispatch:
@@ -80,15 +80,15 @@ on:
         type: string
   push:
     branches:
-      - main
       - develop
+      - main
   pull_request:
     types:
       - opened
       - synchronize
       - reopened
     branches:
-      - main
+      - develop
 jobs:
   
   #=============================================================================
@@ -151,65 +151,6 @@ jobs:
 
   # <--START CUSTOM JOBS-->
 
-  #=============================================================================
-  # TEST ACTION (Custom - you control this)
-  #=============================================================================
-  # Build and test the GitHub Action before tagging/releasing
-
-  test-action:
-    needs: [ changes ]
-    if: ${{ needs.changes.outputs.action == 'true' || always() }}
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.commitSha || github.sha }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build action
-        run: pnpm run build
-
-      - name: Verify dist files exist
-        run: |
-          if [ ! -f "dist/index.js" ]; then
-            echo "❌ Build failed: dist/index.js not found"
-            exit 1
-          fi
-          if [ ! -f "dist/cli.js" ]; then
-            echo "❌ Build failed: dist/cli.js not found"
-            exit 1
-          fi
-          echo "✅ All build artifacts present"
-
-      - name: Run unit and integration tests
-        run: |
-          pnpm test tests/unit tests/integration --run
-        env:
-          CI: true
-
-      - name: Upload build artifacts
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: dist/
-          retention-days: 7
-
   # <--END CUSTOM JOBS-->
 
 
@@ -246,56 +187,21 @@ jobs:
     if: ${{
         always() &&
         github.event_name != 'pull_request' &&
-        github.ref_name == 'main' &&
+        github.ref_name == 'develop' &&
         needs.version.result == 'success' &&
         needs.version.outputs.version != '' &&
         needs.gate.result == 'success'
       }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.commitSha || github.sha }}
           fetch-depth: ${{ env.FETCH_DEPTH_VERSIONING }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Configure Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
       - uses: ./.github/actions/create-tag
-        id: create-tag
         with:
           version: ${{ needs.version.outputs.version }}
           commitSha: ${{ inputs.commitSha || github.sha }}
-      
-      - name: Create/Update Major Version Tag
-        if: steps.create-tag.outputs.success == 'true'
-        shell: bash
-        run: |
-          VERSION="${{ needs.version.outputs.version }}"
-          # Extract major version (e.g., "2" from "2.0.0")
-          MAJOR_VERSION=$(echo "$VERSION" | cut -d. -f1)
-          MAJOR_TAG="v${MAJOR_VERSION}"
-          
-          echo "📌 Creating/updating major version tag: $MAJOR_TAG"
-          
-          # Delete local tag if exists
-          git tag -d "$MAJOR_TAG" 2>/dev/null || true
-          
-          # Delete remote tag if exists (force update)
-          git push origin ":refs/tags/$MAJOR_TAG" 2>/dev/null || true
-          
-          # Create new major version tag pointing to current commit
-          git tag -a "$MAJOR_TAG" -m "Update $MAJOR_TAG to $VERSION"
-          
-          # Push the major version tag
-          git push origin "$MAJOR_TAG"
-          
-          echo "✅ Major version tag $MAJOR_TAG now points to v$VERSION"
 
   #=============================================================================
   # PROMOTE (⚠️  Managed by Pipecraft - do not modify)
@@ -308,11 +214,11 @@ jobs:
         always() &&
         (github.event_name == 'push' ||
         github.event_name == 'workflow_dispatch') &&
-        github.ref_name == 'develop' &&
         needs.version.result == 'success' &&
         needs.version.outputs.version != '' &&
         (needs.tag.result == 'success' ||
-        needs.tag.result == 'skipped')
+        needs.tag.result == 'skipped') &&
+        (github.ref_name == 'develop')
       }}
     runs-on: ubuntu-latest
     steps:
@@ -324,8 +230,8 @@ jobs:
         with:
           version: ${{ needs.version.outputs.version }}
           sourceBranch: ${{ github.ref_name }}
-          targetBranch: main
-          autoMerge: ${{ 'false' }}
+          targetBranch: ${{ 'main' }}
+          autoMerge: ${{ (github.ref_name == 'develop' && 'false') || 'false' }}
           run_number: ${{ inputs.run_number || github.run_number }}
 
   #=============================================================================
@@ -343,31 +249,12 @@ jobs:
         needs.tag.result == 'success'
       }}
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.commitSha || github.sha }}
           fetch-depth: ${{ env.FETCH_DEPTH_VERSIONING }}
-      
       - uses: ./.github/actions/create-release
-        id: create-release
         with:
           version: ${{ needs.version.outputs.version }}
           commitSha: ${{ inputs.commitSha || github.sha }}
-      
-      - name: Release Summary
-        run: |
-          echo "✅ Release created successfully"
-          echo "🔗 URL: ${{ steps.create-release.outputs.release_url }}"
-          echo ""
-          echo "📦 Version: ${{ needs.version.outputs.version }}"
-          echo "🏷️  Tag: v${{ needs.version.outputs.version }}"
-          echo "📌 Major tag: v$(echo '${{ needs.version.outputs.version }}' | cut -d. -f1)"
-          echo ""
-          echo "💡 To publish to GitHub Marketplace:"
-          echo "   1. Go to: ${{ steps.create-release.outputs.release_url }}"
-          echo "   2. Click 'Edit release'"
-          echo "   3. Check 'Publish this Action to the GitHub Marketplace'"
-          echo "   4. Select categories and save"

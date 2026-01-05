@@ -2,7 +2,7 @@
 # Automated versioning, tagging, and GitHub releases for GitHub Action publishing
 
 ciProvider: github
-mergeStrategy: fast-forward
+mergeStrategy: squash
 requireConventionalCommits: true
 
 # PipeCraft branch flow for library/action publishing
