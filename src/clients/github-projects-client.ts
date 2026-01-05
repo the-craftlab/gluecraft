@@ -23,6 +23,25 @@ export interface ProjectInfo {
   columns: ProjectColumn[];
 }
 
+export interface ProjectFieldInfo {
+  id: string;
+  name: string;
+  dataType: 'TEXT' | 'NUMBER' | 'DATE' | 'SINGLE_SELECT';
+  options?: Array<{ id: string; name: string }>;
+}
+
+export interface FieldValue {
+  date?: string;
+  number?: number;
+  singleSelectOptionId?: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
 export class GitHubProjectsClient {
   private octokit: Octokit;
   private logger: typeof Logger;
@@ -219,6 +238,200 @@ export class GitHubProjectsClient {
     } catch (error: any) {
       this.logger.error(`Failed to get issue project item: ${error.message}`);
       return null;
+    }
+  }
+
+  /**
+   * Get all field definitions for a project
+   */
+  async getProjectFields(projectId: string): Promise<ProjectFieldInfo[]> {
+    try {
+      const query = `
+        query($projectId: ID!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              id
+              fields(first: 50) {
+                nodes {
+                  ... on ProjectV2Field {
+                    id
+                    name
+                    dataType
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const result: any = await this.octokit.graphql(query, { projectId });
+
+      if (!result.node) {
+        throw new Error('Project not found');
+      }
+
+      const fields: ProjectFieldInfo[] = [];
+      for (const field of result.node.fields.nodes) {
+        if (field.options) {
+          // Single select field
+          fields.push({
+            id: field.id,
+            name: field.name,
+            dataType: 'SINGLE_SELECT',
+            options: field.options
+          });
+        } else {
+          // Regular field (DATE, NUMBER, TEXT, etc.)
+          fields.push({
+            id: field.id,
+            name: field.name,
+            dataType: field.dataType,
+            options: undefined
+          });
+        }
+      }
+
+      return fields;
+    } catch (error: any) {
+      this.logger.error(`Failed to get project fields: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Update a field value on a project item
+   */
+  async updateFieldValue(
+    projectId: string,
+    itemId: string,
+    fieldId: string,
+    value: FieldValue
+  ): Promise<boolean> {
+    if (this.dryRun) {
+      this.logger.info(
+        `[DRY RUN] Would update field ${fieldId} on item ${itemId} to ${JSON.stringify(value)}`
+      );
+      return true;
+    }
+
+    try {
+      const mutation = `
+        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: ProjectV2FieldValue!) {
+          updateProjectV2ItemFieldValue(input: {
+            projectId: $projectId
+            itemId: $itemId
+            fieldId: $fieldId
+            value: $value
+          }) {
+            projectV2Item {
+              id
+            }
+          }
+        }
+      `;
+
+      await this.octokit.graphql(mutation, {
+        projectId,
+        itemId,
+        fieldId,
+        value
+      });
+
+      return true;
+    } catch (error: any) {
+      this.logger.error(`Failed to update field value: ${error.message}`);
+      return false;
+    }
+  }
+
+  /**
+   * Validate field mappings against project fields
+   */
+  async validateFieldMappings(
+    projectId: string,
+    mappings: Array<{
+      jpd: string;
+      github_field: string;
+      type: 'date' | 'number' | 'single_select';
+      mapping?: Record<string, string>;
+      derive?: any;
+    }>
+  ): Promise<ValidationResult> {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+
+    try {
+      const projectFields = await this.getProjectFields(projectId);
+      const fieldMap = new Map<string, ProjectFieldInfo>();
+      
+      for (const field of projectFields) {
+        fieldMap.set(field.name, field);
+      }
+
+      for (const mapping of mappings) {
+        const projectField = fieldMap.get(mapping.github_field);
+
+        if (!projectField) {
+          errors.push(`Field "${mapping.github_field}" not found in project`);
+          continue;
+        }
+
+        // Check type compatibility
+        const expectedDataType = this.mapTypeToDataType(mapping.type);
+        if (projectField.dataType !== expectedDataType) {
+          errors.push(
+            `Field "${mapping.github_field}" type mismatch: expected ${mapping.type}, got ${projectField.dataType}`
+          );
+          continue;
+        }
+
+        // For single-select fields, validate options
+        if (mapping.type === 'single_select' && mapping.mapping && projectField.options) {
+          const projectOptionNames = new Set(projectField.options.map(opt => opt.name));
+          
+          for (const [jpdValue, githubValue] of Object.entries(mapping.mapping)) {
+            if (!projectOptionNames.has(githubValue)) {
+              warnings.push(
+                `Field "${mapping.github_field}" missing option: ${githubValue} (mapped from ${jpdValue})`
+              );
+            }
+          }
+        }
+      }
+
+      return {
+        valid: errors.length === 0,
+        errors,
+        warnings
+      };
+    } catch (error: any) {
+      errors.push(`Failed to validate field mappings: ${error.message}`);
+      return { valid: false, errors, warnings };
+    }
+  }
+
+  /**
+   * Map config field type to GitHub dataType
+   */
+  private mapTypeToDataType(type: 'date' | 'number' | 'single_select'): string {
+    switch (type) {
+      case 'date':
+        return 'DATE';
+      case 'number':
+        return 'NUMBER';
+      case 'single_select':
+        return 'SINGLE_SELECT';
+      default:
+        return 'TEXT';
     }
   }
 }
