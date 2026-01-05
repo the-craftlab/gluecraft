@@ -313,6 +313,31 @@ export class SyncEngine {
     console.log('');
   }
 
+  /**
+   * Evaluate a condition string against issue data
+   * Simple condition syntax: "field.path != null", "field.path == 'value'", etc.
+   */
+  private evaluateCondition(condition: string, data: any): boolean {
+    // Parse simple conditions: "field.path != null", "field.path == 'value'"
+    const match = condition.match(/^(.+?)\s*(==|!=)\s*(.+)$/);
+    if (!match) {
+      this.logger.warn(`Invalid condition syntax: ${condition}`);
+      return true; // Default to true if we can't parse
+    }
+    
+    const [, fieldPath, operator, expectedValue] = match;
+    const actualValue = fieldPath.trim().split('.').reduce((obj: any, key: string) => obj?.[key], data);
+    const expected = expectedValue.trim() === 'null' ? null : expectedValue.trim().replace(/^['"]|['"]$/g, '');
+    
+    if (operator === '!=') {
+      return actualValue != expected; // Loose comparison (null != undefined is false)
+    } else if (operator === '==') {
+      return actualValue == expected;
+    }
+    
+    return true;
+  }
+
   private async processJpdIssue(
     issue: any,
     jpdToGithubMap: Map<string, number>,
@@ -406,11 +431,24 @@ export class SyncEngine {
     
     // Mappings
     for (const mapping of this.config.mappings) {
+      // Check condition first (if specified)
+      if (mapping.condition) {
+        const conditionMet = this.evaluateCondition(mapping.condition, enrichedIssue);
+        if (!conditionMet) {
+          continue; // Skip this mapping
+        }
+      }
+      
       const value = await TransformerEngine.transform(mapping, enrichedIssue);
-      if (value !== undefined) {
+      if (value !== undefined && value !== null && value !== '') {
         if (mapping.github === 'labels') {
-            if (Array.isArray(value)) githubPayload.labels.push(...value);
-            else githubPayload.labels.push(value);
+            if (Array.isArray(value)) {
+              // Filter out empty strings from array
+              const validLabels = value.filter(v => v !== null && v !== undefined && v !== '');
+              githubPayload.labels.push(...validLabels);
+            } else {
+              githubPayload.labels.push(value);
+            }
         } else {
             githubPayload[mapping.github] = value;
         }
