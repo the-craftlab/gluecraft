@@ -92,33 +92,8 @@ runs:
       id: nx-cli
       shell: bash
       run: |
-        NX_SPEC=""
-        if [ -f "package.json" ]; then
-          NX_SPEC=$(node - <<'NODE'
-const fs = require('fs')
-try {
-  const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-  const spec =
-    (pkg.devDependencies && pkg.devDependencies.nx) ||
-    (pkg.dependencies && pkg.dependencies.nx) ||
-    ''
-  if (typeof spec === 'string') {
-    const cleaned = spec.trim()
-    if (cleaned && !cleaned.startsWith('workspace:') && !cleaned.startsWith('file:')) {
-      process.stdout.write(cleaned)
-    }
-  }
-} catch {
-  // ignore JSON parse errors and fall back to latest
-}
-NODE
-          )
-        fi
-        if [ -n "$NX_SPEC" ]; then
-          echo "package=nx@$NX_SPEC" >> $GITHUB_OUTPUT
-        else
-          echo "package=nx@latest" >> $GITHUB_OUTPUT
-        fi
+        # Default to latest nx if not specified in package.json
+        echo "package=nx@latest" >> $GITHUB_OUTPUT
 
     - name: Detect Changes with Nx (if available)
       id: nx-filter
