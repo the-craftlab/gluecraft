@@ -151,6 +151,65 @@ jobs:
 
   # <--START CUSTOM JOBS-->
 
+  #=============================================================================
+  # TEST ACTION (Custom - you control this)
+  #=============================================================================
+  # Build and test the GitHub Action before tagging/releasing
+
+  test-action:
+    needs: [ changes ]
+    if: ${{ needs.changes.outputs.action == 'true' || always() }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commitSha || github.sha }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build action
+        run: pnpm run build
+
+      - name: Verify dist files exist
+        run: |
+          if [ ! -f "dist/index.js" ]; then
+            echo "❌ Build failed: dist/index.js not found"
+            exit 1
+          fi
+          if [ ! -f "dist/cli.js" ]; then
+            echo "❌ Build failed: dist/cli.js not found"
+            exit 1
+          fi
+          echo "✅ All build artifacts present"
+
+      - name: Run unit and integration tests
+        run: |
+          pnpm test tests/unit tests/integration --run
+        env:
+          CI: true
+
+      - name: Upload build artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
   # <--END CUSTOM JOBS-->
 
 
