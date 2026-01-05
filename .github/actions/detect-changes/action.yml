@@ -257,15 +257,6 @@ runs:
         echo "affectedDomains=$AFFECTED_DOMAINS" >> $GITHUB_OUTPUT
         
         echo "📋 Change Detection Results:"
-        CHANGES_JSON="$CHANGES_JSON" node - <<'NODE'
-const data = process.env.CHANGES_JSON || '{}'
-try {
-  const parsed = JSON.parse(data)
-  console.log(JSON.stringify(parsed, null, 2))
-} catch (error) {
-  console.warn('⚠️  Unable to pretty-print change detection JSON:', error.message)
-  console.log(data)
-}
-NODE
+        echo "$CHANGES_JSON"
         echo "🎯 Affected domains: $AFFECTED_DOMAINS"
         echo "  nx-available: ${{ steps.nx-check.outputs.available }}"
