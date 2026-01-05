@@ -105,7 +105,7 @@ jobs:
       DOMAINS: |
         action:
           paths:
-          - '**/*'
+            - '**/*'
     steps:
       - uses: actions/checkout@v4
         with:
