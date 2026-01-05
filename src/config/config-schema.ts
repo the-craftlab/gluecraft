@@ -79,10 +79,24 @@ export const TeamSchema = z.object({
   epic_ownership: z.boolean().default(true),
 });
 
+export const ProjectFieldMappingSchema = z.object({
+  jpd: z.string(),                    // JPD field path (e.g., "fields.customfield_14383")
+  github_field: z.string(),           // GitHub Project field name (e.g., "Start date")
+  type: z.enum(['date', 'number', 'single_select']),
+  mapping: z.record(z.string()).optional(), // Value mapping for single_select
+  derive: z.object({                  // Threshold-based derivation
+    thresholds: z.array(z.object({
+      max: z.number(),
+      value: z.string()
+    }))
+  }).optional()
+});
+
 export const ProjectsSchema = z.object({
   enabled: z.boolean().default(false),
   project_number: z.number().optional(), // GitHub Projects (Beta) number
   status_field_name: z.string().default('Status'), // Name of status field in project
+  field_mappings: z.array(ProjectFieldMappingSchema).optional() // Field mappings for custom fields
 });
 
 export const GithubToJpdCreationSchema = z.object({
