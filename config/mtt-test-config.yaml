@@ -126,6 +126,54 @@ body_template: |
 #       github_project_column: "✅ Done"
 
 # ==========================================
+# GITHUB PROJECTS V2 INTEGRATION
+# Sync custom fields to GitHub Project roadmap fields
+# ==========================================
+projects:
+  enabled: true
+  project_number: 23
+  status_field_name: "Status"
+  
+  # Custom field mappings for roadmap planning
+  field_mappings:
+    # Start Date - when work begins
+    - jpd: "fields.customfield_14383"
+      github_field: "Start date"
+      type: date
+      
+    # Target Date - planned completion
+    - jpd: "fields.customfield_14384"
+      github_field: "Target date"
+      type: date
+      
+    # Priority - execution priority with value mapping
+    - jpd: "fields.customfield_14425.value"
+      github_field: "Priority"
+      type: single_select
+      mapping:
+        Critical: "P0"
+        High: "P1"
+        Normal: "P2"
+        Low: "P3"
+        
+    # Size - derived from Effort using thresholds
+    - jpd: "fields.customfield_14387"
+      github_field: "Size"
+      type: single_select
+      derive:
+        thresholds:
+          - { max: 2, value: "XS" }
+          - { max: 5, value: "S" }
+          - { max: 10, value: "M" }
+          - { max: 20, value: "L" }
+          - { max: 999, value: "XL" }
+          
+    # Estimate - RICE Effort as numeric field
+    - jpd: "fields.customfield_14387"
+      github_field: "Estimate"
+      type: number
+
+# ==========================================
 # FIELD ID MAPPINGS
 # Map friendly names to JPD custom field IDs
 # ==========================================
@@ -133,12 +181,15 @@ field_mappings:
   theme: "customfield_14377"
   roadmap: "customfield_14378"
   category: "customfield_14385"
+  dev_priority: "customfield_14425"
   impact: "customfield_14376"
   reach: "customfield_14379"
   value: "customfield_14386"
   effort: "customfield_14387"
   confidence: "customfield_14389"
   short_description: "customfield_14388"
+  project_start: "customfield_14383"
+  project_target: "customfield_14384"
   
   # Approval gates (add these to your test project when ready)
   # spec_ready: "customfield_14381"
@@ -223,4 +274,17 @@ fields:
     type: "text"
     required: false
     description: "Brief idea summary"
+  
+  # GitHub Projects Roadmap fields
+  - id: "customfield_14383"
+    name: "Project start"
+    type: "string"
+    required: false
+    description: "Start date for GitHub roadmap"
+  
+  - id: "customfield_14384"
+    name: "Project target"
+    type: "string"
+    required: false
+    description: "Target date for GitHub roadmap"
 
