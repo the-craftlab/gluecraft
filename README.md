@@ -39,7 +39,9 @@ That's it. Your JPD issues are now in GitHub, and status updates flow both ways.
 
 **Bidirectional sync** - JPD issues sync to GitHub, GitHub status updates sync back to JPD. Work where you want, stay in sync automatically. Sync runs on schedule, manual trigger, or real-time webhooks.
 
-**Epic + Story sync (v0.0.3)** - Sync both Epics AND Stories to GitHub as separate issues with proper hierarchy. Automatic `[EPIC]`/`[STORY]` title prefixes, epic:* labels, and visual parent-child relationships. See [EPIC_STORY_SYNC.md](EPIC_STORY_SYNC.md) for details.
+**Epic + Story sync** - Sync both Epics AND Stories to GitHub as separate issues with proper hierarchy. Automatic `[EPIC]`/`[STORY]` title prefixes, epic:* labels, and visual parent-child relationships. See [EPIC_STORY_SYNC.md](EPIC_STORY_SYNC.md) for details.
+
+**GitHub Projects v2 roadmap sync** - Automatically populate roadmap fields in GitHub Projects: Start Date, Target Date, Priority (with value mapping), Size (derived from Effort), and Estimate. Full support for date, number, and single-select field types.
 
 **Fully configurable** - Zero hardcoded values. All field IDs, category values, status names, and workflows are configurable per project. Use environment variables for multi-project setups. See [CONFIGURABILITY.md](CONFIGURABILITY.md) for details.
 
