@@ -3,6 +3,7 @@ import { JpdClient } from './clients/jpd-client.js';
 import { GitHubClient } from './clients/github-client.js';
 import { GitHubProjectsClient } from './clients/github-projects-client.js';
 import { TransformerEngine } from './transformers/transformer-engine.js';
+import { ProjectFieldTransformer } from './transformers/project-field-transformer.js';
 import { HierarchyManager } from './hierarchy/hierarchy-manager.js';
 import { StatusBasedHierarchy } from './hierarchy/status-based-hierarchy.js';
 import { CommentSyncManager } from './comments/comment-sync-manager.js';
@@ -654,8 +655,98 @@ export class SyncEngine {
       );
 
       this.logger.info(`Updated issue #${githubIssueNumber} to column "${targetColumn.name}"`);
+
+      // Update custom fields if configured
+      await this.updateProjectFields(jpdIssue, project.id, itemId);
     } catch (error: any) {
       this.logger.error(`Failed to update project status: ${error.message}`);
+    }
+  }
+
+  /**
+   * Update custom fields on a project item
+   */
+  private async updateProjectFields(
+    jpdIssue: any,
+    projectId: string,
+    itemId: string
+  ): Promise<void> {
+    // Check if field mappings are configured
+    if (!this.config.projects?.field_mappings || this.config.projects.field_mappings.length === 0) {
+      return;
+    }
+
+    try {
+      // Get project fields to map field names to IDs and get option IDs
+      const projectFields = await this.projects!.getProjectFields(projectId);
+      const fieldMap = new Map<string, any>();
+      
+      for (const field of projectFields) {
+        fieldMap.set(field.name, field);
+      }
+
+      // Process each field mapping
+      for (const mapping of this.config.projects.field_mappings) {
+        // Get the JPD value
+        const jpdValue = ProjectFieldTransformer.extractJpdValue(jpdIssue, mapping.jpd);
+        
+        if (jpdValue === null || jpdValue === undefined) {
+          this.logger.debug(`Skipping ${mapping.github_field}: no value in JPD`);
+          continue;
+        }
+
+        // Transform the value
+        const transformedValue = ProjectFieldTransformer.transformFieldValue(jpdValue, mapping);
+        
+        if (!transformedValue) {
+          this.logger.debug(`Skipping ${mapping.github_field}: transformation returned null`);
+          continue;
+        }
+
+        // Get field info from project
+        const fieldInfo = fieldMap.get(mapping.github_field);
+        
+        if (!fieldInfo) {
+          this.logger.warn(`Field "${mapping.github_field}" not found in project`);
+          continue;
+        }
+
+        // For single-select fields, we need to convert value name to option ID
+        if (transformedValue.singleSelectValue) {
+          const optionName = transformedValue.singleSelectValue;
+          const option = fieldInfo.options?.find((opt: any) => opt.name === optionName);
+          
+          if (!option) {
+            this.logger.warn(
+              `Option "${optionName}" not found for field "${mapping.github_field}"`
+            );
+            continue;
+          }
+
+          // Update with option ID
+          await this.projects!.updateFieldValue(
+            projectId,
+            itemId,
+            fieldInfo.id,
+            { singleSelectOptionId: option.id }
+          );
+          
+          this.logger.debug(`Updated ${mapping.github_field} = ${optionName}`);
+        } else {
+          // Date or number field
+          await this.projects!.updateFieldValue(
+            projectId,
+            itemId,
+            fieldInfo.id,
+            transformedValue
+          );
+          
+          const value = transformedValue.date || transformedValue.number;
+          this.logger.debug(`Updated ${mapping.github_field} = ${value}`);
+        }
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to update project fields: ${error.message}`);
     }
   }
 
