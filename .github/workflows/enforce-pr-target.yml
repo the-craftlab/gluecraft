@@ -8,19 +8,25 @@ jobs:
   check-pr-target:
     runs-on: ubuntu-latest
     steps:
-      - name: Check PR base branch
-        if: github.base_ref == 'main'
+      - name: Skip check for release PRs
+        if: startsWith(github.head_ref, 'release/')
         run: |
-          echo "::error::Pull requests must target 'main' branch, not 'main'"
-          echo "::error::Please change the base branch to 'main'"
+          echo "⏭️  Skipping check for Pipecraft release PR"
+          exit 0
+      
+      - name: Check PR base branch
+        if: github.base_ref != 'develop' && !startsWith(github.head_ref, 'release/')
+        run: |
+          echo "::error::Pull requests must target 'develop' branch, not '${{ github.base_ref }}'"
+          echo "::error::Please change the base branch to 'develop'"
           echo ""
           echo "To fix this:"
           echo "1. Go to your PR"
           echo "2. Click 'Edit' next to the title"
-          echo "3. Change base branch from 'main' to 'main'"
+          echo "3. Change base branch from '${{ github.base_ref }}' to 'develop'"
           exit 1
       
       - name: Confirm correct target
-        if: github.base_ref == 'main'
+        if: github.base_ref == 'develop' || startsWith(github.head_ref, 'release/')
         run: |
-          echo "✅ PR correctly targets 'main' branch"
+          echo "✅ PR correctly targets '${{ github.base_ref }}' branch"
