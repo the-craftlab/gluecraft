@@ -1,0 +1,13 @@
+{
+    "folders": [
+		{
+			"path": "../../Expedition/jpd-to-github-connector"
+		},
+		{
+			"path": "."
+		},
+		{
+			"path": "../pipecraft"
+		}
+	]
+}
