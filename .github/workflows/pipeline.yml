@@ -301,9 +301,10 @@ jobs:
           run_number: ${{ inputs.run_number || github.run_number }}
 
   #=============================================================================
-  # RELEASE (⚠️  Managed by Pipecraft - do not modify)
+  # RELEASE (Customized for npm publishing)
   #=============================================================================
-  # Creates a release for the version.
+  # Creates a GitHub release and publishes to npm.
+  # Requires NPM_TOKEN secret for npm publishing.
 
   release:
     needs: [ tag, version ]
@@ -312,7 +313,7 @@ jobs:
         github.ref_name == 'main' &&
         needs.version.result == 'success' &&
         needs.version.outputs.version != '' &&
-        needs.tag.result == 'success'
+        (needs.tag.result == 'success' || needs.tag.result == 'skipped')
       }}
     runs-on: ubuntu-latest
     steps:
@@ -323,4 +324,6 @@ jobs:
       - uses: ./.github/actions/create-release
         with:
           version: ${{ needs.version.outputs.version }}
-          commitSha: ${{ inputs.commitSha || github.sha }}
+          npm-token: ${{ secrets.NPM_TOKEN }}
+          node-version: ${{ env.NODE_VERSION }}
+          pnpm-version: ${{ env.PNPM_VERSION }}

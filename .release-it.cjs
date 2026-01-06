@@ -26,8 +26,7 @@ module.exports = {
       "releaseName": "Release ${version}"
     },
     "npm": {
-      "ignoreVersion": true,
-      "publish": false,
+      "publish": true,
       "skipChecks": true
     },
     "hooks": {

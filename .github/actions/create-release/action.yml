@@ -1,5 +1,5 @@
 name: 'Create Release'
-description: 'Create a GitHub release with auto-generated release notes'
+description: 'Create a GitHub release and publish to npm using release-it'
 author: 'PipeCraft'
 
 inputs:
@@ -10,18 +10,26 @@ inputs:
     description: 'GitHub token for authentication'
     required: false
     default: ${{ github.token }}
-  publish-workflow:
-    description: 'Name of the publish workflow file to trigger (e.g., publish.yml)'
+  npm-token:
+    description: 'NPM token for publishing (required for npm publish)'
     required: false
-    default: 'publish.yml'
+    default: ''
+  node-version:
+    description: 'Node.js version to use'
+    required: false
+    default: '24'
+  pnpm-version:
+    description: 'pnpm version to use'
+    required: false
+    default: '10.20.0'
 
 outputs:
   release_url:
     description: 'The URL of the created release'
-    value: ${{ steps.create.outputs.release_url }}
+    value: ${{ steps.release.outputs.release_url }}
   release_id:
     description: 'The ID of the created release'
-    value: ${{ steps.create.outputs.release_id }}
+    value: ${{ steps.release.outputs.release_id }}
 
 runs:
   using: 'composite'
@@ -32,11 +40,52 @@ runs:
         fetch-depth: 0
         token: ${{ inputs.token }}
 
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm-version }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+        registry-url: 'https://registry.npmjs.org'
+
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+
+    - name: Build package
+      shell: bash
+      run: pnpm run build
+
+    - name: Configure Git
+      shell: bash
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Update package.json version
+      shell: bash
+      run: |
+        VERSION="${{ inputs.version }}"
+        # Remove 'v' prefix if present
+        VERSION_NUM="${VERSION#v}"
+        echo "📝 Setting package.json version to $VERSION_NUM"
+        node -e "
+          const fs = require('fs');
+          const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+          pkg.version = '$VERSION_NUM';
+          fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+        "
+
     - name: Create GitHub Release
-      id: create
+      id: release
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.token }}
+        GITHUB_TOKEN: ${{ inputs.token }}
       run: |
         VERSION="${{ inputs.version }}"
         echo "📦 Creating GitHub release for $VERSION"
@@ -49,52 +98,49 @@ runs:
           RELEASE_NOTES=$(git log $PREVIOUS_TAG..HEAD --pretty=format:"- %s" --no-merges)
         else
           echo "📝 Generating release notes from all commits"
-          RELEASE_NOTES=$(git log --pretty=format:"- %s" --no-merges)
+          RELEASE_NOTES=$(git log --pretty=format:"- %s" --no-merges | head -50)
         fi
 
-        # Create release with notes
-        RELEASE_OUTPUT=$(gh release create "$VERSION" \--title "Release $VERSION" \--notes "$RELEASE_NOTES" \--latest 2>&1)
-
-        RELEASE_EXIT_CODE=$?
-
-        if [ $RELEASE_EXIT_CODE -eq 0 ]; then
-          # Extract release URL from output
-          RELEASE_URL=$(echo "$RELEASE_OUTPUT" | grep -oE 'https://github.com/.*/releases/.*')
-          echo "release_url=$RELEASE_URL" >> $GITHUB_OUTPUT
-
-          # Get release ID using gh api
-          RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/$VERSION --jq '.id')
-          echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
-
-          echo "✅ Release created successfully"
-          echo "🔗 URL: $RELEASE_URL"
+        # Check if release already exists
+        if gh release view "$VERSION" &>/dev/null; then
+          echo "⚠️  Release $VERSION already exists, skipping creation"
+          RELEASE_URL=$(gh release view "$VERSION" --json url --jq '.url')
         else
-          echo "❌ Failed to create release"
-          echo "$RELEASE_OUTPUT"
-          exit 1
+          # Create release with notes
+          RELEASE_OUTPUT=$(gh release create "$VERSION" \
+            --title "Release $VERSION" \
+            --notes "$RELEASE_NOTES" \
+            --latest 2>&1)
+          RELEASE_URL=$(echo "$RELEASE_OUTPUT" | grep -oE 'https://github.com/.*/releases/.*' || echo "")
         fi
 
-    - name: Trigger Publish Workflow (if exists)
+        echo "release_url=$RELEASE_URL" >> $GITHUB_OUTPUT
+
+        # Get release ID using gh api
+        RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/$VERSION --jq '.id' 2>/dev/null || echo "")
+        echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
+
+        echo "✅ GitHub release ready"
+        echo "🔗 URL: $RELEASE_URL"
+
+    - name: Publish to npm
+      if: inputs.npm-token != ''
       shell: bash
       env:
-        GH_TOKEN: ${{ inputs.token }}
+        NODE_AUTH_TOKEN: ${{ inputs.npm-token }}
       run: |
         VERSION="${{ inputs.version }}"
-        PUBLISH_WORKFLOW="${{ inputs.publish-workflow }}"
+        VERSION_NUM="${VERSION#v}"
+        echo "📦 Publishing @thecraftlab/gluecraft@$VERSION_NUM to npm"
 
-        # Check if publish workflow file exists
-        if [ -f ".github/workflows/$PUBLISH_WORKFLOW" ]; then
-          echo "🔄 Triggering $PUBLISH_WORKFLOW for $VERSION"
+        pnpm publish --no-git-checks --access public
 
-          # Trigger the publish workflow with the release tag
-          # This is necessary because GITHUB_TOKEN release creation doesn't trigger workflows
-          if gh workflow run "$PUBLISH_WORKFLOW" --field tag="$VERSION" 2>&1; then
-            echo "✅ Publish workflow triggered for $VERSION"
-          else
-            echo "⚠️  Failed to trigger publish workflow, but continuing"
-            echo "   Check that $PUBLISH_WORKFLOW accepts workflow_dispatch with a 'tag' input"
-          fi
-        else
-          echo "ℹ️  No $PUBLISH_WORKFLOW workflow found - skipping publish trigger"
-          echo "   This is normal if you don't have a separate publish workflow"
-        fi
+        echo "✅ Published to npm"
+        echo "🔗 https://www.npmjs.com/package/@thecraftlab/gluecraft/v/$VERSION_NUM"
+
+    - name: Skip npm publish (no token)
+      if: inputs.npm-token == ''
+      shell: bash
+      run: |
+        echo "ℹ️  NPM_TOKEN not provided - skipping npm publish"
+        echo "   To enable npm publishing, add NPM_TOKEN secret to your repository"
