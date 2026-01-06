@@ -1,245 +1,287 @@
 /**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+ * Custom CSS for Gluecraft documentation site
+ * Color scheme: Teal, coral, and amber against clean backgrounds
  */
 
-/* You can override the default Infima variables here. */
+/* Light theme - Primary colors */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
+  /*
+   * THEME COLORS - Gluecraft brand colors
+   * Teal primary, coral secondary, amber accent
+   */
+
+  --color-primary-base: #0d9488; /* Teal */
+  --color-secondary-base: #f97316; /* Orange/Coral */
+  --color-info-base: #eab308; /* Amber */
+
+  /* Teal - programmatically generated variations */
+  --ifm-color-primary: var(--color-primary-base);
+  --ifm-color-primary-dark: color-mix(in srgb, var(--color-primary-base) 85%, black);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--color-primary-base) 70%, black);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--color-primary-base) 55%, black);
+  --ifm-color-primary-light: color-mix(in srgb, var(--color-primary-base) 85%, white);
+  --ifm-color-primary-lighter: color-mix(in srgb, var(--color-primary-base) 70%, white);
+  --ifm-color-primary-lightest: color-mix(in srgb, var(--color-primary-base) 55%, white);
+
+  /* Orange/Coral - programmatically generated variations */
+  --ifm-color-secondary: var(--color-secondary-base);
+  --ifm-color-secondary-dark: color-mix(in srgb, var(--color-secondary-base) 85%, black);
+  --ifm-color-secondary-darker: color-mix(in srgb, var(--color-secondary-base) 70%, black);
+  --ifm-color-secondary-darkest: color-mix(in srgb, var(--color-secondary-base) 55%, black);
+  --ifm-color-secondary-light: color-mix(in srgb, var(--color-secondary-base) 85%, white);
+  --ifm-color-secondary-lighter: color-mix(in srgb, var(--color-secondary-base) 70%, white);
+  --ifm-color-secondary-lightest: color-mix(in srgb, var(--color-secondary-base) 55%, white);
+
+  /* Amber - programmatically generated variations */
+  --ifm-color-info: var(--color-info-base);
+  --ifm-color-info-dark: color-mix(in srgb, var(--color-info-base) 85%, black);
+  --ifm-color-info-darker: color-mix(in srgb, var(--color-info-base) 70%, black);
+  --ifm-color-info-darkest: color-mix(in srgb, var(--color-info-base) 55%, black);
+  --ifm-color-info-light: color-mix(in srgb, var(--color-info-base) 85%, white);
+  --ifm-color-info-lighter: color-mix(in srgb, var(--color-info-base) 70%, white);
+  --ifm-color-info-lightest: color-mix(in srgb, var(--color-info-base) 55%, white);
+
+  /* Background colors */
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f0fdfa;
+  --ifm-hover-overlay: color-mix(in srgb, var(--color-primary-base) 10%, transparent);
+
+  /* Text colors */
+  --ifm-font-color-base: #374151;
+  --ifm-font-color-secondary: #6b7280;
+  --ifm-heading-color: #1f2937;
+
+  /* Code styling */
   --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  
-  /* Enhanced heading sizes for better hierarchy */
-  --ifm-h1-font-size: 2.5rem;
-  --ifm-h2-font-size: 2rem;
-  --ifm-h3-font-size: 1.5rem;
-  --ifm-h4-font-size: 1.25rem;
-  --ifm-h5-font-size: 1.125rem;
-  --ifm-h6-font-size: 1rem;
+  --ifm-code-background: #f0fdfa;
+  --ifm-code-color: var(--color-primary-base);
+  --docusaurus-highlighted-code-line-bg: color-mix(
+    in srgb,
+    var(--color-primary-base) 10%,
+    transparent
+  );
+
+  /* Border and shadow colors */
+  --ifm-border-color: #e5e7eb;
+  --ifm-global-shadow-lw: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ifm-global-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --ifm-global-shadow-tl: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
+  /* Navbar styling */
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+  /* Footer styling */
+  --ifm-footer-background-color: #134e4a;
+  --ifm-footer-color: #ccfbf1;
+  --ifm-footer-link-color: #5eead4;
+  --ifm-footer-link-hover-color: #99f6e4;
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
+/* Dark theme - Adjusted for readability */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* Override base colors with brighter versions for better contrast on dark backgrounds */
+  --color-primary-base: #2dd4bf; /* Brighter teal */
+  --color-secondary-base: #fb923c; /* Brighter orange */
+  --color-info-base: #fbbf24; /* Brighter amber */
+
+  /* All variations are automatically recalculated from the brighter base colors above */
+  --ifm-color-primary: var(--color-primary-base);
+  --ifm-color-primary-dark: color-mix(in srgb, var(--color-primary-base) 85%, black);
+  --ifm-color-primary-darker: color-mix(in srgb, var(--color-primary-base) 70%, black);
+  --ifm-color-primary-darkest: color-mix(in srgb, var(--color-primary-base) 55%, black);
+  --ifm-color-primary-light: color-mix(in srgb, var(--color-primary-base) 85%, white);
+  --ifm-color-primary-lighter: color-mix(in srgb, var(--color-primary-base) 70%, white);
+  --ifm-color-primary-lightest: color-mix(in srgb, var(--color-primary-base) 55%, white);
+
+  --ifm-color-secondary: var(--color-secondary-base);
+  --ifm-color-secondary-dark: color-mix(in srgb, var(--color-secondary-base) 85%, black);
+  --ifm-color-secondary-darker: color-mix(in srgb, var(--color-secondary-base) 70%, black);
+  --ifm-color-secondary-darkest: color-mix(in srgb, var(--color-secondary-base) 55%, black);
+  --ifm-color-secondary-light: color-mix(in srgb, var(--color-secondary-base) 85%, white);
+  --ifm-color-secondary-lighter: color-mix(in srgb, var(--color-secondary-base) 70%, white);
+  --ifm-color-secondary-lightest: color-mix(in srgb, var(--color-secondary-base) 55%, white);
+
+  --ifm-color-info: var(--color-info-base);
+  --ifm-color-info-dark: color-mix(in srgb, var(--color-info-base) 85%, black);
+  --ifm-color-info-darker: color-mix(in srgb, var(--color-info-base) 70%, black);
+  --ifm-color-info-darkest: color-mix(in srgb, var(--color-info-base) 55%, black);
+  --ifm-color-info-light: color-mix(in srgb, var(--color-info-base) 85%, white);
+  --ifm-color-info-lighter: color-mix(in srgb, var(--color-info-base) 70%, white);
+  --ifm-color-info-lightest: color-mix(in srgb, var(--color-info-base) 55%, white);
+
+  /* Background colors for dark mode */
+  --ifm-background-color: #0f172a;
+  --ifm-background-surface-color: #1e293b;
+  --ifm-hover-overlay: color-mix(in srgb, var(--color-primary-base) 10%, transparent);
+
+  /* Text colors for dark mode */
+  --ifm-font-color-base: #e2e8f0;
+  --ifm-font-color-secondary: #94a3b8;
+  --ifm-heading-color: #f1f5f9;
+
+  /* Code styling for dark mode */
+  --ifm-code-background: #1e293b;
+  --ifm-code-color: var(--color-primary-base);
+  --docusaurus-highlighted-code-line-bg: color-mix(
+    in srgb,
+    var(--color-primary-base) 10%,
+    transparent
+  );
+
+  /* Border and shadow colors for dark mode */
+  --ifm-border-color: #334155;
+  --ifm-global-shadow-lw: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --ifm-global-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --ifm-global-shadow-tl: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+
+  /* Navbar styling for dark mode */
+  --ifm-navbar-background-color: #1e293b;
+  --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+
+  /* Footer styling for dark mode */
+  --ifm-footer-background-color: #0f172a;
+  --ifm-footer-color: #94a3b8;
+  --ifm-footer-link-color: var(--color-primary-base);
+  --ifm-footer-link-hover-color: var(--ifm-color-primary-light);
 }
 
-/* ============================================================================
-   TYPOGRAPHY HIERARCHY - Clear visual distinction between heading levels
-   ============================================================================ */
-
-/* Page Title (H1) - Hero-sized, maximum impact */
-.markdown h1 {
-  font-size: 3rem;
-  font-weight: 700;
-  margin-top: 0;
-  margin-bottom: 2.5rem;
-  line-height: 1.1;
-  letter-spacing: -0.03em;
-  color: var(--ifm-heading-color);
+/* Logo scaling and cropping */
+.navbar__logo img {
+  transform: scale(1.5);
+  object-fit: cover;
+  object-position: center;
+  margin: 0px 0px 0px 0px;
+  padding-right: 8px;
+  padding-left: 8px;
 }
 
-/* Major Sections (H2) - Clear secondary hierarchy with strong visual break */
-.markdown h2 {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-top: 4rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 3px solid var(--ifm-color-emphasis-300);
-  line-height: 1.25;
-  letter-spacing: -0.015em;
-  color: var(--ifm-heading-color);
+[data-theme='dark'] .navbar__logo img {
+  filter: brightness(1.2);
 }
 
-/* First H2 doesn't need large top margin */
-.markdown h1 + h2,
-.markdown > h2:first-of-type {
-  margin-top: 2rem;
+[data-theme='dark'] .hero img {
+  filter: brightness(1.2);
 }
 
-/* Subsections (H3) - Clearly smaller than H2 */
-.markdown h3 {
-  font-size: 1.5rem;
+/* Custom styling for better visual hierarchy */
+.navbar__title {
   font-weight: 600;
-  margin-top: 2.5rem;
-  margin-bottom: 1rem;
-  line-height: 1.35;
-  color: var(--ifm-heading-color);
+  color: var(--ifm-color-primary-dark);
+  font-size: 1.3rem;
 }
 
-/* Sub-subsections (H4) - More subtle, but still distinct */
-.markdown h4 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-top: 2rem;
-  margin-bottom: 0.75rem;
-  line-height: 1.4;
-  color: var(--ifm-color-emphasis-900);
-}
-
-/* Minor headings (H5, H6) - Close to body size but bolded */
-.markdown h5 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-top: 1.5rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-  color: var(--ifm-color-emphasis-800);
-}
-
-.markdown h6 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-top: 1.25rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-  color: var(--ifm-color-emphasis-700);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Add visual breathing room after headings */
-.markdown h2 + p,
-.markdown h3 + p,
-.markdown h4 + p {
-  margin-top: 0;
-}
-
-/* ============================================================================
-   CONTENT SPACING - Better readability and breathing room
-   ============================================================================ */
-
-/* Paragraphs - generous spacing */
-.markdown p {
-  margin-bottom: 1.5rem;
-  line-height: 1.75;
-  font-size: 1rem;
-}
-
-/* Lists - clear hierarchy */
-.markdown ul,
-.markdown ol {
-  margin-bottom: 1.75rem;
-  margin-top: 0.75rem;
-  line-height: 1.75;
-}
-
-.markdown li {
-  margin-bottom: 0.5rem;
-}
-
-.markdown li > p {
-  margin-bottom: 0.5rem;
-}
-
-/* Nested lists */
-.markdown li > ul,
-.markdown li > ol {
-  margin-top: 0.5rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Code blocks - prominent and well-spaced */
-.markdown pre {
-  margin-top: 1.5rem;
-  margin-bottom: 2rem;
-  border-radius: 8px;
-}
-
-/* Inline code */
-.markdown code {
-  font-size: 0.9em;
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-}
-
-/* Blockquotes */
-.markdown blockquote {
-  margin: 1.5rem 0;
-  padding: 1rem 1.5rem;
-  border-left: 4px solid var(--ifm-color-primary);
-}
-
-/* Tables */
-.markdown table {
-  margin-top: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-/* Horizontal rules */
-.markdown hr {
-  margin: 3rem 0;
-  border: none;
-  border-top: 2px solid var(--ifm-color-emphasis-200);
-}
-
-/* ============================================================================
-   ADMONITIONS - Stand out from body content
-   ============================================================================ */
-
-.admonition {
-  margin: 2rem 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.admonition-heading h5 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  text-transform: none;
-  letter-spacing: normal;
-}
-
-.admonition-content {
-  line-height: 1.7;
-}
-
-.admonition-content p:last-child {
-  margin-bottom: 0;
-}
-
-/* ============================================================================
-   TABLE OF CONTENTS - Better visual hierarchy
-   ============================================================================ */
-
-.table-of-contents__link {
-  font-size: 0.875rem;
-  line-height: 1.6;
-}
-
-.table-of-contents__link--active {
-  font-weight: 600;
+.navbar__link {
+  font-weight: 400;
   color: var(--ifm-color-primary);
+  opacity: 0.85;
+  padding-top: 5px;
+  margin-top: 2px;
 }
 
-/* ============================================================================
-   DARK MODE ADJUSTMENTS
-   ============================================================================ */
-
-[data-theme='dark'] .markdown h2 {
-  border-bottom-color: var(--ifm-color-emphasis-300);
+.navbar__link:hover {
+  color: var(--ifm-color-primary);
+  opacity: 1;
 }
 
-[data-theme='dark'] .markdown h4 {
-  color: var(--ifm-color-emphasis-900);
+/* Custom button styling */
+.button--primary {
+  background-color: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
 }
 
-[data-theme='dark'] .markdown h5,
-[data-theme='dark'] .markdown h6 {
-  color: var(--ifm-color-emphasis-800);
+.button--primary:hover {
+  background-color: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary-dark);
+}
+
+.button--secondary {
+  background-color: var(--ifm-color-secondary);
+  border-color: var(--ifm-color-secondary);
+  color: white;
+}
+
+.button--secondary:hover {
+  background-color: var(--ifm-color-secondary-dark);
+  border-color: var(--ifm-color-secondary-dark);
+}
+
+/* Code block styling */
+.prism-code {
+  background-color: var(--ifm-code-background) !important;
+}
+
+/* Table styling */
+.table {
+  border: 1px solid var(--ifm-border-color);
+}
+
+.table th {
+  background-color: var(--ifm-background-surface-color);
+  color: var(--ifm-heading-color);
+  font-weight: 600;
+}
+
+/* Card styling */
+.card {
+  border: 1px solid var(--ifm-border-color);
+  box-shadow: var(--ifm-global-shadow-lw);
+}
+
+.card:hover {
+  box-shadow: var(--ifm-global-shadow-md);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Fix heading contrast issues */
+.hero__title {
+  color: var(--ifm-color-primary) !important;
+}
+
+.hero__subtitle {
+  color: var(--ifm-font-color-secondary) !important;
+}
+
+/* Ensure proper contrast for headings in dark mode */
+[data-theme='dark'] .hero__title {
+  color: var(--ifm-color-primary) !important;
+}
+
+[data-theme='dark'] .hero__subtitle {
+  color: var(--ifm-font-color-secondary) !important;
+}
+
+/* Admonition styling for Gluecraft colors */
+.alert--info {
+  --ifm-alert-background-color: color-mix(in srgb, var(--color-primary-base) 10%, transparent);
+  --ifm-alert-border-color: var(--color-primary-base);
+}
+
+.alert--warning {
+  --ifm-alert-background-color: color-mix(in srgb, var(--color-info-base) 10%, transparent);
+  --ifm-alert-border-color: var(--color-info-base);
+}
+
+/* Feature cards on homepage */
+.feature-card {
+  background: var(--ifm-background-surface-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--ifm-global-shadow-md);
+}
+
+/* Sync animation for hero */
+@keyframes sync-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.sync-indicator {
+  animation: sync-pulse 2s ease-in-out infinite;
 }
