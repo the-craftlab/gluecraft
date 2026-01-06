@@ -1,20 +1,20 @@
 /**
  * Custom CSS for Gluecraft documentation site
- * Color scheme: Teal, coral, and amber against clean backgrounds
+ * Color scheme: Reds, dark reds, and deep maroons
  */
 
 /* Light theme - Primary colors */
 :root {
   /*
    * THEME COLORS - Gluecraft brand colors
-   * Teal primary, coral secondary, amber accent
+   * Deep maroon primary, crimson secondary, warm amber accent
    */
 
-  --color-primary-base: #0d9488; /* Teal */
-  --color-secondary-base: #f97316; /* Orange/Coral */
-  --color-info-base: #eab308; /* Amber */
+  --color-primary-base: #991b1b; /* Deep maroon/red-800 */
+  --color-secondary-base: #dc2626; /* Crimson/red-600 */
+  --color-info-base: #d97706; /* Warm amber */
 
-  /* Teal - programmatically generated variations */
+  /* Deep maroon - programmatically generated variations */
   --ifm-color-primary: var(--color-primary-base);
   --ifm-color-primary-dark: color-mix(in srgb, var(--color-primary-base) 85%, black);
   --ifm-color-primary-darker: color-mix(in srgb, var(--color-primary-base) 70%, black);
@@ -23,7 +23,7 @@
   --ifm-color-primary-lighter: color-mix(in srgb, var(--color-primary-base) 70%, white);
   --ifm-color-primary-lightest: color-mix(in srgb, var(--color-primary-base) 55%, white);
 
-  /* Orange/Coral - programmatically generated variations */
+  /* Crimson - programmatically generated variations */
   --ifm-color-secondary: var(--color-secondary-base);
   --ifm-color-secondary-dark: color-mix(in srgb, var(--color-secondary-base) 85%, black);
   --ifm-color-secondary-darker: color-mix(in srgb, var(--color-secondary-base) 70%, black);
@@ -32,7 +32,7 @@
   --ifm-color-secondary-lighter: color-mix(in srgb, var(--color-secondary-base) 70%, white);
   --ifm-color-secondary-lightest: color-mix(in srgb, var(--color-secondary-base) 55%, white);
 
-  /* Amber - programmatically generated variations */
+  /* Warm amber - programmatically generated variations */
   --ifm-color-info: var(--color-info-base);
   --ifm-color-info-dark: color-mix(in srgb, var(--color-info-base) 85%, black);
   --ifm-color-info-darker: color-mix(in srgb, var(--color-info-base) 70%, black);
@@ -41,9 +41,9 @@
   --ifm-color-info-lighter: color-mix(in srgb, var(--color-info-base) 70%, white);
   --ifm-color-info-lightest: color-mix(in srgb, var(--color-info-base) 55%, white);
 
-  /* Background colors */
+  /* Background colors - warm neutrals */
   --ifm-background-color: #ffffff;
-  --ifm-background-surface-color: #f0fdfa;
+  --ifm-background-surface-color: #fef2f2;
   --ifm-hover-overlay: color-mix(in srgb, var(--color-primary-base) 10%, transparent);
 
   /* Text colors */
@@ -53,7 +53,7 @@
 
   /* Code styling */
   --ifm-code-font-size: 95%;
-  --ifm-code-background: #f0fdfa;
+  --ifm-code-background: #fef2f2;
   --ifm-code-color: var(--color-primary-base);
   --docusaurus-highlighted-code-line-bg: color-mix(
     in srgb,
@@ -71,18 +71,18 @@
   --ifm-navbar-background-color: #ffffff;
   --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 
-  /* Footer styling */
-  --ifm-footer-background-color: #134e4a;
-  --ifm-footer-color: #ccfbf1;
-  --ifm-footer-link-color: #5eead4;
-  --ifm-footer-link-hover-color: #99f6e4;
+  /* Footer styling - deep maroon */
+  --ifm-footer-background-color: #7f1d1d;
+  --ifm-footer-color: #fecaca;
+  --ifm-footer-link-color: #fca5a5;
+  --ifm-footer-link-hover-color: #fef2f2;
 }
 
 /* Dark theme - Adjusted for readability */
 [data-theme='dark'] {
   /* Override base colors with brighter versions for better contrast on dark backgrounds */
-  --color-primary-base: #2dd4bf; /* Brighter teal */
-  --color-secondary-base: #fb923c; /* Brighter orange */
+  --color-primary-base: #f87171; /* Brighter red */
+  --color-secondary-base: #fb7185; /* Brighter rose */
   --color-info-base: #fbbf24; /* Brighter amber */
 
   /* All variations are automatically recalculated from the brighter base colors above */
@@ -110,18 +110,18 @@
   --ifm-color-info-lighter: color-mix(in srgb, var(--color-info-base) 70%, white);
   --ifm-color-info-lightest: color-mix(in srgb, var(--color-info-base) 55%, white);
 
-  /* Background colors for dark mode */
-  --ifm-background-color: #0f172a;
-  --ifm-background-surface-color: #1e293b;
+  /* Background colors for dark mode - warm dark */
+  --ifm-background-color: #1c1917;
+  --ifm-background-surface-color: #292524;
   --ifm-hover-overlay: color-mix(in srgb, var(--color-primary-base) 10%, transparent);
 
   /* Text colors for dark mode */
-  --ifm-font-color-base: #e2e8f0;
-  --ifm-font-color-secondary: #94a3b8;
-  --ifm-heading-color: #f1f5f9;
+  --ifm-font-color-base: #e7e5e4;
+  --ifm-font-color-secondary: #a8a29e;
+  --ifm-heading-color: #fafaf9;
 
   /* Code styling for dark mode */
-  --ifm-code-background: #1e293b;
+  --ifm-code-background: #292524;
   --ifm-code-color: var(--color-primary-base);
   --docusaurus-highlighted-code-line-bg: color-mix(
     in srgb,
@@ -130,18 +130,18 @@
   );
 
   /* Border and shadow colors for dark mode */
-  --ifm-border-color: #334155;
+  --ifm-border-color: #44403c;
   --ifm-global-shadow-lw: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
   --ifm-global-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
   --ifm-global-shadow-tl: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
 
   /* Navbar styling for dark mode */
-  --ifm-navbar-background-color: #1e293b;
+  --ifm-navbar-background-color: #292524;
   --ifm-navbar-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
 
   /* Footer styling for dark mode */
-  --ifm-footer-background-color: #0f172a;
-  --ifm-footer-color: #94a3b8;
+  --ifm-footer-background-color: #1c1917;
+  --ifm-footer-color: #a8a29e;
   --ifm-footer-link-color: var(--color-primary-base);
   --ifm-footer-link-hover-color: var(--ifm-color-primary-light);
 }

@@ -1,19 +1,11 @@
 #=============================================================================
-# DOCS DEPLOYMENT WORKFLOW
+# DOCS BUILD AND DEPLOYMENT
 #=============================================================================
-# Deploys documentation to Vercel when docs change on develop or main.
-# Uses Vercel's automatic deployment with custom domain: gluecraft.thecraftlab.dev
+# Builds and deploys documentation to GitHub Pages.
+# Triggered on push to main when docs change, or manually via workflow_dispatch.
 #
-# Triggers:
-#   - Push to develop/main with changes in docs/
-#   - Manual workflow_dispatch
-#
-# Note: This workflow triggers Vercel deployment via push. Vercel should be
-# configured with:
-#   - Root Directory: docs
-#   - Framework: Docusaurus 2
-#   - Build Command: pnpm build
-#   - Output Directory: build
+# Custom domain: gluecraft.thecraftlab.dev
+# Configure in repo Settings > Pages > Custom domain
 #=============================================================================
 
 name: Deploy Docs
@@ -21,7 +13,6 @@ name: Deploy Docs
 on:
   push:
     branches:
-      - develop
       - main
     paths:
       - 'docs/**'
@@ -38,7 +29,7 @@ env:
   PNPM_VERSION: '10.20.0'
 
 jobs:
-  build:
+  build-docs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
@@ -70,44 +61,50 @@ jobs:
           echo "📦 Docs version: $VERSION"
 
       - name: Install dependencies
-        working-directory: docs
-        run: pnpm install --frozen-lockfile
+        run: |
+          pnpm install --frozen-lockfile
+          cd docs && pnpm install --frozen-lockfile
 
-      - name: Build docs
+      - name: Build Docusaurus site
         working-directory: docs
         env:
           GLUECRAFT_DOCS_VERSION: ${{ steps.version.outputs.version }}
+          NODE_ENV: production
         run: pnpm build
 
-      - name: Upload build artifact
+      - name: Upload docs build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: docs-build
           path: docs/build
-          retention-days: 7
+          retention-days: 1
 
-  # Note: Vercel deploys automatically on push via its GitHub integration.
-  # This job just validates the build. If you need to deploy via CLI instead,
-  # uncomment the deploy job below and add VERCEL_TOKEN, VERCEL_ORG_ID, 
-  # and VERCEL_PROJECT_ID secrets.
-  
-  # deploy:
-  #   name: Deploy to Vercel
-  #   needs: build
-  #   runs-on: ubuntu-latest
-  #   if: github.ref == 'refs/heads/main'
-  #   steps:
-  #     - name: Download build artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: docs-build
-  #         path: build
-  #
-  #     - name: Deploy to Vercel
-  #       uses: amondnet/vercel-action@v25
-  #       with:
-  #         vercel-token: ${{ secrets.VERCEL_TOKEN }}
-  #         vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-  #         vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-  #         working-directory: ./build
-  #         vercel-args: '--prod'
+  deploy-docs:
+    name: Deploy to GitHub Pages
+    needs: build-docs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download docs build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-build
+          path: docs/build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/build
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
