@@ -255,7 +255,7 @@ jobs:
         needs.version.result == 'success' &&
         needs.version.outputs.version != '' &&
         needs.gate.result == 'success' &&
-        (contains(github.event.head_commit.message, 'Merge pull request') || github.event_name == 'workflow_dispatch')
+        (github.event.head_commit.committer.email == 'noreply@github.com' || github.event_name == 'workflow_dispatch')
       }}
     runs-on: ubuntu-latest
     steps:
@@ -284,7 +284,7 @@ jobs:
         (needs.tag.result == 'success' ||
         needs.tag.result == 'skipped') &&
         (github.ref_name == 'develop') &&
-        (contains(github.event.head_commit.message, 'Merge pull request') || github.event_name == 'workflow_dispatch')
+        (github.event.head_commit.committer.email == 'noreply@github.com' || github.event_name == 'workflow_dispatch')
       }}
     runs-on: ubuntu-latest
     steps:
