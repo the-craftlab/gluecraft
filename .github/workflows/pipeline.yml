@@ -297,7 +297,7 @@ jobs:
           version: ${{ needs.version.outputs.version }}
           sourceBranch: ${{ github.ref_name }}
           targetBranch: ${{ 'main' }}
-          autoMerge: ${{ (github.ref_name == 'develop' && 'false') || 'false' }}
+          autoMerge: ${{ 'true' }}
           run_number: ${{ inputs.run_number || github.run_number }}
 
   #=============================================================================
