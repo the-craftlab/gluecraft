@@ -301,10 +301,9 @@ jobs:
           run_number: ${{ inputs.run_number || github.run_number }}
 
   #=============================================================================
-  # RELEASE (Customized for npm publishing)
+  # RELEASE (⚠️  Managed by Pipecraft - do not modify)
   #=============================================================================
-  # Creates a GitHub release and publishes to npm.
-  # Requires NPM_TOKEN secret for npm publishing.
+  # Creates a GitHub release and triggers publish.yml for npm publishing.
 
   release:
     needs: [ tag, version ]
@@ -324,6 +323,3 @@ jobs:
       - uses: ./.github/actions/create-release
         with:
           version: ${{ needs.version.outputs.version }}
-          npm-token: ${{ secrets.NPM_TOKEN }}
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}

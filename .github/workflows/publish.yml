@@ -1,0 +1,108 @@
+#=============================================================================
+# NPM PUBLISH WORKFLOW
+#=============================================================================
+# Triggered by create-release action after a GitHub release is created.
+# Publishes the package to npm under @thecraftlab org.
+#
+# Required secrets:
+#   NPM_TOKEN - npm automation token with publish permissions for @thecraftlab
+#
+# Setup:
+#   1. Go to https://www.npmjs.com/settings/~/tokens
+#   2. Create a new "Automation" token (bypasses 2FA for CI/CD)
+#   3. Add as NPM_TOKEN in: https://github.com/the-craftlab/gluecraft/settings/secrets/actions
+#=============================================================================
+
+name: Publish to NPM
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Git tag to publish (e.g., v1.2.3)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  NODE_VERSION: '24'
+  PNPM_VERSION: '10.20.0'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate tag format
+        run: |
+          TAG="${{ inputs.tag }}"
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Invalid tag format: $TAG"
+            echo "   Expected format: v1.2.3"
+            exit 1
+          fi
+          echo "✅ Valid tag: $TAG"
+
+      - name: Checkout code at tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm run build
+
+      - name: Verify build artifacts
+        run: |
+          if [ ! -f "dist/cli.js" ]; then
+            echo "❌ Build failed: dist/cli.js not found"
+            exit 1
+          fi
+          echo "✅ Build artifacts verified"
+
+      - name: Set package version from tag
+        run: |
+          TAG="${{ inputs.tag }}"
+          VERSION="${TAG#v}"
+          echo "📝 Setting package.json version to $VERSION"
+          node -e "
+            const fs = require('fs');
+            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+            pkg.version = '$VERSION';
+            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+
+      - name: Publish to npm
+        run: pnpm publish --no-git-checks --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Verify publication
+        run: |
+          TAG="${{ inputs.tag }}"
+          VERSION="${TAG#v}"
+          echo "⏳ Waiting for npm to index..."
+          sleep 10
+          
+          if npm view @thecraftlab/gluecraft@$VERSION version 2>/dev/null; then
+            echo "✅ Published @thecraftlab/gluecraft@$VERSION"
+            echo "🔗 https://www.npmjs.com/package/@thecraftlab/gluecraft/v/$VERSION"
+          else
+            echo "⚠️  Package may still be indexing - check npm in a few minutes"
+          fi
