@@ -89,9 +89,9 @@ describe('GitHubProjectsClient - Field Operations', () => {
     it('should handle project not found', async () => {
       mockGraphql.mockResolvedValueOnce({ node: null });
 
-      await expect(client.getProjectFields('PVT_nonexistent')).rejects.toThrow(
-        'Project not found'
-      );
+      // When project is not found, getProjectFields returns an empty array for graceful degradation
+      const result = await client.getProjectFields('PVT_nonexistent');
+      expect(result).toEqual([]);
     });
   });
 

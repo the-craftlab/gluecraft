@@ -508,8 +508,8 @@ describe('GitHubProjectsClient - Comprehensive Integration', () => {
       });
 
       it('should handle validation errors gracefully', async () => {
-        // Clear previous mock and set up error
-        mockGraphql.mockClear();
+        // Reset mock completely to remove beforeEach's queued response
+        mockGraphql.mockReset();
         mockGraphql.mockRejectedValueOnce(new Error('Validation failed'));
 
         const mappings = [

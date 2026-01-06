@@ -365,12 +365,15 @@ describe('RateLimitHandler', () => {
         maxRetries: 3
       });
 
+      // Set up rejection expectation BEFORE advancing time
+      const expectReject = expect(promise).rejects.toThrow();
+
       // Advance through all retries
       for (let i = 0; i < 4; i++) {
         await vi.advanceTimersByTimeAsync(1000);
       }
 
-      await expect(promise).rejects.toThrow();
+      await expectReject;
       expect(fn).toHaveBeenCalledTimes(4); // Initial + 3 retries
     });
 
@@ -384,14 +387,17 @@ describe('RateLimitHandler', () => {
         maxRetries: 2
       });
 
+      // Set up rejection expectation BEFORE advancing time
+      const expectReject = expect(promise).rejects.toMatchObject({
+        status: 429,
+        message: 'Rate limit exceeded'
+      });
+
       for (let i = 0; i < 3; i++) {
         await vi.advanceTimersByTimeAsync(500);
       }
 
-      await expect(promise).rejects.toMatchObject({
-        status: 429,
-        message: 'Rate limit exceeded'
-      });
+      await expectReject;
     });
 
     it('should return immediately on success (no retry)', async () => {
@@ -492,7 +498,10 @@ describe('RateLimitHandler', () => {
         maxRetries: 1
       });
 
+      // Set up rejection expectation BEFORE advancing time to avoid unhandled rejection warnings
+      const expectReject = expect(promise).rejects.toThrow();
       await vi.advanceTimersByTimeAsync(200);
+      await expectReject;
       
       // Should retry
       expect(fn).toHaveBeenCalledTimes(2);
@@ -508,7 +517,10 @@ describe('RateLimitHandler', () => {
         maxRetries: 1
       });
 
+      // Set up rejection expectation BEFORE advancing time to avoid unhandled rejection warnings
+      const expectReject = expect(promise).rejects.toThrow();
       await vi.advanceTimersByTimeAsync(200);
+      await expectReject;
       
       expect(fn).toHaveBeenCalledTimes(2);
     });
@@ -523,7 +535,10 @@ describe('RateLimitHandler', () => {
         maxRetries: 1
       });
 
+      // Set up rejection expectation BEFORE advancing time to avoid unhandled rejection warnings
+      const expectReject = expect(promise).rejects.toThrow();
       await vi.advanceTimersByTimeAsync(200);
+      await expectReject;
       
       expect(fn).toHaveBeenCalledTimes(2);
     });
@@ -672,10 +687,14 @@ describe('RateLimitHandler', () => {
         maxRetries: 1
       });
 
+      // Set up rejection expectations before advancing time to avoid unhandled rejection warnings
+      const expectReject1 = expect(promise1).rejects.toThrow();
+      const expectReject2 = expect(promise2).rejects.toThrow();
+
       await vi.advanceTimersByTimeAsync(500);
 
-      await expect(promise1).rejects.toThrow();
-      await expect(promise2).rejects.toThrow();
+      await expectReject1;
+      await expectReject2;
       
       expect(fn1).toHaveBeenCalledTimes(2);
       expect(fn2).toHaveBeenCalledTimes(2);
