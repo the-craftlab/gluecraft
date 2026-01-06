@@ -1,39 +1,90 @@
-import {themes as prismThemes} from 'prism-react-renderer';
-import type {Config} from '@docusaurus/types';
-import type * as Preset from '@docusaurus/preset-classic';
+import type * as Preset from '@docusaurus/preset-classic'
+import type { Config } from '@docusaurus/types'
+import { themes as prismThemes } from 'prism-react-renderer'
+import { readFileSync } from 'fs'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
-// This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const rootPackageJsonPath = path.resolve(__dirname, '../package.json')
+const rootPackageJson = JSON.parse(readFileSync(rootPackageJsonPath, 'utf8'))
+
+// Version resolution priority:
+// 1. GLUECRAFT_DOCS_VERSION env var (set by CI/CD pipeline during release builds)
+// 2. package.json version (fallback for local development)
+const rawDocsVersion = process.env.GLUECRAFT_DOCS_VERSION
+const derivedDocsVersion =
+  typeof rawDocsVersion === 'string' && rawDocsVersion.trim().length > 0
+    ? rawDocsVersion
+    : rootPackageJson.version
+
+// Normalize to remove v prefix if present
+const GLUECRAFT_VERSION: string = (derivedDocsVersion ?? '0.0.0-dev').replace(/^v/i, '')
 
 const config: Config = {
-  title: 'Gluecraft JPD',
-  tagline: 'Bidirectional sync between Jira Product Discovery and GitHub Issues by The Craft Lab',
+  title: 'Gluecraft',
+  tagline: 'Bidirectional sync between Jira Product Discovery and GitHub Issues',
   favicon: 'img/favicon.ico',
-
-  // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
-  future: {
-    v4: true, // Improve compatibility with the upcoming Docusaurus v4
+  customFields: {
+    gluecraftVersion: GLUECRAFT_VERSION
   },
 
-  // Set the production url of your site here
-  url: 'https://thecraftlab.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/gluecraft/',
+  future: {
+    v4: true
+  },
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'thecraftlab', // Usually your GitHub org/user name.
-  projectName: 'gluecraft', // Usually your repo name.
+  // Production URL - custom domain
+  url: 'https://gluecraft.thecraftlab.dev',
+  baseUrl: '/',
 
-  onBrokenLinks: 'throw',
+  organizationName: 'the-craftlab',
+  projectName: 'gluecraft',
 
-  // Even if you don't use internationalization, you can use this field to set
-  // useful metadata like html lang. For example, if your site is Chinese, you
-  // may want to replace "en" with "zh-Hans".
+  headTags: [
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'apple-touch-icon',
+        sizes: '180x180',
+        href: '/img/apple-touch-icon.png'
+      }
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '32x32',
+        href: '/img/favicon-32x32.png'
+      }
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'icon',
+        type: 'image/png',
+        sizes: '16x16',
+        href: '/img/favicon-16x16.png'
+      }
+    },
+    {
+      tagName: 'link',
+      attributes: {
+        rel: 'manifest',
+        href: '/site.webmanifest'
+      }
+    }
+  ],
+
+  onBrokenLinks: 'warn',
+  onBrokenMarkdownLinks: 'warn',
+
   i18n: {
     defaultLocale: 'en',
-    locales: ['en'],
+    locales: ['en']
   },
+
+  plugins: [],
 
   presets: [
     [
@@ -41,42 +92,49 @@ const config: Config = {
       {
         docs: {
           sidebarPath: './sidebars.ts',
-          editUrl:
-            'https://github.com/thecraftlab/gluecraft/tree/main/docs/',
+          editUrl: 'https://github.com/the-craftlab/gluecraft/tree/develop/docs/',
+          showLastUpdateTime: true,
+          showLastUpdateAuthor: true
         },
-        blog: false, // Disable blog feature
+        blog: false,
         theme: {
-          customCss: './src/css/custom.css',
-        },
-      } satisfies Preset.Options,
-    ],
+          customCss: './src/css/custom.css'
+        }
+      } satisfies Preset.Options
+    ]
   ],
 
   themeConfig: {
-    // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'img/gluecraft-social-card.png',
     colorMode: {
-      respectPrefersColorScheme: true,
+      defaultMode: 'light',
+      disableSwitch: false,
+      respectPrefersColorScheme: true
     },
     navbar: {
-      title: 'Gluecraft JPD',
+      title: 'Gluecraft',
       logo: {
-        alt: 'Gluecraft JPD Logo',
-        src: 'img/logo.svg',
+        alt: 'Gluecraft Logo',
+        src: '/img/logo.png'
       },
       items: [
         {
           type: 'docSidebar',
           sidebarId: 'tutorialSidebar',
           position: 'left',
-          label: 'Docs',
+          label: 'Documentation'
         },
         {
-          href: 'https://github.com/thecraftlab/gluecraft',
+          href: 'https://github.com/the-craftlab/gluecraft',
           label: 'GitHub',
-          position: 'right',
+          position: 'right'
         },
-      ],
+        {
+          href: 'https://www.npmjs.com/package/@thecraftlab/gluecraft',
+          label: 'npm',
+          position: 'right'
+        }
+      ]
     },
     footer: {
       style: 'dark',
@@ -86,43 +144,62 @@ const config: Config = {
           items: [
             {
               label: 'Getting Started',
-              to: '/docs/intro',
-            },
-            {
-              label: 'CLI Guide',
-              to: '/docs/cli',
+              to: '/docs/intro'
             },
             {
               label: 'Configuration',
-              to: '/docs/configuration',
+              to: '/docs/configuration/overview'
             },
-          ],
+            {
+              label: 'CLI Guide',
+              to: '/docs/cli/overview'
+            }
+          ]
         },
         {
-          title: 'Resources',
+          title: 'Community',
           items: [
             {
-              label: 'GitHub Repository',
-              href: 'https://github.com/thecraftlab/gluecraft',
+              label: 'GitHub Issues',
+              href: 'https://github.com/the-craftlab/gluecraft/issues'
             },
             {
-              label: 'Issue Tracker',
-              href: 'https://github.com/thecraftlab/gluecraft/issues',
+              label: 'GitHub Discussions',
+              href: 'https://github.com/the-craftlab/gluecraft/discussions'
+            }
+          ]
+        },
+        {
+          title: 'More',
+          items: [
+            {
+              label: 'GitHub',
+              href: 'https://github.com/the-craftlab/gluecraft'
+            },
+            {
+              label: 'npm',
+              href: 'https://www.npmjs.com/package/@thecraftlab/gluecraft'
             },
             {
               label: 'The Craft Lab',
-              href: 'https://github.com/thecraftlab',
-            },
-          ],
-        },
+              href: 'https://github.com/the-craftlab'
+            }
+          ]
+        }
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} The Craft Lab. Built with Docusaurus.`,
+      copyright: `
+        <div>Copyright © ${new Date().getFullYear()} The Craft Lab. Built with Docusaurus.</div>
+        <div id="docs-version-badge" style="margin-top: 0.5rem; font-size: 0.875rem; opacity: 0.8;">
+          Latest Release: <span class="version-value">v${GLUECRAFT_VERSION}</span>
+        </div>
+      `
     },
     prism: {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
-    },
-  } satisfies Preset.ThemeConfig,
-};
+      additionalLanguages: ['bash', 'diff', 'json', 'yaml']
+    }
+  } satisfies Preset.ThemeConfig
+}
 
-export default config;
+export default config
