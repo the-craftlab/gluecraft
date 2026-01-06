@@ -27,7 +27,7 @@ name: Pipeline
 permissions:
   contents: write
   pull-requests: write
-  actions: read
+  actions: write
 
 run-name: "${{ github.event_name == 'pull_request' && !contains('develop,main', github.head_ref) && github.event.pull_request.title || github.ref_name }} #${{ inputs.run_number || github.run_number }}${{ inputs.version && format(' - {0}', inputs.version) || '' }}"
 

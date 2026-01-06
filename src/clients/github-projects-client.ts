@@ -276,7 +276,8 @@ export class GitHubProjectsClient {
       const result: any = await this.octokit.graphql(query, { projectId });
 
       if (!result.node) {
-        throw new Error('Project not found');
+        this.logger.error(`Failed to get project fields: Project not found`);
+        return [];
       }
 
       const fields: ProjectFieldInfo[] = [];
@@ -303,7 +304,7 @@ export class GitHubProjectsClient {
       return fields;
     } catch (error: any) {
       this.logger.error(`Failed to get project fields: ${error.message}`);
-      throw error;
+      return [];
     }
   }
 
