@@ -40,7 +40,7 @@ class LabelCleaner {
   
   constructor(token: string, options: ClearLabelsOptions) {
     this.octokit = new Octokit({ auth: token });
-    this.logger = new Logger('label-cleaner');
+    this.logger = new Logger({ operation: 'label-cleaner' });
     this.options = options;
   }
 

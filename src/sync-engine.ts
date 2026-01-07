@@ -181,7 +181,7 @@ export class SyncEngine {
       const result = await this.jpd.searchIssues(epicJql, ['summary', 'key', categoryFieldId], 100);
       
       // Build option values using template
-      const template = this.config.hierarchy.epic_option_template || '{{key}}: {{summary}}';
+      const template = this.config.hierarchy?.epic_option_template || '{{key}}: {{summary}}';
       const options = result.issues.map((epic: any) => {
         return template
           .replace('{{key}}', epic.key)
@@ -347,7 +347,7 @@ export class SyncEngine {
   ): Promise<void> {
     // 1a. Filter by Category field if configured
     const category = this.hierarchy.getIssueCategory(issue);
-    const syncTypes = this.config.hierarchy?.sync_types || ['Epic', 'Story'];
+    const syncTypes: string[] = this.config.hierarchy?.sync_types || ['Epic', 'Story'];
     
     if (category && !syncTypes.includes(category)) {
       stats.skippedWrongType.push(issue.key);

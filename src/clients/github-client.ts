@@ -252,7 +252,7 @@ export class GitHubClient {
     }
 
     if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would update issue #${number}:`, JSON.stringify(updatePayload, null, 2));
+      this.logger.info(`[DRY RUN] Would update issue #${number}: ${JSON.stringify(updatePayload, null, 2)}`);
       return;
     }
 
@@ -453,13 +453,7 @@ export class GitHubClient {
 
     const body = child.data.body || '';
     
-    // First, check metadata
-    const metadata = StateManager.getSyncState(body);
-    if (metadata?.parent_github_issue) {
-      return metadata.parent_github_issue;
-    }
-
-    // Fallback: Parse body for parent reference
+    // Parse body for parent reference
     // Matches: Parent: #123 or Parent Epic: #123
     const parentRegex = /Parent(?:\s+Epic)?:\s*#(\d+)/i;
     const match = body.match(parentRegex);

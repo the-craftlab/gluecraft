@@ -29,7 +29,7 @@ class AllLabelsCleaner {
   
   constructor(token: string, options: ClearOptions) {
     this.octokit = new Octokit({ auth: token });
-    this.logger = new Logger('clear-all-labels');
+    this.logger = new Logger({ operation: 'clear-all-labels' });
     this.options = options;
   }
 

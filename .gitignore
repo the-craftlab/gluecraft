@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Environment files
 .env
@@ -34,6 +35,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # Test fixtures (optional - comment out if you want to commit them)
 # tests/fixtures/
@@ -46,6 +48,10 @@ Thumbs.db
 *.old
 *copy
 * copy
+
+# Build outputs (dist/ is committed for GitHub Action)
+coverage/
+*.tgz
 
 # Docusaurus
 docs/node_modules/
