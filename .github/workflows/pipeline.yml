@@ -189,7 +189,7 @@ jobs:
 
   test-core:
     needs: [ changes ]
-    if: ${{ needs.changes.outputs.core == 'true' || always() }}
+    if: ${{ needs.changes.outputs.core == 'true' }}
     runs-on: ubuntu-latest
     
     steps:
