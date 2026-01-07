@@ -1,0 +1,71 @@
+name: 'Docs Smoke Test'
+description: 'Validate live documentation availability, key endpoints, and release version badge'
+author: 'Gluecraft'
+
+inputs:
+  docs-url:
+    description: 'Base URL of the published documentation site'
+    required: false
+    default: 'https://gluecraft.thecraftlab.dev'
+  expected-version:
+    description: 'Version string that should be rendered on the docs homepage (e.g., v1.2.3)'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run docs smoke test
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        DOCS_URL="${{ inputs.docs-url }}"
+        EXPECTED_VERSION="${{ inputs.expected-version }}"
+        # Version job outputs format: v1.2.3
+        # Strip the v prefix for comparison with rendered docs
+        NORMALIZED_EXPECTED_VERSION="${EXPECTED_VERSION#v}"
+
+        if [ -z "${DOCS_URL}" ]; then
+          echo "❌ docs-url input must not be empty"
+          exit 1
+        fi
+
+        BASE_URL="${DOCS_URL%/}"
+        HOMEPAGE="${BASE_URL}/"
+
+        TMP_HTML="$(mktemp)"
+
+        if [ -z "${EXPECTED_VERSION}" ]; then
+          echo "⚠️  expected-version not provided; skipping smoke test"
+          rm -f "${TMP_HTML}"
+          exit 0
+        fi
+
+        echo "ℹ️  Fetching docs homepage: ${HOMEPAGE}"
+        STATUS=$(curl -sS -o "${TMP_HTML}" -w "%{http_code}" "${HOMEPAGE}")
+        if [ "${STATUS}" != "200" ]; then
+          echo "❌ Expected HTTP 200 from ${HOMEPAGE}, got ${STATUS}"
+          cat "${TMP_HTML}" || true
+          rm -f "${TMP_HTML}"
+          exit 1
+        fi
+
+        echo "ℹ️  Validating docs version badge renders expected version v${NORMALIZED_EXPECTED_VERSION} (input: ${EXPECTED_VERSION})"
+
+        if ! grep -q "id=\"docs-version-badge\"" "${TMP_HTML}"; then
+          echo "❌ Version badge element (id=docs-version-badge) not found on homepage"
+          rm -f "${TMP_HTML}"
+          exit 1
+        fi
+
+        # Use a more flexible pattern that handles React's comment markers between v and version
+        if ! grep -q "Latest Release:.*v[[:space:]]*${NORMALIZED_EXPECTED_VERSION}" "${TMP_HTML}"; then
+          echo "❌ Homepage did not render expected docs version v${NORMALIZED_EXPECTED_VERSION}"
+          echo "🔍 Extracted snippet:"
+          grep -A 2 -B 2 "docs-version-badge" "${TMP_HTML}" || true
+          rm -f "${TMP_HTML}"
+          exit 1
+        fi
+
+        echo "✅ Docs version v${NORMALIZED_EXPECTED_VERSION} validated successfully"
+        rm -f "${TMP_HTML}"

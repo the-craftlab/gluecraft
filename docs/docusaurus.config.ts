@@ -33,12 +33,14 @@ const config: Config = {
     v4: true
   },
 
-  // Production URL - custom domain
+  // Production URL - GitHub Pages with custom domain
   url: 'https://gluecraft.thecraftlab.dev',
   baseUrl: '/',
 
+  // GitHub Pages deployment config
   organizationName: 'the-craftlab',
   projectName: 'gluecraft',
+  trailingSlash: false,
 
   headTags: [
     {
