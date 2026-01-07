@@ -34,6 +34,7 @@ Thumbs.db
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # Test fixtures (optional - comment out if you want to commit them)
 # tests/fixtures/
