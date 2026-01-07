@@ -375,7 +375,10 @@ jobs:
     needs: [ version, lint, test-core, test-docs, deploy-docs, remote-test-docs ]
     if: ${{
         always() &&
-        needs.version.result == 'success' &&
+        (
+          github.event_name == 'pull_request' ||
+          needs.version.result == 'success'
+        ) &&
         (
           needs.lint.result != 'failure' &&
           needs.test-core.result != 'failure' &&
