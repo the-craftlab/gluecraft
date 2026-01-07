@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+.pnpm-store/
 
 # Environment files
 .env
@@ -47,6 +48,10 @@ Thumbs.db
 *.old
 *copy
 * copy
+
+# Build outputs (dist/ is committed for GitHub Action)
+coverage/
+*.tgz
 
 # Docusaurus
 docs/node_modules/
