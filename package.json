@@ -55,12 +55,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/thecraftlab/gluecraft.git"
+    "url": "https://github.com/the-craftlab/gluecraft.git"
   },
   "bugs": {
-    "url": "https://github.com/thecraftlab/gluecraft/issues"
+    "url": "https://github.com/the-craftlab/gluecraft/issues"
   },
-  "homepage": "https://github.com/thecraftlab/gluecraft#readme",
+  "homepage": "https://github.com/the-craftlab/gluecraft#readme",
   "packageManager": "pnpm@10.20.0",
   "engines": {
     "node": ">=20.0.0",
