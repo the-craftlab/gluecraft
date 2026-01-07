@@ -94,7 +94,7 @@ export class HierarchyManager {
     // If hierarchy is disabled, return empty relationships
     if (!this.isEnabled()) {
       return {
-        parent_jpd_key: null,
+        parent_jpd_key: undefined,
         child_jpd_keys: [],
         related_jpd_keys: []
       };

@@ -17146,12 +17146,30 @@ var TeamSchema = external_exports.object({
   team_label_template: external_exports.string().optional(),
   epic_ownership: external_exports.boolean().default(true)
 });
+var ProjectFieldMappingSchema = external_exports.object({
+  jpd: external_exports.string(),
+  // JPD field path (e.g., "fields.customfield_14383")
+  github_field: external_exports.string(),
+  // GitHub Project field name (e.g., "Start date")
+  type: external_exports.enum(["date", "number", "single_select"]),
+  mapping: external_exports.record(external_exports.string()).optional(),
+  // Value mapping for single_select
+  derive: external_exports.object({
+    // Threshold-based derivation
+    thresholds: external_exports.array(external_exports.object({
+      max: external_exports.number(),
+      value: external_exports.string()
+    }))
+  }).optional()
+});
 var ProjectsSchema = external_exports.object({
   enabled: external_exports.boolean().default(false),
   project_number: external_exports.number().optional(),
   // GitHub Projects (Beta) number
-  status_field_name: external_exports.string().default("Status")
+  status_field_name: external_exports.string().default("Status"),
   // Name of status field in project
+  field_mappings: external_exports.array(ProjectFieldMappingSchema).optional()
+  // Field mappings for custom fields
 });
 var GithubToJpdCreationSchema = external_exports.object({
   enabled: external_exports.boolean().default(false),
@@ -22402,6 +22420,523 @@ var StateManager = class {
   }
 };
 
+// src/clients/github-client.ts
+var GitHubClient = class {
+  octokit;
+  owner;
+  repo;
+  dryRun;
+  logger;
+  labelCache = /* @__PURE__ */ new Map();
+  // Cache for existing labels
+  labelConfig = /* @__PURE__ */ new Map();
+  // Label definitions from config
+  constructor(token, logger, dryRun = false, owner, repo) {
+    this.octokit = new Octokit2({ auth: token });
+    this.owner = owner || "";
+    this.repo = repo || "";
+    this.dryRun = dryRun;
+    this.logger = logger;
+  }
+  /**
+   * Load label definitions from config
+   */
+  setLabelConfig(config) {
+    if (!config.labels) return;
+    const allLabels = [
+      ...config.labels.hierarchy || [],
+      ...config.labels.types || [],
+      ...config.labels.priorities || [],
+      ...config.labels.statuses || [],
+      ...config.labels.custom || []
+    ];
+    for (const label of allLabels) {
+      this.labelConfig.set(label.name, label);
+    }
+    this.logger.debug(`Loaded ${this.labelConfig.size} label definitions from config`);
+  }
+  async getIssue(owner, repo, issueNumber) {
+    const { data } = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: issueNumber
+    });
+    return data;
+  }
+  /**
+   * Get ALL issues from a repository (including unsynced ones)
+   */
+  async getAllIssues(owner, repo) {
+    const finalOwner = owner || this.owner;
+    const finalRepo = repo || this.repo;
+    const { data } = await this.octokit.issues.listForRepo({
+      owner: finalOwner,
+      repo: finalRepo,
+      state: "all",
+      per_page: 100
+    });
+    return data;
+  }
+  async getSyncedIssues(owner, repo) {
+    const finalOwner = owner || this.owner;
+    const finalRepo = repo || this.repo;
+    const { data } = await this.octokit.search.issuesAndPullRequests({
+      q: `repo:${finalOwner}/${finalRepo} is:issue "jpd-sync-metadata"`,
+      per_page: 100
+    });
+    return data.items.map((issue) => ({
+      number: issue.number,
+      title: issue.title,
+      body: issue.body || "",
+      state: issue.state,
+      labels: issue.labels.map((l) => typeof l === "string" ? l : l.name || ""),
+      updated_at: issue.updated_at,
+      metadata: StateManager.getSyncState(issue.body || "")
+    }));
+  }
+  /**
+   * Get a specific issue by number
+   */
+  async getIssueByNumber(owner, repo, issueNumber) {
+    try {
+      const { data: issue } = await this.octokit.issues.get({
+        owner,
+        repo,
+        issue_number: issueNumber
+      });
+      return {
+        number: issue.number,
+        title: issue.title,
+        body: issue.body || "",
+        state: issue.state,
+        labels: issue.labels.map((l) => typeof l === "string" ? l : l.name || ""),
+        updated_at: issue.updated_at,
+        metadata: StateManager.getSyncState(issue.body || "")
+      };
+    } catch (error) {
+      if (error.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+  async createIssue(owner, repo, title, body, labels, jpdMetadata) {
+    const bodyWithMetadata = StateManager.createSyncState(
+      body,
+      jpdMetadata.jpd_id,
+      jpdMetadata.jpd_updated,
+      jpdMetadata.sync_hash,
+      jpdMetadata.parent_jpd_id,
+      jpdMetadata.original_link
+    );
+    const cleanedLabels = labels.filter((l) => l != null && l !== void 0).map((l) => String(l)).filter((l) => l.trim().length > 0);
+    const finalLabels = [...new Set(cleanedLabels)];
+    await this.ensureLabels(owner, repo, finalLabels);
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would create issue: "${title}" with labels: ${finalLabels.join(", ")}`);
+      return 0;
+    }
+    const { data } = await this.octokit.issues.create({
+      owner,
+      repo,
+      title,
+      body: bodyWithMetadata,
+      labels: finalLabels
+    });
+    return data.number;
+  }
+  async updateIssue(owner, repo, number, updates) {
+    const updatePayload = {
+      owner,
+      repo,
+      issue_number: number
+    };
+    if (updates.title) updatePayload.title = updates.title;
+    if (updates.state) updatePayload.state = updates.state;
+    if (updates.body || updates.jpdMetadata) {
+      let newBody = updates.body;
+      if (!newBody && updates.jpdMetadata && !this.dryRun) {
+        const { data } = await this.octokit.issues.get({
+          owner,
+          repo,
+          issue_number: number
+        });
+        newBody = data.body || "";
+      } else if (!newBody && updates.jpdMetadata && this.dryRun) {
+        newBody = "[DRY RUN: Current Body Placeholder]";
+      }
+      if (newBody && updates.jpdMetadata) {
+        newBody = StateManager.createSyncState(
+          newBody,
+          updates.jpdMetadata.jpd_id,
+          updates.jpdMetadata.jpd_updated,
+          updates.jpdMetadata.sync_hash,
+          updates.jpdMetadata.parent_jpd_id,
+          updates.jpdMetadata.original_link
+        );
+      }
+      if (newBody) updatePayload.body = newBody;
+    }
+    if (updates.labels) {
+      const cleanedLabels = updates.labels.filter((l) => l != null && l !== void 0).map((l) => String(l)).filter((l) => l.trim().length > 0);
+      await this.ensureLabels(owner, repo, cleanedLabels);
+      updatePayload.labels = cleanedLabels;
+    }
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would update issue #${number}: ${JSON.stringify(updatePayload, null, 2)}`);
+      return;
+    }
+    await this.octokit.issues.update(updatePayload);
+  }
+  /**
+   * Clean up stale JPD metadata from an issue
+   * This bypasses dry-run mode because it's fixing broken data, not syncing new data
+   */
+  async cleanupStaleMetadata(owner, repo, issueNumber, cleanedBody) {
+    try {
+      const response = await this.octokit.issues.update({
+        owner,
+        repo,
+        issue_number: issueNumber,
+        body: cleanedBody
+      });
+      this.logger.debug(`Successfully updated #${issueNumber}, status: ${response.status}`);
+    } catch (error) {
+      this.logger.error(`Failed to cleanup #${issueNumber}: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * Get comments for a GitHub issue
+   */
+  async getComments(owner, repo, issueNumber) {
+    const { data } = await this.octokit.issues.listComments({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      per_page: 100
+    });
+    return data;
+  }
+  /**
+   * Add a comment to a GitHub issue
+   */
+  async addComment(owner, repo, issueNumber, body) {
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would add comment to issue #${issueNumber}: ${body.substring(0, 100)}...`);
+      return { id: 0 };
+    }
+    const { data } = await this.octokit.issues.createComment({
+      owner,
+      repo,
+      issue_number: issueNumber,
+      body
+    });
+    return data;
+  }
+  /**
+   * Create a sub-issue linked to a parent issue
+   * Creates the issue and adds it to the parent's task list
+   */
+  async createSubIssue(owner, repo, title, body, labels, jpdMetadata, parentIssueNumber) {
+    const parentDepth = await this.calculateIssueDepth(owner, repo, parentIssueNumber);
+    if (parentDepth >= 8) {
+      this.logger.warn(`Cannot create sub-issue of #${parentIssueNumber}: depth limit reached (${parentDepth} levels, max 8)`);
+      return await this.createIssue(owner, repo, title, body, labels, jpdMetadata);
+    }
+    const childNumber = await this.createIssue(owner, repo, title, body, labels, jpdMetadata);
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would link issue #${childNumber} to parent #${parentIssueNumber}`);
+      return childNumber;
+    }
+    await this.addSubIssueToParent(owner, repo, parentIssueNumber, childNumber, title);
+    this.logger.info(`Created sub-issue #${childNumber} under parent #${parentIssueNumber}`);
+    return childNumber;
+  }
+  /**
+   * Add an existing issue as a sub-issue to a parent
+   */
+  async addSubIssueToParent(owner, repo, parentNumber, childNumber, childTitle) {
+    const parent = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: parentNumber
+    });
+    const parentBody = parent.data.body || "";
+    const subIssuesHeaderRegex = /^## 📋 (Subtasks?|Sub-issues?)$/m;
+    const hasSubIssuesSection = subIssuesHeaderRegex.test(parentBody);
+    let updatedBody;
+    if (hasSubIssuesSection) {
+      const lines = parentBody.split("\n");
+      const headerIndex = lines.findIndex((line) => subIssuesHeaderRegex.test(line));
+      let insertIndex = headerIndex + 1;
+      while (insertIndex < lines.length && lines[insertIndex].trim() === "") {
+        insertIndex++;
+      }
+      const newItem = `- [ ] #${childNumber} ${childTitle}`;
+      lines.splice(insertIndex, 0, newItem);
+      updatedBody = lines.join("\n");
+    } else {
+      const metadataIndex = parentBody.indexOf("<!-- jpd-sync-metadata");
+      const newSection = `
+
+## \u{1F4CB} Subtasks
+
+- [ ] #${childNumber} ${childTitle}
+`;
+      if (metadataIndex !== -1) {
+        updatedBody = parentBody.slice(0, metadataIndex) + newSection + parentBody.slice(metadataIndex);
+      } else {
+        updatedBody = parentBody + newSection;
+      }
+    }
+    await this.octokit.issues.update({
+      owner,
+      repo,
+      issue_number: parentNumber,
+      body: updatedBody
+    });
+    this.logger.debug(`Added sub-issue #${childNumber} to parent #${parentNumber}'s task list`);
+  }
+  /**
+   * Get sub-issues of a parent issue by parsing task list
+   */
+  async getSubIssues(owner, repo, parentNumber) {
+    const parent = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: parentNumber
+    });
+    const body = parent.data.body || "";
+    const taskListRegex = /^- \[[ x]\] #(\d+)/gm;
+    const matches = [...body.matchAll(taskListRegex)];
+    return matches.map((match) => parseInt(match[1], 10));
+  }
+  /**
+   * Get parent issue number from a child issue's metadata or body
+   */
+  async getParentIssue(owner, repo, childNumber) {
+    const child = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: childNumber
+    });
+    const body = child.data.body || "";
+    const parentRegex = /Parent(?:\s+Epic)?:\s*#(\d+)/i;
+    const match = body.match(parentRegex);
+    return match ? parseInt(match[1], 10) : null;
+  }
+  /**
+   * Mark a sub-issue as complete in the parent's task list
+   */
+  async markSubIssueComplete(owner, repo, parentNumber, childNumber) {
+    const parent = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: parentNumber
+    });
+    const parentBody = parent.data.body || "";
+    const updatedBody = parentBody.replace(
+      new RegExp(`^- \\[ \\] #${childNumber}`, "gm"),
+      `- [x] #${childNumber}`
+    );
+    if (updatedBody !== parentBody) {
+      await this.octokit.issues.update({
+        owner,
+        repo,
+        issue_number: parentNumber,
+        body: updatedBody
+      });
+      this.logger.debug(`Marked sub-issue #${childNumber} as complete in parent #${parentNumber}`);
+    }
+  }
+  /**
+   * Calculate the depth of an issue in the hierarchy
+   * Returns 1 for root issues, 2 for their children, etc.
+   * Max depth is 8 (GitHub's limit)
+   */
+  async calculateIssueDepth(owner, repo, issueNumber, visited = /* @__PURE__ */ new Set()) {
+    if (visited.has(issueNumber)) {
+      this.logger.warn(`Circular reference detected in hierarchy at issue #${issueNumber}`);
+      return 0;
+    }
+    visited.add(issueNumber);
+    try {
+      const issue = await this.octokit.issues.get({
+        owner,
+        repo,
+        issue_number: issueNumber
+      });
+      const body = issue.data.body || "";
+      const parentMatch = body.match(/## 🔗 Parent[\s\S]*?- GitHub: #(\d+)/);
+      if (parentMatch) {
+        const parentNumber = parseInt(parentMatch[1]);
+        const parentDepth = await this.calculateIssueDepth(owner, repo, parentNumber, visited);
+        return parentDepth + 1;
+      }
+      return 1;
+    } catch (error) {
+      this.logger.warn(`Could not calculate depth for issue #${issueNumber}: ${error}`);
+      return 1;
+    }
+  }
+  /**
+   * Ensure a child issue is in the parent's task list.
+   * Adds it if missing, updates checkbox state if present but wrong state.
+   */
+  async ensureInParentTaskList(owner, repo, parentNumber, childNumber, childTitle, childIsClosed = false) {
+    if (this.dryRun) {
+      this.logger.debug(`[DRY RUN] Would ensure #${childNumber} is in parent #${parentNumber}'s task list`);
+      return;
+    }
+    const parent = await this.octokit.issues.get({
+      owner,
+      repo,
+      issue_number: parentNumber
+    });
+    const parentBody = parent.data.body || "";
+    const childPattern = new RegExp(`^- \\[[x ]\\] #${childNumber}`, "gm");
+    const isInTaskList = childPattern.test(parentBody);
+    if (isInTaskList) {
+      const expectedCheckbox = childIsClosed ? "[x]" : "[ ]";
+      const currentCheckbox = childIsClosed ? "[ ]" : "[x]";
+      const updatedBody = parentBody.replace(
+        new RegExp(`^- \\[${currentCheckbox.slice(1, 2)}\\] #${childNumber}`, "gm"),
+        `- ${expectedCheckbox} #${childNumber}`
+      );
+      if (updatedBody !== parentBody) {
+        await this.octokit.issues.update({
+          owner,
+          repo,
+          issue_number: parentNumber,
+          body: updatedBody
+        });
+        this.logger.debug(`Updated checkbox state for #${childNumber} in parent #${parentNumber}`);
+      }
+    } else {
+      await this.addSubIssueToParent(owner, repo, parentNumber, childNumber, childTitle);
+      this.logger.info(`Added #${childNumber} to parent #${parentNumber}'s task list`);
+    }
+  }
+  /**
+   * Ensure a label exists in the repository, creating it if necessary
+   */
+  async ensureLabel(owner, repo, labelName) {
+    const cacheKey = `${owner}/${repo}/${labelName}`;
+    if (this.labelCache.has(cacheKey)) {
+      return;
+    }
+    try {
+      const existingLabel = await this.octokit.issues.getLabel({
+        owner,
+        repo,
+        name: labelName
+      });
+      const labelDef = this.labelConfig.get(labelName);
+      const expectedColor = labelDef?.color || this.getDefaultLabelColor(labelName);
+      const expectedDescription = labelDef?.description || "";
+      if (existingLabel.data.color !== expectedColor || existingLabel.data.description !== expectedDescription) {
+        await this.updateLabel(owner, repo, labelName, expectedColor, expectedDescription);
+      }
+      this.labelCache.set(cacheKey, true);
+      this.logger.debug(`Label exists: ${labelName}`);
+    } catch (error) {
+      if (error.status === 404) {
+        await this.createLabel(owner, repo, labelName);
+        this.labelCache.set(cacheKey, true);
+      } else {
+        this.logger.warn(`Error checking label ${labelName}: ${error.message}`);
+      }
+    }
+  }
+  /**
+   * Create a label in the repository
+   */
+  async createLabel(owner, repo, labelName) {
+    const labelDef = this.labelConfig.get(labelName);
+    const color = labelDef?.color || this.getDefaultLabelColor(labelName);
+    const description = labelDef?.description || "";
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would create label: ${labelName} (color: ${color})`);
+      return;
+    }
+    this.logger.info(`Creating label: ${labelName} (color: ${color})`);
+    try {
+      await this.octokit.issues.createLabel({
+        owner,
+        repo,
+        name: labelName,
+        color,
+        description
+      });
+    } catch (error) {
+      this.logger.error(`Failed to create label ${labelName}: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * Update an existing label's color and description
+   */
+  async updateLabel(owner, repo, labelName, color, description) {
+    if (this.dryRun) {
+      this.logger.info(`[DRY RUN] Would update label: ${labelName} (color: ${color})`);
+      return;
+    }
+    this.logger.info(`Updating label: ${labelName} (color: ${color})`);
+    try {
+      await this.octokit.issues.updateLabel({
+        owner,
+        repo,
+        name: labelName,
+        color,
+        description
+      });
+    } catch (error) {
+      this.logger.error(`Failed to update label ${labelName}: ${error.message}`);
+      throw error;
+    }
+  }
+  /**
+   * Get default color for a label based on naming conventions
+   */
+  getDefaultLabelColor(labelName) {
+    if (labelName === "bug") return "DE350B";
+    if (labelName === "epic") return "0052CC";
+    if (labelName === "story") return "FFC400";
+    if (labelName === "enhancement") return "7FE5B3";
+    if (labelName === "task") return "B3D4FF";
+    if (labelName.startsWith("epic:")) return "0052CC";
+    if (labelName === "critical") return "DE350B";
+    if (labelName === "high") return "FF8B00";
+    if (labelName === "medium") return "00B8D9";
+    if (labelName === "low") return "8B5CF6";
+    if (labelName.startsWith("priority:critical")) return "DE350B";
+    if (labelName.startsWith("priority:high")) return "FF8B00";
+    if (labelName.startsWith("priority:medium")) return "00B8D9";
+    if (labelName.startsWith("priority:low")) return "8B5CF6";
+    if (labelName === "blocked") return "DE350B";
+    if (labelName === "needs-review") return "00B8D9";
+    if (labelName === "ready-for-dev") return "36B37E";
+    return "8993A4";
+  }
+  /**
+   * Ensure multiple labels exist, creating them if necessary
+   */
+  async ensureLabels(owner, repo, labels) {
+    const uniqueLabels = [...new Set(labels.filter((l) => l && l.trim()))];
+    if (uniqueLabels.length === 0) {
+      return;
+    }
+    this.logger.debug(`Ensuring ${uniqueLabels.length} labels exist`);
+    await Promise.all(
+      uniqueLabels.map((label) => this.ensureLabel(owner, repo, label))
+    );
+  }
+};
+
+// src/clients/github-projects-client.ts
+init_cjs_shims();
+
 // src/utils/logger.ts
 init_cjs_shims();
 var LogLevel = /* @__PURE__ */ ((LogLevel2) => {
@@ -22709,526 +23244,7 @@ ${"\u2500".repeat(60)}`);
   }
 };
 
-// src/clients/github-client.ts
-var GitHubClient = class {
-  octokit;
-  owner;
-  repo;
-  dryRun;
-  logger;
-  labelCache = /* @__PURE__ */ new Map();
-  // Cache for existing labels
-  labelConfig = /* @__PURE__ */ new Map();
-  // Label definitions from config
-  constructor(token, logger, dryRun = false, owner, repo) {
-    this.octokit = new Octokit2({ auth: token });
-    this.owner = owner || "";
-    this.repo = repo || "";
-    this.dryRun = dryRun;
-    this.logger = logger;
-  }
-  /**
-   * Load label definitions from config
-   */
-  setLabelConfig(config) {
-    if (!config.labels) return;
-    const allLabels = [
-      ...config.labels.hierarchy || [],
-      ...config.labels.types || [],
-      ...config.labels.priorities || [],
-      ...config.labels.statuses || [],
-      ...config.labels.custom || []
-    ];
-    for (const label of allLabels) {
-      this.labelConfig.set(label.name, label);
-    }
-    this.logger.debug(`Loaded ${this.labelConfig.size} label definitions from config`);
-  }
-  async getIssue(owner, repo, issueNumber) {
-    const { data } = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: issueNumber
-    });
-    return data;
-  }
-  /**
-   * Get ALL issues from a repository (including unsynced ones)
-   */
-  async getAllIssues(owner, repo) {
-    const finalOwner = owner || this.owner;
-    const finalRepo = repo || this.repo;
-    const { data } = await this.octokit.issues.listForRepo({
-      owner: finalOwner,
-      repo: finalRepo,
-      state: "all",
-      per_page: 100
-    });
-    return data;
-  }
-  async getSyncedIssues(owner, repo) {
-    const finalOwner = owner || this.owner;
-    const finalRepo = repo || this.repo;
-    const { data } = await this.octokit.search.issuesAndPullRequests({
-      q: `repo:${finalOwner}/${finalRepo} is:issue "jpd-sync-metadata"`,
-      per_page: 100
-    });
-    return data.items.map((issue) => ({
-      number: issue.number,
-      title: issue.title,
-      body: issue.body || "",
-      state: issue.state,
-      labels: issue.labels.map((l) => typeof l === "string" ? l : l.name || ""),
-      updated_at: issue.updated_at,
-      metadata: StateManager.getSyncState(issue.body || "")
-    }));
-  }
-  /**
-   * Get a specific issue by number
-   */
-  async getIssueByNumber(owner, repo, issueNumber) {
-    try {
-      const { data: issue } = await this.octokit.issues.get({
-        owner,
-        repo,
-        issue_number: issueNumber
-      });
-      return {
-        number: issue.number,
-        title: issue.title,
-        body: issue.body || "",
-        state: issue.state,
-        labels: issue.labels.map((l) => typeof l === "string" ? l : l.name || ""),
-        updated_at: issue.updated_at,
-        metadata: StateManager.getSyncState(issue.body || "")
-      };
-    } catch (error) {
-      if (error.status === 404) {
-        return null;
-      }
-      throw error;
-    }
-  }
-  async createIssue(owner, repo, title, body, labels, jpdMetadata) {
-    const bodyWithMetadata = StateManager.createSyncState(
-      body,
-      jpdMetadata.jpd_id,
-      jpdMetadata.jpd_updated,
-      jpdMetadata.sync_hash,
-      jpdMetadata.parent_jpd_id,
-      jpdMetadata.original_link
-    );
-    const cleanedLabels = labels.filter((l) => l != null && l !== void 0).map((l) => String(l)).filter((l) => l.trim().length > 0);
-    const finalLabels = [...new Set(cleanedLabels)];
-    await this.ensureLabels(owner, repo, finalLabels);
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would create issue: "${title}" with labels: ${finalLabels.join(", ")}`);
-      return 0;
-    }
-    const { data } = await this.octokit.issues.create({
-      owner,
-      repo,
-      title,
-      body: bodyWithMetadata,
-      labels: finalLabels
-    });
-    return data.number;
-  }
-  async updateIssue(owner, repo, number, updates) {
-    const updatePayload = {
-      owner,
-      repo,
-      issue_number: number
-    };
-    if (updates.title) updatePayload.title = updates.title;
-    if (updates.state) updatePayload.state = updates.state;
-    if (updates.body || updates.jpdMetadata) {
-      let newBody = updates.body;
-      if (!newBody && updates.jpdMetadata && !this.dryRun) {
-        const { data } = await this.octokit.issues.get({
-          owner,
-          repo,
-          issue_number: number
-        });
-        newBody = data.body || "";
-      } else if (!newBody && updates.jpdMetadata && this.dryRun) {
-        newBody = "[DRY RUN: Current Body Placeholder]";
-      }
-      if (newBody && updates.jpdMetadata) {
-        newBody = StateManager.createSyncState(
-          newBody,
-          updates.jpdMetadata.jpd_id,
-          updates.jpdMetadata.jpd_updated,
-          updates.jpdMetadata.sync_hash,
-          updates.jpdMetadata.parent_jpd_id,
-          updates.jpdMetadata.original_link
-        );
-      }
-      if (newBody) updatePayload.body = newBody;
-    }
-    if (updates.labels) {
-      const cleanedLabels = updates.labels.filter((l) => l != null && l !== void 0).map((l) => String(l)).filter((l) => l.trim().length > 0);
-      await this.ensureLabels(owner, repo, cleanedLabels);
-      updatePayload.labels = cleanedLabels;
-    }
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would update issue #${number}:`, JSON.stringify(updatePayload, null, 2));
-      return;
-    }
-    await this.octokit.issues.update(updatePayload);
-  }
-  /**
-   * Clean up stale JPD metadata from an issue
-   * This bypasses dry-run mode because it's fixing broken data, not syncing new data
-   */
-  async cleanupStaleMetadata(owner, repo, issueNumber, cleanedBody) {
-    try {
-      const response = await this.octokit.issues.update({
-        owner,
-        repo,
-        issue_number: issueNumber,
-        body: cleanedBody
-      });
-      this.logger.debug(`Successfully updated #${issueNumber}, status: ${response.status}`);
-    } catch (error) {
-      this.logger.error(`Failed to cleanup #${issueNumber}: ${error.message}`);
-      throw error;
-    }
-  }
-  /**
-   * Get comments for a GitHub issue
-   */
-  async getComments(owner, repo, issueNumber) {
-    const { data } = await this.octokit.issues.listComments({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      per_page: 100
-    });
-    return data;
-  }
-  /**
-   * Add a comment to a GitHub issue
-   */
-  async addComment(owner, repo, issueNumber, body) {
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would add comment to issue #${issueNumber}: ${body.substring(0, 100)}...`);
-      return { id: 0 };
-    }
-    const { data } = await this.octokit.issues.createComment({
-      owner,
-      repo,
-      issue_number: issueNumber,
-      body
-    });
-    return data;
-  }
-  /**
-   * Create a sub-issue linked to a parent issue
-   * Creates the issue and adds it to the parent's task list
-   */
-  async createSubIssue(owner, repo, title, body, labels, jpdMetadata, parentIssueNumber) {
-    const parentDepth = await this.calculateIssueDepth(owner, repo, parentIssueNumber);
-    if (parentDepth >= 8) {
-      this.logger.warn(`Cannot create sub-issue of #${parentIssueNumber}: depth limit reached (${parentDepth} levels, max 8)`);
-      return await this.createIssue(owner, repo, title, body, labels, jpdMetadata);
-    }
-    const childNumber = await this.createIssue(owner, repo, title, body, labels, jpdMetadata);
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would link issue #${childNumber} to parent #${parentIssueNumber}`);
-      return childNumber;
-    }
-    await this.addSubIssueToParent(owner, repo, parentIssueNumber, childNumber, title);
-    this.logger.info(`Created sub-issue #${childNumber} under parent #${parentIssueNumber}`);
-    return childNumber;
-  }
-  /**
-   * Add an existing issue as a sub-issue to a parent
-   */
-  async addSubIssueToParent(owner, repo, parentNumber, childNumber, childTitle) {
-    const parent = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: parentNumber
-    });
-    const parentBody = parent.data.body || "";
-    const subIssuesHeaderRegex = /^## 📋 (Subtasks?|Sub-issues?)$/m;
-    const hasSubIssuesSection = subIssuesHeaderRegex.test(parentBody);
-    let updatedBody;
-    if (hasSubIssuesSection) {
-      const lines = parentBody.split("\n");
-      const headerIndex = lines.findIndex((line) => subIssuesHeaderRegex.test(line));
-      let insertIndex = headerIndex + 1;
-      while (insertIndex < lines.length && lines[insertIndex].trim() === "") {
-        insertIndex++;
-      }
-      const newItem = `- [ ] #${childNumber} ${childTitle}`;
-      lines.splice(insertIndex, 0, newItem);
-      updatedBody = lines.join("\n");
-    } else {
-      const metadataIndex = parentBody.indexOf("<!-- jpd-sync-metadata");
-      const newSection = `
-
-## \u{1F4CB} Subtasks
-
-- [ ] #${childNumber} ${childTitle}
-`;
-      if (metadataIndex !== -1) {
-        updatedBody = parentBody.slice(0, metadataIndex) + newSection + parentBody.slice(metadataIndex);
-      } else {
-        updatedBody = parentBody + newSection;
-      }
-    }
-    await this.octokit.issues.update({
-      owner,
-      repo,
-      issue_number: parentNumber,
-      body: updatedBody
-    });
-    this.logger.debug(`Added sub-issue #${childNumber} to parent #${parentNumber}'s task list`);
-  }
-  /**
-   * Get sub-issues of a parent issue by parsing task list
-   */
-  async getSubIssues(owner, repo, parentNumber) {
-    const parent = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: parentNumber
-    });
-    const body = parent.data.body || "";
-    const taskListRegex = /^- \[[ x]\] #(\d+)/gm;
-    const matches = [...body.matchAll(taskListRegex)];
-    return matches.map((match) => parseInt(match[1], 10));
-  }
-  /**
-   * Get parent issue number from a child issue's metadata or body
-   */
-  async getParentIssue(owner, repo, childNumber) {
-    const child = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: childNumber
-    });
-    const body = child.data.body || "";
-    const metadata = StateManager.getSyncState(body);
-    if (metadata?.parent_github_issue) {
-      return metadata.parent_github_issue;
-    }
-    const parentRegex = /Parent(?:\s+Epic)?:\s*#(\d+)/i;
-    const match = body.match(parentRegex);
-    return match ? parseInt(match[1], 10) : null;
-  }
-  /**
-   * Mark a sub-issue as complete in the parent's task list
-   */
-  async markSubIssueComplete(owner, repo, parentNumber, childNumber) {
-    const parent = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: parentNumber
-    });
-    const parentBody = parent.data.body || "";
-    const updatedBody = parentBody.replace(
-      new RegExp(`^- \\[ \\] #${childNumber}`, "gm"),
-      `- [x] #${childNumber}`
-    );
-    if (updatedBody !== parentBody) {
-      await this.octokit.issues.update({
-        owner,
-        repo,
-        issue_number: parentNumber,
-        body: updatedBody
-      });
-      this.logger.debug(`Marked sub-issue #${childNumber} as complete in parent #${parentNumber}`);
-    }
-  }
-  /**
-   * Calculate the depth of an issue in the hierarchy
-   * Returns 1 for root issues, 2 for their children, etc.
-   * Max depth is 8 (GitHub's limit)
-   */
-  async calculateIssueDepth(owner, repo, issueNumber, visited = /* @__PURE__ */ new Set()) {
-    if (visited.has(issueNumber)) {
-      this.logger.warn(`Circular reference detected in hierarchy at issue #${issueNumber}`);
-      return 0;
-    }
-    visited.add(issueNumber);
-    try {
-      const issue = await this.octokit.issues.get({
-        owner,
-        repo,
-        issue_number: issueNumber
-      });
-      const body = issue.data.body || "";
-      const parentMatch = body.match(/## 🔗 Parent[\s\S]*?- GitHub: #(\d+)/);
-      if (parentMatch) {
-        const parentNumber = parseInt(parentMatch[1]);
-        const parentDepth = await this.calculateIssueDepth(owner, repo, parentNumber, visited);
-        return parentDepth + 1;
-      }
-      return 1;
-    } catch (error) {
-      this.logger.warn(`Could not calculate depth for issue #${issueNumber}: ${error}`);
-      return 1;
-    }
-  }
-  /**
-   * Ensure a child issue is in the parent's task list.
-   * Adds it if missing, updates checkbox state if present but wrong state.
-   */
-  async ensureInParentTaskList(owner, repo, parentNumber, childNumber, childTitle, childIsClosed = false) {
-    if (this.dryRun) {
-      this.logger.debug(`[DRY RUN] Would ensure #${childNumber} is in parent #${parentNumber}'s task list`);
-      return;
-    }
-    const parent = await this.octokit.issues.get({
-      owner,
-      repo,
-      issue_number: parentNumber
-    });
-    const parentBody = parent.data.body || "";
-    const childPattern = new RegExp(`^- \\[[x ]\\] #${childNumber}`, "gm");
-    const isInTaskList = childPattern.test(parentBody);
-    if (isInTaskList) {
-      const expectedCheckbox = childIsClosed ? "[x]" : "[ ]";
-      const currentCheckbox = childIsClosed ? "[ ]" : "[x]";
-      const updatedBody = parentBody.replace(
-        new RegExp(`^- \\[${currentCheckbox.slice(1, 2)}\\] #${childNumber}`, "gm"),
-        `- ${expectedCheckbox} #${childNumber}`
-      );
-      if (updatedBody !== parentBody) {
-        await this.octokit.issues.update({
-          owner,
-          repo,
-          issue_number: parentNumber,
-          body: updatedBody
-        });
-        this.logger.debug(`Updated checkbox state for #${childNumber} in parent #${parentNumber}`);
-      }
-    } else {
-      await this.addSubIssueToParent(owner, repo, parentNumber, childNumber, childTitle);
-      this.logger.info(`Added #${childNumber} to parent #${parentNumber}'s task list`);
-    }
-  }
-  /**
-   * Ensure a label exists in the repository, creating it if necessary
-   */
-  async ensureLabel(owner, repo, labelName) {
-    const cacheKey = `${owner}/${repo}/${labelName}`;
-    if (this.labelCache.has(cacheKey)) {
-      return;
-    }
-    try {
-      const existingLabel = await this.octokit.issues.getLabel({
-        owner,
-        repo,
-        name: labelName
-      });
-      const labelDef = this.labelConfig.get(labelName);
-      const expectedColor = labelDef?.color || this.getDefaultLabelColor(labelName);
-      const expectedDescription = labelDef?.description || "";
-      if (existingLabel.data.color !== expectedColor || existingLabel.data.description !== expectedDescription) {
-        await this.updateLabel(owner, repo, labelName, expectedColor, expectedDescription);
-      }
-      this.labelCache.set(cacheKey, true);
-      this.logger.debug(`Label exists: ${labelName}`);
-    } catch (error) {
-      if (error.status === 404) {
-        await this.createLabel(owner, repo, labelName);
-        this.labelCache.set(cacheKey, true);
-      } else {
-        this.logger.warn(`Error checking label ${labelName}: ${error.message}`);
-      }
-    }
-  }
-  /**
-   * Create a label in the repository
-   */
-  async createLabel(owner, repo, labelName) {
-    const labelDef = this.labelConfig.get(labelName);
-    const color = labelDef?.color || this.getDefaultLabelColor(labelName);
-    const description = labelDef?.description || "";
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would create label: ${labelName} (color: ${color})`);
-      return;
-    }
-    this.logger.info(`Creating label: ${labelName} (color: ${color})`);
-    try {
-      await this.octokit.issues.createLabel({
-        owner,
-        repo,
-        name: labelName,
-        color,
-        description
-      });
-    } catch (error) {
-      this.logger.error(`Failed to create label ${labelName}: ${error.message}`);
-      throw error;
-    }
-  }
-  /**
-   * Update an existing label's color and description
-   */
-  async updateLabel(owner, repo, labelName, color, description) {
-    if (this.dryRun) {
-      this.logger.info(`[DRY RUN] Would update label: ${labelName} (color: ${color})`);
-      return;
-    }
-    this.logger.info(`Updating label: ${labelName} (color: ${color})`);
-    try {
-      await this.octokit.issues.updateLabel({
-        owner,
-        repo,
-        name: labelName,
-        color,
-        description
-      });
-    } catch (error) {
-      this.logger.error(`Failed to update label ${labelName}: ${error.message}`);
-      throw error;
-    }
-  }
-  /**
-   * Get default color for a label based on naming conventions
-   */
-  getDefaultLabelColor(labelName) {
-    if (labelName === "bug") return "DE350B";
-    if (labelName === "epic") return "0052CC";
-    if (labelName === "story") return "FFC400";
-    if (labelName === "enhancement") return "7FE5B3";
-    if (labelName === "task") return "B3D4FF";
-    if (labelName.startsWith("epic:")) return "0052CC";
-    if (labelName === "critical") return "DE350B";
-    if (labelName === "high") return "FF8B00";
-    if (labelName === "medium") return "00B8D9";
-    if (labelName === "low") return "8B5CF6";
-    if (labelName.startsWith("priority:critical")) return "DE350B";
-    if (labelName.startsWith("priority:high")) return "FF8B00";
-    if (labelName.startsWith("priority:medium")) return "00B8D9";
-    if (labelName.startsWith("priority:low")) return "8B5CF6";
-    if (labelName === "blocked") return "DE350B";
-    if (labelName === "needs-review") return "00B8D9";
-    if (labelName === "ready-for-dev") return "36B37E";
-    return "8993A4";
-  }
-  /**
-   * Ensure multiple labels exist, creating them if necessary
-   */
-  async ensureLabels(owner, repo, labels) {
-    const uniqueLabels = [...new Set(labels.filter((l) => l && l.trim()))];
-    if (uniqueLabels.length === 0) {
-      return;
-    }
-    this.logger.debug(`Ensuring ${uniqueLabels.length} labels exist`);
-    await Promise.all(
-      uniqueLabels.map((label) => this.ensureLabel(owner, repo, label))
-    );
-  }
-};
-
 // src/clients/github-projects-client.ts
-init_cjs_shims();
 var GitHubProjectsClient = class {
   octokit;
   logger;
@@ -23394,6 +23410,164 @@ var GitHubProjectsClient = class {
       return null;
     }
   }
+  /**
+   * Get all field definitions for a project
+   */
+  async getProjectFields(projectId) {
+    try {
+      const query = `
+        query($projectId: ID!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              id
+              fields(first: 50) {
+                nodes {
+                  ... on ProjectV2Field {
+                    id
+                    name
+                    dataType
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    id
+                    name
+                    options {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      `;
+      const result = await this.octokit.graphql(query, { projectId });
+      if (!result.node) {
+        this.logger.error(`Failed to get project fields: Project not found`);
+        return [];
+      }
+      const fields = [];
+      for (const field of result.node.fields.nodes) {
+        if (field.options) {
+          fields.push({
+            id: field.id,
+            name: field.name,
+            dataType: "SINGLE_SELECT",
+            options: field.options
+          });
+        } else {
+          fields.push({
+            id: field.id,
+            name: field.name,
+            dataType: field.dataType,
+            options: void 0
+          });
+        }
+      }
+      return fields;
+    } catch (error) {
+      this.logger.error(`Failed to get project fields: ${error.message}`);
+      return [];
+    }
+  }
+  /**
+   * Update a field value on a project item
+   */
+  async updateFieldValue(projectId, itemId, fieldId, value) {
+    if (this.dryRun) {
+      this.logger.info(
+        `[DRY RUN] Would update field ${fieldId} on item ${itemId} to ${JSON.stringify(value)}`
+      );
+      return true;
+    }
+    try {
+      const mutation = `
+        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $value: ProjectV2FieldValue!) {
+          updateProjectV2ItemFieldValue(input: {
+            projectId: $projectId
+            itemId: $itemId
+            fieldId: $fieldId
+            value: $value
+          }) {
+            projectV2Item {
+              id
+            }
+          }
+        }
+      `;
+      await this.octokit.graphql(mutation, {
+        projectId,
+        itemId,
+        fieldId,
+        value
+      });
+      return true;
+    } catch (error) {
+      this.logger.error(`Failed to update field value: ${error.message}`);
+      return false;
+    }
+  }
+  /**
+   * Validate field mappings against project fields
+   */
+  async validateFieldMappings(projectId, mappings) {
+    const errors = [];
+    const warnings = [];
+    try {
+      const projectFields = await this.getProjectFields(projectId);
+      const fieldMap = /* @__PURE__ */ new Map();
+      for (const field of projectFields) {
+        fieldMap.set(field.name, field);
+      }
+      for (const mapping of mappings) {
+        const projectField = fieldMap.get(mapping.github_field);
+        if (!projectField) {
+          errors.push(`Field "${mapping.github_field}" not found in project`);
+          continue;
+        }
+        const expectedDataType = this.mapTypeToDataType(mapping.type);
+        if (projectField.dataType !== expectedDataType) {
+          errors.push(
+            `Field "${mapping.github_field}" type mismatch: expected ${mapping.type}, got ${projectField.dataType}`
+          );
+          continue;
+        }
+        if (mapping.type === "single_select" && mapping.mapping && projectField.options) {
+          const projectOptionNames = new Set(projectField.options.map((opt) => opt.name));
+          for (const [jpdValue, githubValue] of Object.entries(mapping.mapping)) {
+            if (!projectOptionNames.has(githubValue)) {
+              warnings.push(
+                `Field "${mapping.github_field}" missing option: ${githubValue} (mapped from ${jpdValue})`
+              );
+            }
+          }
+        }
+      }
+      return {
+        valid: errors.length === 0,
+        errors,
+        warnings
+      };
+    } catch (error) {
+      errors.push(`Failed to validate field mappings: ${error.message}`);
+      return { valid: false, errors, warnings };
+    }
+  }
+  /**
+   * Map config field type to GitHub dataType
+   */
+  mapTypeToDataType(type) {
+    switch (type) {
+      case "date":
+        return "DATE";
+      case "number":
+        return "NUMBER";
+      case "single_select":
+        return "SINGLE_SELECT";
+      default:
+        return "TEXT";
+    }
+  }
 };
 
 // src/transformers/transformer-engine.ts
@@ -23526,6 +23700,130 @@ var TransformerEngine = class {
   }
 };
 
+// src/transformers/project-field-transformer.ts
+init_cjs_shims();
+var ProjectFieldTransformer = class {
+  /**
+   * Parse a date string to ISO format (YYYY-MM-DD)
+   */
+  static parseDate(dateStr) {
+    if (!dateStr || dateStr.trim() === "") {
+      return null;
+    }
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+      return date.toISOString().split("T")[0];
+    } catch (error) {
+      return null;
+    }
+  }
+  /**
+   * Map a JPD select value to GitHub select value using mapping
+   */
+  static mapSelectValue(jpdValue, mapping) {
+    if (!jpdValue) {
+      return null;
+    }
+    if (!mapping) {
+      return jpdValue;
+    }
+    return mapping[jpdValue] || jpdValue;
+  }
+  /**
+   * Derive a value from a number using threshold ranges
+   * Returns the value for the first threshold where number <= max
+   */
+  static deriveFromThresholds(value, thresholds) {
+    if (value === null || value === void 0 || value < 0) {
+      return null;
+    }
+    if (!thresholds || thresholds.length === 0) {
+      return null;
+    }
+    for (const threshold of thresholds) {
+      if (value <= threshold.max) {
+        return threshold.value;
+      }
+    }
+    return thresholds[thresholds.length - 1].value;
+  }
+  /**
+   * Transform a JPD field value to GitHub Project field value
+   * Returns the value in the format expected by GitHub's updateProjectV2ItemFieldValue mutation
+   */
+  static transformFieldValue(jpdValue, mapping) {
+    if (jpdValue === null || jpdValue === void 0) {
+      return null;
+    }
+    switch (mapping.type) {
+      case "date": {
+        const parsedDate = this.parseDate(jpdValue);
+        if (!parsedDate) {
+          return null;
+        }
+        return { date: parsedDate };
+      }
+      case "number": {
+        const numValue = typeof jpdValue === "number" ? jpdValue : Number(jpdValue);
+        if (isNaN(numValue)) {
+          return null;
+        }
+        return { number: numValue };
+      }
+      case "single_select": {
+        let selectValue;
+        if (mapping.derive) {
+          const numValue = typeof jpdValue === "number" ? jpdValue : Number(jpdValue);
+          if (isNaN(numValue)) {
+            return null;
+          }
+          selectValue = this.deriveFromThresholds(numValue, mapping.derive.thresholds);
+        } else {
+          selectValue = this.mapSelectValue(jpdValue, mapping.mapping);
+        }
+        if (!selectValue) {
+          return null;
+        }
+        return { singleSelectValue: selectValue };
+      }
+      default:
+        return null;
+    }
+  }
+  /**
+   * Extract a value from JPD issue data using dot notation path
+   */
+  static extractJpdValue(data, path3) {
+    const parts = path3.split(".");
+    let current = data;
+    for (const part of parts) {
+      if (current === null || current === void 0) {
+        return void 0;
+      }
+      current = current[part];
+    }
+    return current;
+  }
+  /**
+   * Transform a JPD issue to GitHub Project field values
+   * Returns a map of field names to their values
+   */
+  static transformIssue(jpdIssue, fieldMappings) {
+    const results = /* @__PURE__ */ new Map();
+    for (const mapping of fieldMappings) {
+      const jpdValue = this.extractJpdValue(jpdIssue, mapping.jpd);
+      const transformedValue = this.transformFieldValue(jpdValue, mapping);
+      if (transformedValue) {
+        results.set(mapping.github_field, transformedValue);
+      }
+    }
+    return results;
+  }
+};
+
 // src/hierarchy/hierarchy-manager.ts
 init_cjs_shims();
 var HierarchyManager = class {
@@ -23592,7 +23890,7 @@ var HierarchyManager = class {
   extractRelationships(jpdIssue) {
     if (!this.isEnabled()) {
       return {
-        parent_jpd_key: null,
+        parent_jpd_key: void 0,
         child_jpd_keys: [],
         related_jpd_keys: []
       };
@@ -24348,7 +24646,7 @@ var SyncEngine = class {
       const fieldNumber = categoryFieldId.match(/\d+/)?.[0];
       const epicJql = fieldNumber ? `project = ${projectKey} AND cf[${fieldNumber}] = Epic ORDER BY created DESC` : `project = ${projectKey} AND Category = Epic ORDER BY created DESC`;
       const result = await this.jpd.searchIssues(epicJql, ["summary", "key", categoryFieldId], 100);
-      const template = this.config.hierarchy.epic_option_template || "{{key}}: {{summary}}";
+      const template = this.config.hierarchy?.epic_option_template || "{{key}}: {{summary}}";
       const options = result.issues.map((epic) => {
         return template.replace("{{key}}", epic.key).replace("{{summary}}", epic.fields.summary || "Untitled Epic");
       });
@@ -24448,6 +24746,26 @@ Results:`);
     }
     console.log("");
   }
+  /**
+   * Evaluate a condition string against issue data
+   * Simple condition syntax: "field.path != null", "field.path == 'value'", etc.
+   */
+  evaluateCondition(condition, data) {
+    const match = condition.match(/^(.+?)\s*(==|!=)\s*(.+)$/);
+    if (!match) {
+      this.logger.warn(`Invalid condition syntax: ${condition}`);
+      return true;
+    }
+    const [, fieldPath, operator, expectedValue] = match;
+    const actualValue = fieldPath.trim().split(".").reduce((obj, key) => obj?.[key], data);
+    const expected = expectedValue.trim() === "null" ? null : expectedValue.trim().replace(/^['"]|['"]$/g, "");
+    if (operator === "!=") {
+      return actualValue != expected;
+    } else if (operator === "==") {
+      return actualValue == expected;
+    }
+    return true;
+  }
   async processJpdIssue(issue, jpdToGithubMap, existingGithubIssues, stats) {
     const category = this.hierarchy.getIssueCategory(issue);
     const syncTypes = this.config.hierarchy?.sync_types || ["Epic", "Story"];
@@ -24506,11 +24824,21 @@ Results:`);
       _epic_github_number: epicGithubNumber
     };
     for (const mapping of this.config.mappings) {
+      if (mapping.condition) {
+        const conditionMet = this.evaluateCondition(mapping.condition, enrichedIssue);
+        if (!conditionMet) {
+          continue;
+        }
+      }
       const value = await TransformerEngine.transform(mapping, enrichedIssue);
-      if (value !== void 0) {
+      if (value !== void 0 && value !== null && value !== "") {
         if (mapping.github === "labels") {
-          if (Array.isArray(value)) githubPayload.labels.push(...value);
-          else githubPayload.labels.push(value);
+          if (Array.isArray(value)) {
+            const validLabels = value.filter((v) => v !== null && v !== void 0 && v !== "");
+            githubPayload.labels.push(...validLabels);
+          } else {
+            githubPayload.labels.push(value);
+          }
         } else {
           githubPayload[mapping.github] = value;
         }
@@ -24665,8 +24993,69 @@ Results:`);
         targetColumn.id
       );
       this.logger.info(`Updated issue #${githubIssueNumber} to column "${targetColumn.name}"`);
+      await this.updateProjectFields(jpdIssue, project.id, itemId);
     } catch (error) {
       this.logger.error(`Failed to update project status: ${error.message}`);
+    }
+  }
+  /**
+   * Update custom fields on a project item
+   */
+  async updateProjectFields(jpdIssue, projectId, itemId) {
+    if (!this.config.projects?.field_mappings || this.config.projects.field_mappings.length === 0) {
+      return;
+    }
+    try {
+      const projectFields = await this.projects.getProjectFields(projectId);
+      const fieldMap = /* @__PURE__ */ new Map();
+      for (const field of projectFields) {
+        fieldMap.set(field.name, field);
+      }
+      for (const mapping of this.config.projects.field_mappings) {
+        const jpdValue = ProjectFieldTransformer.extractJpdValue(jpdIssue, mapping.jpd);
+        if (jpdValue === null || jpdValue === void 0) {
+          this.logger.debug(`Skipping ${mapping.github_field}: no value in JPD`);
+          continue;
+        }
+        const transformedValue = ProjectFieldTransformer.transformFieldValue(jpdValue, mapping);
+        if (!transformedValue) {
+          this.logger.debug(`Skipping ${mapping.github_field}: transformation returned null`);
+          continue;
+        }
+        const fieldInfo = fieldMap.get(mapping.github_field);
+        if (!fieldInfo) {
+          this.logger.warn(`Field "${mapping.github_field}" not found in project`);
+          continue;
+        }
+        if (transformedValue.singleSelectValue) {
+          const optionName = transformedValue.singleSelectValue;
+          const option = fieldInfo.options?.find((opt) => opt.name === optionName);
+          if (!option) {
+            this.logger.warn(
+              `Option "${optionName}" not found for field "${mapping.github_field}"`
+            );
+            continue;
+          }
+          await this.projects.updateFieldValue(
+            projectId,
+            itemId,
+            fieldInfo.id,
+            { singleSelectOptionId: option.id }
+          );
+          this.logger.debug(`Updated ${mapping.github_field} = ${optionName}`);
+        } else {
+          await this.projects.updateFieldValue(
+            projectId,
+            itemId,
+            fieldInfo.id,
+            transformedValue
+          );
+          const value = transformedValue.date || transformedValue.number;
+          this.logger.debug(`Updated ${mapping.github_field} = ${value}`);
+        }
+      }
+    } catch (error) {
+      this.logger.error(`Failed to update project fields: ${error.message}`);
     }
   }
   async syncGithubToJpd() {
