@@ -41,5 +41,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
   },
-  "exclude": ["tests", "transforms", "webhook", "node_modules", "dist", "*.config.ts"]
+  "exclude": ["tests", "transforms", "webhook", "node_modules", "dist", "docs", "*.config.ts"]
 }
